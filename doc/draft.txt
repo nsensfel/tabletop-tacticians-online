@@ -1,0 +1,44 @@
+Asynchronous Online Board Game Simulator
+
+Rooms have lifetime, reset by update.
+Similar to airboardgame, except:
+- Edition mode and play mode are fully separate.
+- Action history and replay (TO's puppeteer).
+- More permissions on items, and they are handled server-side:
+	- Items in Fully Hidden Area give no info to players not owning area.
+	- Items in Hand Area only show their backside to other players, but show their
+		front to the owner.
+	- Translucent overlays show on the items to indicate visibility.
+	- Putting items in there automatically claims them, unless a config is set
+	for the zone.
+- Server side shuffling.
+- Server side dire rolling.
+- Zone collapsing / tabs.
+- Fewer item types:
+	- Image: front/back.
+	- Card: front/back.
+	- Dice: 1+ pictures. May have its side manually selected, or server-decided.
+	- Area.
+	- Finite Bag: a deck. Draw from top, draw from bottom, put on top, put on bottom, put at random, shuffle.
+	- Open Bag: take random, or look inside and pick a specific element.
+	- Magic Bag: generates/deletes on the fly.
+- Layers within layers: Should be able to put an object on another, even if
+  they're the same type.
+- Accounts.
+- Open rooms looking for players.
+- Rooms with restrictions.
+- Snapping.
+
+Player in a room:
+- Can freely move their pieces. Must confirm once all moves are done to commit,
+  in order to avoid filling the history with small moves.
+- Cannot move pieces owned by others.
+- Can freely move unclaimed pieces.
+- Can claim pieces.
+- Can change active tab in own area. This is local only.
+- Can manually select a dice's side.
+- Can request dice roll.
+- Can draw from an owned / unclaimed finite bag (top, bottom, random).
+- Can shuffle a finite bag (top, bottom, random).
+- Can add to a magic bag.
+- Can take from a magic bag.
