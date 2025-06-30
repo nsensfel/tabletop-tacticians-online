@@ -1,5 +1,8 @@
 -module(room_action).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% TYPES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -type deck_source() :: 'top' | 'bottom' | 'random'.
 
 -record
@@ -64,6 +67,16 @@
 		object_id :: room_object:id(), % Can only be applied to
 		previous_top :: room_object:id(),
 		new_top :: room_object:id()
+	}
+).
+
+-record
+(
+	roll,
+	{
+		objects_id :: list(room_object:id()), % Can only be applied to
+		previous_faces :: list(non_neg_value()),
+		new_faces :: list(non_neg_value())
 	}
 ).
 
