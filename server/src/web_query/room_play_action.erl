@@ -1,9 +1,34 @@
 -module(room_play_action).
 
+-define(ACTION_FIELD, <<"act">>).
+-define(ACTION_ID_FIELD, <<"aid">>).
+-define(CURRENT_HISTORY_IX_FIELD, <<"hix">>).
+-define(ROOM_ID_FIELD, <<"rid">>).
+-define(SESSION_TOKEN_FIELD, <<"sto">>).
+-define(USER_ID_FIELD, <<"uid">>).
+-define(TARGETS_FIELD, <<"tar">>).
+
+-define(FLIP_ACTION_ID, <<"fli">>).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% TYPES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -include("yaws_api.hrl").
+
+-record
+(
+	request,
+	{
+		user_id :: ataxia_id:type(),
+		session_token :: binary(),
+		lock_janitor :: ataxia_lock_client:janitor(),
+		room_id :: ataxia_id:type(),
+		current_history_ix :: non_neg_integer(),
+		act :: room_action:act()
+	}
+).
+
+-type request() :: #request{}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% EXPORTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -13,27 +38,68 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% LOCAL FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+-spec decode_action (map()) -> ('error' | {'ok', room_action:act()}).
+decode_action (Map) ->
+	case maps:get(?ACTION_ID_FIELD, Map) of
+		?FLIP_ACTION_ID -> {ok, room_action:new_flip(maps:get(?TARGETS_FIELD))};
+		_ -> error
+	end.
+
+-spec decode_request (web_query:type()) -> ('error' | {'ok', request()}).
+decode_request (Query) ->
+	Map = web_query:get_params(Query),
+	{ok, DecodedAct} = decode_action(decode_action(?ACTION_FIELD, Map)),
+	#request
+	{
+		user_id = maps:get(?USER_ID_FIELD, Map),
+		session_token = maps:get(?SESSION_TOKEN_FIELD, Map),
+		room_id = maps:get(?ROOM_ID_FIELD, Map),
+		current_history_ix = maps:get(?CURRENT_HISTORY_IX_FIELD, Map),
+		act = DecodedAct,
+		lock_janitor = ataxia_lock_client:new_janitor()
+	}.
+
+%%%% Request Accessors %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+-spec get_request_user_id (request()) -> ataxia_id:type().
+get_request_user_id (Request#request{ user_id = Result }) -> Result.
+
+-spec get_request_session_token (request()) -> binary().
+get_request_session_token (Request#request{ session_token = Result }) -> Result.
+
+-spec get_request_lock_janitor (request()) -> ataxia_lock_client:janitor().
+get_request_lock_janitor (Request#request{ lock_janitor = Result }) -> Result.
+
+-spec get_request_room_id (request()) -> ataxia_id:type().
+get_request_room_id (Request#request{ room_id = Result }) -> Result.
+
+-spec get_request_current_history_ix (request()) -> non_neg_integer().
+get_request_current_history_ix
+(
+	Request#request{ current_history_ix = Result }
+) ->
+	Result.
 
 %%%% SECURITY CHECK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -spec authenticate_user (room_action_request:type()) -> ('ok' | 'error').
 authenticate_user (Request) ->
-	UserID = room_action_request:get_user_id(Request),
-	SessionToken = room_action_request:get_session_token(Request),
-	LockJanitor = room_action_request:get_lock_janitor(Request),
+	UserID = get_request_user_id(Request),
+	SessionToken = get_request_session_token(Request),
+	LockJanitor = get_request_lock_janitor(Request),
 	case shr_security:credentials_match(LockJanitor, SessionToken, UserID) of
 		true -> ok;
-		Error -> jiffy:encode([shr_disconnected:generate()])
+		_ -> jiffy:encode([shr_disconnected:generate()])
 	end.
 
 -spec fetch_data
 	(
 		room_action_request:type()
-	) -> ({'ok', room:type()} | ataxic_error:type()).
+	) -> ({'ok', room_db_entry:type()} | ataxic_error:type()).
 fetch_data (Request) ->
-	RoomID = room_action_request:get_room_id(Request),
+	RoomID = get_request_room_id(Request),
+	UserID = get_request_user_id(Request),
 	% Would be nice to automatically release any still held lock on termination.
 	% Should be doable, too. Let's call it the lock janitor
-	LockJanitor = room_action_request:get_lock_janitor(Request),
+	LockJanitor = get_request_lock_janitor(Request),
 	case ataxia_lock_client:request_write_lock(LockJanitor, room_db, RoomID) of
 		{ok, Lock} ->
 			case
@@ -42,13 +108,13 @@ fetch_data (Request) ->
 					room_db,
 					RoomID,
 					Lock,
-					room:ataxic_is_user_in_room(UserID)
+					room_db_entry:ataxic_is_user_in_room(UserID)
 				)
 			of
 				{ok, RoomVersion, RoomData} ->
 					{ok, ataxia_client_data:new(Lock, RoomVersion, RoomData)};
 
-				Error -> {error, Error};
+				Error -> {error, Error}
 			end;
 
 		Error ->
@@ -56,23 +122,30 @@ fetch_data (Request) ->
 	end.
 
 apply_action (Request, S0Data) ->
-	UserID = room_action_request:get_user_id(Request),
-	Action = room_action_request:get_action(Request),
+	UserID = get_request_user_id(Request),
+	Act = get_request_act(Request),
 	S0Room = ataxia_client_data:get_value(S0Data),
-	UserData = room:get_user_data(S0Room, UserID),
+	UserIX = room_db_entry:get_user_index(S0Room, UserID),
+	UserData = room_db_entry:get_user_data(S0Room, UserIX),
+	S0Objects = room_db_entry:get_objects(S0Room),
 	CurrentUserHistoryIX = room_user_data:get_current_history_index(UserData),
-	case
-		room_action:ataxia_apply_to
-		(
-			UserID,
-			Action,
-		)
-	of
-		{ok, AtaxicUpdate, S1Room} ->
-			S1Data = ataxia_client_data:add_update(AtaxicUpdate, S1Room, S0Data),
+	Action = room_action:new(UserIX, Act),
+	case room_action:ataxia_apply_to(Action, S0Objects) of
+		{ok, ObjectsAtaxicUpdate, S1Objects} ->
+			{RoomAtaxicUpdate, S1Room} =
+				room_db_entry:ataxia_update_objects
+				(
+					ObjectsAtaxicUpdate,
+					S1Objects,
+					S0Room
+				),
+
+			S1Data =
+				ataxia_client_data:add_update(RoomAtaxicUpdate, S1Room, S0Data),
+
 			{ok, S1Data, CurrentUserHistoryIX};
 
-		{error, Error} -> {error, Error}
+		error -> error
 	end.
 
 update_database (ClientData) ->
@@ -94,26 +167,32 @@ update_database (ClientData) ->
 release_resources (Request) ->
 	ataxia_lock_client:release_all
 	(
-		room_action_request:get_lock_janitor(Request)
+		get_request_lock_janitor(Request)
 	).
 
 generate_reply (ClientData, PreviousUserHistoryIX) ->
 	lists:map
 	(
-		fun encode_history_action/1 end,
-		room:get_history_from(PreviousUserHistoryIX)
+		fun room_action:encode/1,
+		room_db_entry:get_history_from(PreviousUserHistoryIX)
 	).
 
 %%%% MAIN LOGIC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec handle (shr_query:type()) -> binary().
+-spec handle (web_query:type()) -> binary().
 handle (Query) ->
-	Request = decode_request(Query), % Add lockJanitor in this decode function.
+	{ok, Request} = decode_request(Query), % Add lockJanitor in this decode function.
 	ok = authenticate_user(Request),
 	{ok, S0Data} = fetch_data(Request),
-	{ok, S1Data, PreviousUserHistoryIX} = apply_action(Request, S0Data),
-	ok = update_database(S1Data),
-	release_resources(Request),
-	generate_reply(S1Data, PreviousUserHistoryIX).
+	case apply_action(Request, S0Data) of
+		{ok, S1Data, PreviousUserHistoryIX} ->
+			ok = update_database(S1Data),
+			release_resources(Request),
+			generate_reply(S1Data, PreviousUserHistoryIX);
+
+		error ->
+			release_resources(Request),
+			generate_error_reply("Invalid action.")
+	end.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% EXPORTED FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -122,5 +201,5 @@ out(A) ->
 	{
 		content,
 		"application/json; charset=UTF-8",
-		handle(shr_query:new(A))
+		handle(web_query:new(A))
 	}.

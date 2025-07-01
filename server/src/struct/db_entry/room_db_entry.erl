@@ -24,7 +24,7 @@
 	room,
 	{
 		allowed_users :: ordsets:ordset(user_db_entry:id()),
-		objects :: orddict:orddict(room_object:type()),
+		objects :: orddict:orddict(non_neg_integer(), room_object:type()),
 		history :: list(room_action:type()),
 		history_start_index :: non_neg_integer(),
 		user_id_to_user_ix :: orddict:orddict(user_db_entry:id(), non_neg_integer()),
@@ -44,6 +44,8 @@
 (
 	[
 		ataxic_room_allows_user/1,
+
+		ataxia_update_objects/3,
 
 		get_allowed_users_field/0,
 		get_objects_field/0,
@@ -75,6 +77,19 @@ ataxic_is_user_in_room (PlayerID) ->
 			ataxic:current_value()
 		)
 	).
+
+-spec ataxia_update_objects
+	(
+		ataxic:type(),
+		orddict:orddict(non_neg_integer(), room_object:type()),
+		type()
+	)
+	-> {ataxic:type(), type()}.
+ataxia_update_objects (Update, Objects, Room) ->
+	{
+		ataxic:update_field(get_objects_field(), Update),
+		Room#room{ objects = Objects }
+	}.
 
 -spec get_allowed_users_field () -> non_neg_integer().
 get_allowed_users_field () -> #room.allowed_users.
