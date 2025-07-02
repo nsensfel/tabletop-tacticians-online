@@ -42,3 +42,16 @@ Player in a room:
 - Can shuffle a finite bag (top, bottom, random).
 - Can add to a magic bag.
 - Can take from a magic bag.
+
+
+Issues with decks and cards:
+- Players will expect that moving a card unto another component causes that
+  card to lay on top of the component. That's not trivial to do. Cards may lay
+  on multiple components, too. Still held only by one, I guess? But the z-index
+  should work.
+- Handling discard and replenishing a deck.
+
+Handling edition is also tricky, when you want to edit multiple objects at the
+same time. Maybe keep the editor offline?
+
+Disk usage is likely high: AirBoardGame JSON Heirless with bad compression is ~500Ko.
