@@ -1,4 +1,4 @@
--module(room_play_action).
+-module(room_history_load).
 
 -include("protocol.hrl").
 
@@ -15,7 +15,7 @@
 		session_token :: binary(),
 		lock_janitor :: ataxia_lock_client:janitor(),
 		room_id :: ataxia_id:type(),
-		act :: room_action:act()
+		history_ix :: non_neg_integer()
 	}
 ).
 
@@ -29,13 +29,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% LOCAL FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec decode_action (map()) -> ('error' | {'ok', room_action:act()}).
-decode_action (Map) ->
-	case maps:get(?ACTION_ID_FIELD, Map) of
-		?FLIP_ACTION_ID -> {ok, room_action:new_flip(maps:get(?TARGETS_FIELD))};
-		_ -> error
-	end.
-
 -spec decode_request (web_query:type()) -> ('error' | {'ok', request()}).
 decode_request (Query) ->
 	Map = web_query:get_params(Query),
@@ -45,7 +38,7 @@ decode_request (Query) ->
 		user_id = maps:get(?USER_ID_FIELD, Map),
 		session_token = maps:get(?SESSION_TOKEN_FIELD, Map),
 		room_id = maps:get(?ROOM_ID_FIELD, Map),
-		act = DecodedAct,
+		history_ix = maps:get(?HISTORY_INDEX_FIELD, Map),
 		lock_janitor = ataxia_lock_client:new_janitor()
 	}.
 
@@ -62,8 +55,8 @@ get_request_lock_janitor (#request{ lock_janitor = Result }) -> Result.
 -spec get_request_room_id (request()) -> ataxia_id:type().
 get_request_room_id (#request{ room_id = Result }) -> Result.
 
--spec get_request_act (request()) -> room_action:act().
-get_request_act (#request{ act = Result }) -> Result.
+-spec get_request_history_index (request()) -> non_neg_integer().
+get_request_history_index (#request{ history_ix = Result }) -> Result.
 
 %%%% SECURITY CHECK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -spec authenticate_user (room_action_request:type()) -> ('ok' | 'error').
@@ -83,9 +76,9 @@ authenticate_user (Request) ->
 fetch_data (Request) ->
 	RoomID = get_request_room_id(Request),
 	UserID = get_request_user_id(Request),
-	% Would be nice to automatically release any still held lock on termination.
-	% Should be doable, too. Let's call it the lock janitor
 	LockJanitor = get_request_lock_janitor(Request),
+	% We need a write lock, to update the user's history index (and potentially
+	% the history itself).
 	case ataxia_lock_client:request_write_lock(LockJanitor, room_db, RoomID) of
 		{ok, Lock} ->
 			case
@@ -108,41 +101,21 @@ fetch_data (Request) ->
 
 apply_action (Request, S0Data) ->
 	UserID = get_request_user_id(Request),
-	Act = get_request_act(Request),
+	CurrentHistoryIX = get_request_act(Request),
 	S0Room = ataxia_client_data:get_value(S0Data),
 	UserIX = room_db_entry:get_user_index(S0Room, UserID),
 	UserData = room_db_entry:get_user_data(S0Room, UserIX),
 	S0Objects = room_db_entry:get_objects(S0Room),
+	CurrentUserHistoryIX = room_user_data:get_current_history_index(UserData),
 	Action = room_action:new(UserIX, Act),
 	case room_action:ataxia_apply_to(Action, S0Objects) of
-		{ok, ObjectsAtaxicUpdate, S1Objects} ->
-			{RoomAtaxicUpdate0, S1Room} =
-				room_db_entry:ataxia_update_objects
-				(
-					ObjectsAtaxicUpdate,
-					S1Objects,
-					S0Room
-				),
-
-			{RoomAtaxicUpdate1, S2Room} =
-				room_db_entry:ataxia_add_to_history(Action, S1Room),
-
-			HistoryView = room_db_entry:get_history_for(UserIX, S2Room),
-			{RoomAtaxicUpdate2, S3Room} =
-				room_db_entry:ataxia_update_user_history_index(UserIX, S2Room),
+			% TODO: update user history index.
+			% TODO: trim history.
 
 			S1Data =
-				ataxia_client_data:add_update
-				(
-					ataxic:sequence
-					(
-						[RoomAtaxicUpdate0, RoomAtaxicUpdate1, RoomAtaxicUpdate2]
-					),
-					S3Room,
-					S0Data
-				),
+				ataxia_client_data:add_update(RoomAtaxicUpdate, S1Room, S0Data),
 
-			{ok, S1Data};
+			{ok, S1Data, CurrentUserHistoryIX};
 
 		error -> error
 	end.

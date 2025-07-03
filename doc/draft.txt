@@ -55,3 +55,5 @@ Handling edition is also tricky, when you want to edit multiple objects at the
 same time. Maybe keep the editor offline?
 
 Disk usage is likely high: AirBoardGame JSON Heirless with bad compression is ~500Ko.
+
+User history update on view vs on act: maybe a user setting?

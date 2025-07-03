@@ -70,10 +70,10 @@ authenticate_user (Request) ->
 fetch_data (Request) ->
 	RoomID = get_request_room_id(Request),
 	UserID = get_request_user_id(Request),
-	% Would be nice to automatically release any still held lock on termination.
-	% Should be doable, too. Let's call it the lock janitor
 	LockJanitor = get_request_lock_janitor(Request),
-	case ataxia_lock_client:request_read_lock(LockJanitor, room_db, RoomID) of
+	% We need a write lock, to update the user's history index (and potentially
+	% the history itself).
+	case ataxia_lock_client:request_write_lock(LockJanitor, room_db, RoomID) of
 		{ok, Lock} ->
 			case
 				ataxia_client:fetch_if
@@ -100,9 +100,13 @@ release_resources (Request) ->
 	).
 
 generate_reply (UserID, ClientData) ->
-	UserIX = room_db_entry:
-	room_db_entry:encode_limited_view(UserIX,
-	ataxia_client_data:get_value(ClientData).
+	Room = ataxia_client_data:get_value(ClientData),
+	UserIX = room_db_entry:user_index_from_user_id(UserID, Room),
+	room_db_entry:encode_limited_view(UserIX, Room).
+
+generate_error_reply (_Error) ->
+	% TODO: implement,
+	ok.
 
 %%%% MAIN LOGIC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -spec handle (web_query:type()) -> binary().
@@ -110,10 +114,14 @@ handle (Query) ->
 	{ok, Request} = decode_request(Query), % Add lockJanitor in this decode function.
 	ok = authenticate_user(Request),
 	MaybeData = fetch_data(Request),
-	release_resources(Request),
-	case MaybeData of
-		{ok, Data} -> generate_reply(Data);
-		{error, Error} -> generate_error_reply(Error)
+	case fetch_data(Request) of
+		{ok, Data} ->
+			update_data(Data, Request),
+			release_resources(Request),
+			generate_reply(get_request_user_id(Request), Data);
+		{error, Error} ->
+			release_resources(Request),
+			generate_error_reply(Error)
 	end.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
