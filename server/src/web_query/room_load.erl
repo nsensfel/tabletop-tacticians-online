@@ -85,7 +85,17 @@ fetch_data (Request) ->
 				)
 			of
 				{ok, RoomVersion, RoomData} ->
-					{ok, ataxia_client_data:new(Lock, RoomVersion, RoomData)};
+					{
+						ok,
+						ataxia_client_data:new
+						(
+							room_db,
+							RoomID,
+							Lock,
+							RoomVersion,
+							RoomData
+						)
+					};
 
 				Error -> {error, Error}
 			end;

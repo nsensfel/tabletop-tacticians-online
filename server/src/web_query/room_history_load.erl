@@ -64,9 +64,11 @@ authenticate_user (Request) ->
 	UserID = get_request_user_id(Request),
 	SessionToken = get_request_session_token(Request),
 	LockJanitor = get_request_lock_janitor(Request),
-	case shr_security:credentials_match(LockJanitor, SessionToken, UserID) of
+	case
+		db_query_security:credentials_match(LockJanitor, SessionToken, UserID)
+	of
 		true -> ok;
-		_ -> jiffy:encode([shr_disconnected:generate()])
+		_ -> reply_disconnect:generate_encoded().
 	end.
 
 -spec fetch_data
