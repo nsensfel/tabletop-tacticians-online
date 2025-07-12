@@ -9,7 +9,7 @@ Similar to airboardgame, except:
 	- Items in Hand Area only show their backside to other players, but show their
 		front to the owner.
 	- Translucent overlays show on the items to indicate visibility.
-	- Putting items in there automatically claims them, unless a config is set
+	- Putting items in there can automatically claim them if a config is set
 	for the zone.
 - Server side shuffling.
 - Server side dire rolling.
@@ -43,7 +43,6 @@ Player in a room:
 - Can add to a magic bag.
 - Can take from a magic bag.
 
-
 Issues with decks and cards:
 - Players will expect that moving a card unto another component causes that
   card to lay on top of the component. That's not trivial to do. Cards may lay
@@ -57,3 +56,29 @@ same time. Maybe keep the editor offline?
 Disk usage is likely high: AirBoardGame JSON Heirless with bad compression is ~500Ko.
 
 User history update on view vs on act: maybe a user setting?
+
+Federalized architecture: accounts can subscribe to feeds from other servers
+to see different available games and rooms. How to handle "ignore/block" across
+servers? Don't, until the person tries to join?
+
+Push notifications: games have pre-set messages. Players can "ping" other players
+through menus in the room. Only 2 notifications can be received per player per room.
+If more than one are sent, the second one says "multiple notifications are
+waiting for you."
+
+Game setting:
+	Action in the history count limit for each player. They can't do more actions
+	until those clear from the history.
+	This can be set either as a setting, or as a actions in the history limit,
+	which then gets divided by the number of players in the room.
+
+Chat.
+Sending a message to chat is an action like the others. Text length limit.
+
+Block user: prevents seeing/joining rooms they are in, prevents them doing the
+same.
+
+component families, so you can select stuff from the same family including with a
+drag select that only targets same family stuff. Select for the families that
+need to be included in the selection (must be in FAM, must not be in FAM, and
+default - FAM has no impact) like in manga search genre stuff.
