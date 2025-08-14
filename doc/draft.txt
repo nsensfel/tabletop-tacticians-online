@@ -82,3 +82,12 @@ component families, so you can select stuff from the same family including with 
 drag select that only targets same family stuff. Select for the families that
 need to be included in the selection (must be in FAM, must not be in FAM, and
 default - FAM has no impact) like in manga search genre stuff.
+
+if all elements are of the same size:
+- Create deck.
+
+Decks only:
+- Shuffle.
+- explode as line.
+- explode as square.
+

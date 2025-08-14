@@ -113,6 +113,23 @@
 	}
 ).
 
+-record
+(
+	create_deck,
+	{
+		deck_id :: room_object:id(),
+		previous_attitudes :: list(room_object:attitude())
+	}
+).
+
+-record
+(
+	explode_deck,
+	{
+		as_line :: boolean()
+	}
+).
+
 -type act() ::
 	#move{}
 	| #ping{}
@@ -125,6 +142,8 @@
 	| #draw_from{}
 	| #place_into{}
 	| #look_inside{}
+	| #create_deck{}
+	| #explode_deck{}
 .
 
 -record

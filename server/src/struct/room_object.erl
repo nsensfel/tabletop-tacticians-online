@@ -88,16 +88,26 @@
 
 -record
 (
+	attitude,
+	{
+		x :: non_neg_integer(),
+		y :: non_neg_integer(),
+		z :: non_neg_integer(),
+		angle :: integer(),
+	}
+).
+
+-type attitude() :: #attitude{}.
+
+-record
+(
 	object,
 	{
 		visible_to_ix :: permissions(),
 		can_interact_ix :: permissions(),
 		width :: non_neg_integer(),
 		height :: non_neg_integer(),
-		x :: non_neg_integer(),
-		y :: non_neg_integer(),
-		z :: non_neg_integer(),
-		angle :: integer(),
+		attitude :: attitude(),
 		properties :: properties()
 	}
 ).
@@ -107,6 +117,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% EXPORTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+-export_type([type/0, attitude/0]).
 %%%% Accessors
 -export
 (
@@ -225,16 +236,16 @@ get_width (Object) -> Object#object.width.
 get_height (Object) -> Object#object.height.
 
 -spec get_x (type()) -> non_neg_integer().
-get_x (Object) -> Object#object.x.
+get_x (Object) -> Object#object.attitude#attitude.x.
 
 -spec get_y (type()) -> non_neg_integer().
-get_y (Object) -> Object#object.y.
+get_y (Object) -> Object#object.attitude#attitude.y.
 
 -spec get_z (type()) -> non_neg_integer().
-get_z (Object) -> Object#object.z.
+get_z (Object) -> Object#object.attitude#attitude.z.
 
 -spec get_angle (type()) -> integer().
-get_angle (Object) -> Object#object.angle.
+get_angle (Object) -> Object#object.attitude#attitude.angle.
 
 -spec get_properties (type()) -> properties().
 get_properties (Object) -> Object#object.properties.
@@ -300,16 +311,32 @@ set_width (Value, Object) -> Object#object{ width = Value }.
 set_height (Value, Object) -> Object#object{ height = Value }.
 
 -spec set_x (non_neg_integer(), type()) -> type().
-set_x (Value, Object) -> Object#object{ x = Value }.
+set_x (Value, Object) ->
+	Object#object
+	{
+		attitude = Object#object.attitude#attitude{ x = Value }
+	}.
 
 -spec set_y (non_neg_integer(), type()) -> type().
-set_y (Value, Object) -> Object#object{ y = Value }.
+set_y (Value, Object) ->
+	Object#object
+	{
+		attitude = Object#object.attitude#attitude{ y = Value }
+	}.
 
 -spec set_z (non_neg_integer(), type()) -> type().
-set_z (Value, Object) -> Object#object{ z = Value }.
+set_z (Value, Object) ->
+	Object#object
+	{
+		attitude = Object#object.attitude#attitude{ z = Value }
+	}.
 
 -spec set_angle (integer(), type()) -> type().
-set_angle (Value, Object) -> Object#object{ angle = Value }.
+set_angle (Value, Object) ->
+	Object#object
+	{
+		attitude = Object#object.attitude#attitude{ angle = Value }
+	}.
 
 -spec set_properties (properties(), type()) -> type().
 set_properties (Value, Object) -> Object#object{ properties = Value }.
@@ -497,9 +524,13 @@ ataxia_set_x (Value, S0Object) ->
 	{
 		ataxic:update_field
 		(
-			get_x_field(),
-			ataxic:constant(S1Object#object.x)
-		),
+			get_attitude_field(),
+			ataxic:update_field
+			(
+				get_x_field(),
+				ataxic:constant(Value)
+			)
+		)
 		S1Object
 	}.
 
@@ -509,8 +540,12 @@ ataxia_set_y (Value, S0Object) ->
 	{
 		ataxic:update_field
 		(
-			get_y_field(),
-			ataxic:constant(S1Object#object.y)
+			get_attitude_field(),
+			ataxic:update_field
+			(
+				get_y_field(),
+				ataxic:constant(Value)
+			)
 		),
 		S1Object
 	}.
@@ -521,8 +556,12 @@ ataxia_set_z (Value, S0Object) ->
 	{
 		ataxic:update_field
 		(
-			get_z_field(),
-			ataxic:constant(S1Object#object.z)
+			get_attitude_field(),
+			ataxic:update_field
+			(
+				get_z_field(),
+				ataxic:constant(Value)
+			)
 		),
 		S1Object
 	}.
@@ -533,8 +572,12 @@ ataxia_set_angle (Value, S0Object) ->
 	{
 		ataxic:update_field
 		(
-			get_angle_field(),
-			ataxic:constant(S1Object#object.angle)
+			get_attitude_field(),
+			ataxic:update_field
+			(
+				get_angle_field(),
+				ataxic:constant(Value)
+			)
 		),
 		S1Object
 	}.
@@ -564,17 +607,20 @@ get_width_field () -> #object.width.
 -spec get_height_field () -> non_neg_integer().
 get_height_field () -> #object.height.
 
+-spec get_attitude_field () -> non_neg_integer().
+get_attitude_field () -> #object.attitude.
+
 -spec get_x_field () -> non_neg_integer().
-get_x_field () -> #object.x.
+get_x_field () -> #attitude.x.
 
 -spec get_y_field () -> non_neg_integer().
-get_y_field () -> #object.y.
+get_y_field () -> #attitude.y.
 
 -spec get_z_field () -> non_neg_integer().
-get_z_field () -> #object.z.
+get_z_field () -> #attitude.z.
 
 -spec get_angle_field () -> non_neg_integer().
-get_angle_field () -> #object.angle.
+get_angle_field () -> #attitude.angle.
 
 -spec get_properties_field () -> non_neg_integer().
 get_properties_field () -> #object.properties.
