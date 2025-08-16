@@ -1,20 +1,15 @@
-module Main exposing (main)
+module Module.Subscriptions exposing (subscriptions)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
-import Browser
 
 -- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Module.Init
-import Module.Subscriptions
-import Module.Update
-import Module.View
-
 import Struct.Event
+import Struct.Model
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -27,15 +22,5 @@ import Struct.Event
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-
-main =
-   (Browser.application
-      {
-         init = Module.Init.init,
-         update = Module.Update.update,
-         view = Module.View.view,
-         subscriptions = Module.Subscriptions.subscriptions,
-         onUrlRequest = Struct.Event.PageURLRequested,
-         onUrlChange = Struct.Event.PageURLChangedTo
-      }
-   )
+subscriptions : Struct.Model.Type -> (Sub Struct.Event.Type)
+subscriptions _ = (Sub.none)

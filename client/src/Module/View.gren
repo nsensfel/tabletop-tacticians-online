@@ -1,4 +1,4 @@
-module Main exposing (main)
+module Module.View exposing (view)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
@@ -6,15 +6,13 @@ module Main exposing (main)
 -- Standard Library ------------------------------------------------------------
 import Browser
 
+import Html
+
 -- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Module.Init
-import Module.Subscriptions
-import Module.Update
-import Module.View
-
 import Struct.Event
+import Struct.Model
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -27,15 +25,11 @@ import Struct.Event
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-
-main =
-   (Browser.application
-      {
-         init = Module.Init.init,
-         update = Module.Update.update,
-         view = Module.View.view,
-         subscriptions = Module.Subscriptions.subscriptions,
-         onUrlRequest = Struct.Event.PageURLRequested,
-         onUrlChange = Struct.Event.PageURLChangedTo
-      }
-   )
+view : Struct.Model.Type -> (Browser.Document Struct.Event.Type)
+view model =
+   when model.page is
+      _ ->
+         {
+            title = "Not implemented.",
+            body = [ (Html.text "This page is not implemented.") ]
+         }

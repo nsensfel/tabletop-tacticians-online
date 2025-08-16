@@ -1,20 +1,18 @@
-module Main exposing (main)
+module Module.Init exposing (init)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
-import Browser
+import Browser.Navigation
+
+import Url
 
 -- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Module.Init
-import Module.Subscriptions
-import Module.Update
-import Module.View
-
 import Struct.Event
+import Struct.Model
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -27,15 +25,15 @@ import Struct.Event
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-
-main =
-   (Browser.application
-      {
-         init = Module.Init.init,
-         update = Module.Update.update,
-         view = Module.View.view,
-         subscriptions = Module.Subscriptions.subscriptions,
-         onUrlRequest = Struct.Event.PageURLRequested,
-         onUrlChange = Struct.Event.PageURLChangedTo
-      }
+init :
+   (
+      {} ->
+      Url.Url ->
+      Browser.Navigation.Key ->
+      { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
    )
+init _ url key =
+   {
+      model = (Struct.Model.init url key),
+      command = Cmd.none
+   }
