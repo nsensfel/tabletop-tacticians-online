@@ -1,4 +1,11 @@
-module Struct.Model exposing (Type, init)
+module Struct.Model exposing
+   (
+      Type,
+      init,
+      get_page,
+      set_page,
+      get_navigation_key
+   )
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
@@ -11,13 +18,15 @@ import Url
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Struct.Page
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
 type alias Type =
    {
-      page : String
+      page : Struct.Page.Type,
+      nav_key : Browser.Navigation.Key
    }
 
 --------------------------------------------------------------------------------
@@ -28,7 +37,17 @@ type alias Type =
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
 init : Url.Url -> Browser.Navigation.Key -> Type
-init _ _ =
+init url nav_key =
    {
-      page = "Nothing"
+      page = (Struct.Page.from_url url),
+      nav_key = nav_key
    }
+
+get_page : Type -> Struct.Page.Type
+get_page model = model.page
+
+set_page : Struct.Page.Type -> Type -> Type
+set_page page model = {model | page = page}
+
+get_navigation_key : Type -> Browser.Navigation.Key
+get_navigation_key model = model.nav_key

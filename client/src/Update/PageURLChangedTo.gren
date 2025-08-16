@@ -1,4 +1,4 @@
-module Main exposing (main)
+module Update.PageURLChangedTo exposing (update)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
@@ -6,15 +6,14 @@ module Main exposing (main)
 -- Standard Library ------------------------------------------------------------
 import Browser
 
+import Url
+
 -- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Module.Init
-import Module.Subscriptions
-import Module.Update
-import Module.View
-
 import Struct.Event
+import Struct.Model
+import Struct.Page
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -27,14 +26,18 @@ import Struct.Event
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-main =
-   (Browser.application
-      {
-         init = Module.Init.init,
-         update = Module.Update.update,
-         view = Module.View.view,
-         subscriptions = Module.Subscriptions.subscriptions,
-         onUrlRequest = Struct.Event.PageURLRequested,
-         onUrlChange = Struct.Event.PageURLChangedTo
-      }
+update :
+   (
+      Url.Url ->
+      Struct.Model.Type ->
+      { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
    )
+update url model =
+   {
+      model =
+         (Struct.Model.set_page
+            (Struct.Page.from_url url)
+            model
+         ),
+      command = Cmd.none
+   }

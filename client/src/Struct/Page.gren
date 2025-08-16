@@ -1,24 +1,26 @@
-module Main exposing (main)
+module Struct.Page exposing (Type(..), from_url)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
-import Browser
+import Url
 
--- Third Party------------------------------------------------------------------
+-- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Module.Init
-import Module.Subscriptions
-import Module.Update
-import Module.View
-
-import Struct.Event
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
+type Type =
+   Home
+   | Login
+   | Register
+   | EditProfile
+   | GameList
+   | Game
+   | Unknown
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
@@ -27,14 +29,12 @@ import Struct.Event
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-main =
-   (Browser.application
-      {
-         init = Module.Init.init,
-         update = Module.Update.update,
-         view = Module.View.view,
-         subscriptions = Module.Subscriptions.subscriptions,
-         onUrlRequest = Struct.Event.PageURLRequested,
-         onUrlChange = Struct.Event.PageURLChangedTo
-      }
-   )
+from_url : (Url.Url -> Type)
+from_url url =
+   when url.path is
+      "/" -> Home
+      "/register" -> Register
+      "/edit_profile" -> EditProfile
+      "/game_list" -> GameList
+      "/game" -> Game
+      _ -> Unknown

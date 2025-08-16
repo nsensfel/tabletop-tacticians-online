@@ -13,6 +13,9 @@ import Html
 -- Project ---------------------------------------------------------------------
 import Struct.Event
 import Struct.Model
+import Struct.Page
+
+import View.Home
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -28,6 +31,8 @@ import Struct.Model
 view : Struct.Model.Type -> (Browser.Document Struct.Event.Type)
 view model =
    when model.page is
+      Struct.Page.Home -> (View.Home.view model)
+
       _ ->
          {
             title = "Not implemented.",

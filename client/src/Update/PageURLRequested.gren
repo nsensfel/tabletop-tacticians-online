@@ -1,20 +1,20 @@
-module Main exposing (main)
+module Update.PageURLRequested exposing (update)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
 import Browser
+import Browser.Navigation
+
+import Url
 
 -- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Module.Init
-import Module.Subscriptions
-import Module.Update
-import Module.View
-
 import Struct.Event
+import Struct.Model
+import Struct.Page
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -27,14 +27,22 @@ import Struct.Event
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-main =
-   (Browser.application
-      {
-         init = Module.Init.init,
-         update = Module.Update.update,
-         view = Module.View.view,
-         subscriptions = Module.Subscriptions.subscriptions,
-         onUrlRequest = Struct.Event.PageURLRequested,
-         onUrlChange = Struct.Event.PageURLChangedTo
-      }
+update :
+   (
+      Browser.UrlRequest ->
+      Struct.Model.Type ->
+      { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
    )
+update url_request model =
+   {
+      model = model,
+      command =
+         when url_request is
+            (Browser.Internal url) ->
+               (Browser.Navigation.pushUrl
+                  (Struct.Model.get_navigation_key model)
+                  (Url.toString url)
+               )
+
+            (Browser.External url) -> (Browser.Navigation.load url)
+   }
