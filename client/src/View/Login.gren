@@ -1,0 +1,130 @@
+module View.Login exposing (view)
+
+--------------------------------------------------------------------------------
+-- IMPORTS ---------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Standard Library ------------------------------------------------------------
+import Browser
+
+import Html
+import Html.Attributes
+import Html.Events
+
+import String
+
+-- Third Party------------------------------------------------------------------
+
+-- Project ---------------------------------------------------------------------
+import Struct.Model
+import Struct.Event
+
+import Struct.Page.Login
+
+--------------------------------------------------------------------------------
+-- TYPES -----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- LOCAL FUNCTIONS -------------------------------------------------------------
+--------------------------------------------------------------------------------
+username_field : Struct.Page.Login.Type -> (Html.Html Struct.Event.Type)
+username_field login =
+   let
+      username = (Struct.Page.Login.get_username login)
+   in
+      (Html.div
+         [
+            (Html.Attributes.class "user-input"),
+            (Html.Attributes.class "login-username")
+         ]
+         [
+            (Html.h1 [] [ (Html.text "Username") ]),
+            (Html.input
+               [
+                  (Html.Events.onInput Struct.Event.LoginSetUsernameTo),
+                  (Html.Attributes.value username),
+                  if (String.isEmpty username)
+                  then (Html.Attributes.class "empty-input")
+                  else (Html.Attributes.class "")
+               ]
+               [
+               ]
+            )
+         ]
+      )
+
+password_field : Struct.Page.Login.Type -> (Html.Html Struct.Event.Type)
+password_field login =
+   let
+      password = (Struct.Page.Login.get_password login)
+   in
+      (Html.div
+         [
+            (Html.Attributes.class "user-input"),
+            (Html.Attributes.class "login-password")
+         ]
+         [
+            (Html.h1 [] [ (Html.text "Password") ]),
+            (Html.input
+               [
+                  (Html.Events.onInput Struct.Event.LoginSetPasswordTo),
+                  (Html.Attributes.value password),
+                  if (String.isEmpty password)
+                  then (Html.Attributes.class "empty-input")
+                  else (Html.Attributes.class "")
+               ]
+               [
+               ]
+            )
+         ]
+      )
+
+--------------------------------------------------------------------------------
+-- EXPORTED FUNCTIONS ----------------------------------------------------------
+--------------------------------------------------------------------------------
+view :
+   (
+      Struct.Model.Type ->
+      Struct.Page.Login.Type ->
+      (Browser.Document Struct.Event.Type)
+   )
+view model login =
+   {
+      title = "Login",
+      body =
+      [
+         (Html.article
+            []
+            [
+               (username_field login),
+               (password_field login),
+               (Html.button
+                  [
+                     (Html.Events.onClick Struct.Event.LoginFormSubmitted)
+                  ]
+                  [
+                     (Html.text "Send")
+                  ]
+               ),
+               (Html.button
+                  [
+                     (Html.Attributes.class "login-debug-button"),
+                     (Html.Events.onClick (Struct.Event.LoginDebugSignInAs "0"))
+                  ]
+                  [
+                     (Html.text "[PH] Login as Player 1")
+                  ]
+               ),
+               (Html.button
+                  [
+                     (Html.Attributes.class "login-debug-button"),
+                     (Html.Events.onClick (Struct.Event.LoginDebugSignInAs "1"))
+                  ]
+                  [
+                     (Html.text "[PH] Login as Player 2")
+                  ]
+               )
+            ]
+         )
+      ]
+   }

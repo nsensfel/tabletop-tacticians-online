@@ -34,6 +34,6 @@ init :
    )
 init _ url key =
    {
-      model = (Struct.Model.init url key),
+      model = (Struct.Model.new url key),
       command = Cmd.none
    }

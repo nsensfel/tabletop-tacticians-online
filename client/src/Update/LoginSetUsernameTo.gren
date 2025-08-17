@@ -1,33 +1,22 @@
-module Struct.Model exposing
-   (
-      Type,
-      new,
-      get_page,
-      set_page,
-      get_navigation_key
-   )
+module Update.LoginSetUsernameTo exposing (update)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
-import Browser.Navigation
 
-import Url
-
--- Third Party -----------------------------------------------------------------
+-- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Struct.Event
+import Struct.Model
+
 import Struct.Page
+import Struct.Page.Login
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
-type alias Type =
-   {
-      page : Struct.Page.Type,
-      nav_key : Browser.Navigation.Key
-   }
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
@@ -36,18 +25,24 @@ type alias Type =
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-new : Url.Url -> Browser.Navigation.Key -> Type
-new url nav_key =
+update :
+   (
+      String ->
+      Struct.Model.Type ->
+      { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
+   )
+update username model =
    {
-      page = (Struct.Page.new url),
-      nav_key = nav_key
+      command = Cmd.none,
+      model =
+         when (Struct.Model.get_page model) is
+            (Struct.Page.Login login) ->
+               (Struct.Model.set_page
+                  (Struct.Page.Login
+                     (Struct.Page.Login.set_username username login)
+                  )
+                  model
+               )
+
+            _ -> model
    }
-
-get_page : Type -> Struct.Page.Type
-get_page model = model.page
-
-set_page : Struct.Page.Type -> Type -> Type
-set_page page model = {model | page = page}
-
-get_navigation_key : Type -> Browser.Navigation.Key
-get_navigation_key model = model.nav_key

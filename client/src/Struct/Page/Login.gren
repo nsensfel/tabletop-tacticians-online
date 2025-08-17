@@ -1,32 +1,29 @@
-module Struct.Model exposing
+module Struct.Page.Login exposing
    (
       Type,
       new,
-      get_page,
-      set_page,
-      get_navigation_key
+      get_username,
+      set_username,
+      get_password,
+      set_password
    )
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
-import Browser.Navigation
-
-import Url
 
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Struct.Page
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
 type alias Type =
    {
-      page : Struct.Page.Type,
-      nav_key : Browser.Navigation.Key
+      username : String,
+      password : String
    }
 
 --------------------------------------------------------------------------------
@@ -36,18 +33,17 @@ type alias Type =
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-new : Url.Url -> Browser.Navigation.Key -> Type
-new url nav_key =
-   {
-      page = (Struct.Page.new url),
-      nav_key = nav_key
-   }
+new : Type
+new = { username = "", password = "" }
 
-get_page : Type -> Struct.Page.Type
-get_page model = model.page
+get_username : Type -> String
+get_username login = login.username
 
-set_page : Struct.Page.Type -> Type -> Type
-set_page page model = {model | page = page}
+set_username : String -> Type -> Type
+set_username username login = {login | username = username}
 
-get_navigation_key : Type -> Browser.Navigation.Key
-get_navigation_key model = model.nav_key
+get_password : Type -> String
+get_password login = login.password
+
+set_password : String -> Type -> Type
+set_password password login = {login | password = password}

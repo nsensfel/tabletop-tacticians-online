@@ -11,6 +11,9 @@ module Module.Update exposing (update)
 import Struct.Event
 import Struct.Model
 
+import Update.LoginFormSubmitted
+import Update.LoginSetPasswordTo
+import Update.LoginSetUsernameTo
 import Update.PageURLChangedTo
 import Update.PageURLRequested
 
@@ -33,6 +36,15 @@ update :
    )
 update event model =
    when event is
+      Struct.Event.LoginFormSubmitted ->
+         (Update.LoginFormSubmitted.update model)
+
+      (Struct.Event.LoginSetPasswordTo password) ->
+         (Update.LoginSetPasswordTo.update password model)
+
+      (Struct.Event.LoginSetUsernameTo username) ->
+         (Update.LoginSetUsernameTo.update username model)
+
       (Struct.Event.PageURLChangedTo url) ->
          (Update.PageURLChangedTo.update url model)
 

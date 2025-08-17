@@ -36,7 +36,7 @@ update url model =
    {
       model =
          (Struct.Model.set_page
-            (Struct.Page.from_url url)
+            (Struct.Page.new url)
             model
          ),
       command = Cmd.none

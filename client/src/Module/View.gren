@@ -16,6 +16,7 @@ import Struct.Model
 import Struct.Page
 
 import View.Home
+import View.Login
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -32,6 +33,7 @@ view : Struct.Model.Type -> (Browser.Document Struct.Event.Type)
 view model =
    when model.page is
       Struct.Page.Home -> (View.Home.view model)
+      (Struct.Page.Login login) -> (View.Login.view model login)
 
       _ ->
          {

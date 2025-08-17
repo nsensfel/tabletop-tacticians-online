@@ -17,6 +17,10 @@ import Url
 --------------------------------------------------------------------------------
 type Type =
    None
+   | LoginDebugSignInAs String
+   | LoginFormSubmitted
+   | LoginSetPasswordTo String
+   | LoginSetUsernameTo String
    | PageURLChangedTo Url.Url
    | PageURLRequested Browser.UrlRequest
 
