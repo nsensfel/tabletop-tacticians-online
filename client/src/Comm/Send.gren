@@ -29,7 +29,7 @@ type Destination = LoginHandler
 destination_to_url : Destination -> String
 destination_to_url destination =
    (
-      (Parameters.get_request_handler_url)
+      (Parameters.request_handler_url)
       ++
       (
          when destination is

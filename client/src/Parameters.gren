@@ -1,35 +1,17 @@
-module Struct.Error exposing
-   (
-      Category(..),
-      Type,
-      new,
-      get_category,
-      get_message
-   )
+module Parameters exposing (..)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
 
--- Third Party -----------------------------------------------------------------
+-- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
-type Category =
-   Warning
-   | Error
-   | Network
-   | ProgrammingError
-
-type alias Type =
-   {
-      category : Category,
-      message : String
-   }
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
@@ -38,12 +20,8 @@ type alias Type =
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-new : Category -> String -> Type
-new category message = { category = category, message = message }
+base_url : String
+base_url = "https://tabletop.tacticians.online/"
 
-get_category : Type -> Category
-get_category error = error.category
-
-get_message : Type -> String
-get_message error = error.message
-
+request_handler_url : String
+request_handler_url = (base_url ++ "request/")

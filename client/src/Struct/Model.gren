@@ -7,7 +7,7 @@ module Struct.Model exposing
       get_navigation_key,
       get_error_tracker,
       set_error_tracker,
-      push_error,
+      push_error
    )
 
 --------------------------------------------------------------------------------
@@ -46,7 +46,8 @@ new : Url.Url -> Browser.Navigation.Key -> Type
 new url nav_key =
    {
       page = (Struct.Page.new url),
-      nav_key = nav_key
+      nav_key = nav_key,
+      error_tracker = (Struct.ErrorTracker.new)
    }
 
 get_page : Type -> Struct.Page.Type
@@ -65,7 +66,7 @@ set_error_tracker : Struct.ErrorTracker.Type -> Type -> Type
 set_error_tracker error_tracker model = {model | error_tracker = error_tracker}
 
 push_error : Struct.Error.Category -> String -> Type -> Type
-push_error category message =
+push_error category message model =
    {model |
       error_tracker =
          (Struct.ErrorTracker.push

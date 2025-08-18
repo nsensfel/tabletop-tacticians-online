@@ -12,7 +12,7 @@ module Struct.ErrorTracker exposing
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
-import List
+import Array
 
 -- Third Party -----------------------------------------------------------------
 
@@ -24,8 +24,8 @@ import Struct.Error
 --------------------------------------------------------------------------------
 type alias Type =
    {
-      unread : (List Struct.Error.Type),
-      read : (List Struct.Error.Type)
+      unread : (Array Struct.Error.Type),
+      read : (Array Struct.Error.Type)
    }
 
 --------------------------------------------------------------------------------
@@ -38,18 +38,18 @@ type alias Type =
 new : Type
 new = { unread = [], read = [] }
 
-get_unread_errors : Type -> (List Struct.Error.Type)
+get_unread_errors : Type -> (Array Struct.Error.Type)
 get_unread_errors tracker = tracker.unread
 
-get_read_errors : Type -> (List Struct.Error.Type)
+get_read_errors : Type -> (Array Struct.Error.Type)
 get_read_errors tracker = tracker.read
 
 mark_errors_as_read : Type -> Type
 mark_errors_as_read tracker =
    {tracker |
       read = [],
-      unread = (List.append tracker.read tracker.unread)
+      unread = (Array.append tracker.read tracker.unread)
    }
 
 push : Struct.Error.Type -> Type -> Type
-push error tracker = {tracker | read = (error :: tracker.read) }
+push error tracker = {tracker | read = (Array.append [error] tracker.read) }
