@@ -1,36 +1,43 @@
-module Struct.Event exposing (Type(..))
+module Comm.Receive exposing (expect)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
-import Browser
+import Json.Decode
 
-import Url
-
--- Third Party -----------------------------------------------------------------
+-- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Struct.Event
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
-type Type =
-   None
-   | LoginDebugSignInAs String
-   | LoginFormSubmitted
-   | LoginSetPasswordTo String
-   | LoginSetUsernameTo String
-   | SetSessionTokenTo String
-   | EraseSessionToken
-   | PageURLChangedTo Url.Url
-   | PageURLRequested Browser.UrlRequest
-   | UnknownMessageTypeReceived String
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
+decoder_step1 : String -> (Json.Decode.Decoder Struct.Event.Type)
+decoder_step1 reply_type =
+   when reply_type is
+      "sst" -> (Comm.Receive.SetSessionToken.decoder)
+      other ->
+         (Json.Decode.hard_coded
+            (Struct.Event.UnknownMessageTypeReceived other)
+         )
+
+decoder_step0 : (Json.Decode.Decoder Struct.Event.Type)
+decoder_step0 =
+   (Json.Decode.field "msg" Json.Decode.string)
+   |> (Json.Decode.andThen (decoder_step1))
+
+decoder: (Json.Decode.Decoder (List Struct.Event.Type))
+decoder = (Json.Decode.list decoder_step0)
 
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
+expect : (Result Error a -> Struct.Event.Type) -> Decoder a
+expect result =
+   when 

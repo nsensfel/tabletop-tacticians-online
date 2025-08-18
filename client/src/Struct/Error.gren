@@ -1,12 +1,16 @@
-module Struct.Event exposing (Type(..))
+module Struct.Error exposing
+   (
+      Category(..),
+      Type,
+      new,
+      get_category,
+      get_message
+   )
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
-import Browser
-
-import Url
 
 -- Third Party -----------------------------------------------------------------
 
@@ -15,17 +19,16 @@ import Url
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
-type Type =
-   None
-   | LoginDebugSignInAs String
-   | LoginFormSubmitted
-   | LoginSetPasswordTo String
-   | LoginSetUsernameTo String
-   | SetSessionTokenTo String
-   | EraseSessionToken
-   | PageURLChangedTo Url.Url
-   | PageURLRequested Browser.UrlRequest
-   | UnknownMessageTypeReceived String
+type Category =
+   Warning
+   | Error
+   | ProgrammingError
+
+type alias Type =
+   {
+      category : Category,
+      message : String
+   }
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
@@ -34,3 +37,12 @@ type Type =
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
+new : Category -> String -> Type
+new category message = { category = category, message = message }
+
+get_category : Type -> Category
+get_category error = error.category
+
+get_message : Type -> Message
+get_message error = error.message
+

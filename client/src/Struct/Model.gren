@@ -4,7 +4,10 @@ module Struct.Model exposing
       new,
       get_page,
       set_page,
-      get_navigation_key
+      get_navigation_key,
+      get_error_tracker,
+      set_error_tracker,
+      push_error,
    )
 
 --------------------------------------------------------------------------------
@@ -19,6 +22,8 @@ import Url
 
 -- Project ---------------------------------------------------------------------
 import Struct.Page
+import Struct.Error
+import Struct.ErrorTracker
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -26,7 +31,8 @@ import Struct.Page
 type alias Type =
    {
       page : Struct.Page.Type,
-      nav_key : Browser.Navigation.Key
+      nav_key : Browser.Navigation.Key,
+      error_tracker : Struct.ErrorTracker.Type
    }
 
 --------------------------------------------------------------------------------
@@ -51,3 +57,19 @@ set_page page model = {model | page = page}
 
 get_navigation_key : Type -> Browser.Navigation.Key
 get_navigation_key model = model.nav_key
+
+get_error_tracker : Type -> Struct.ErrorTracker.Type
+get_error_tracker model = model.error_tracker
+
+set_error_tracker : Struct.ErrorTracker.Type -> Type -> Type
+set_error_tracker error_tracker model = {model | error_tracker = error_tracker}
+
+push_error : Struct.Error.Category -> String -> Type -> Type
+push_error category message =
+   {model |
+      error_tracker =
+         (Struct.ErrorTracker.push
+            (Struct.Error.new category message)
+            model.error_tracker
+         )
+   }

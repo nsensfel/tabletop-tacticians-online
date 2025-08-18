@@ -1,31 +1,32 @@
-module Struct.Event exposing (Type(..))
+module Struct.ErrorTracker exposing
+   (
+      Type,
+      new,
+      get_unread_errors,
+      get_read_errors,
+      mark_errors_as_read,
+      push
+   )
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
-import Browser
-
-import Url
+import List
 
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Struct.Error
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
-type Type =
-   None
-   | LoginDebugSignInAs String
-   | LoginFormSubmitted
-   | LoginSetPasswordTo String
-   | LoginSetUsernameTo String
-   | SetSessionTokenTo String
-   | EraseSessionToken
-   | PageURLChangedTo Url.Url
-   | PageURLRequested Browser.UrlRequest
-   | UnknownMessageTypeReceived String
+type alias Type =
+   {
+      unread : (List Struct.Error.Type),
+      read : (List Struct.Error.Type)
+   }
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
@@ -34,3 +35,21 @@ type Type =
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
+new : Type
+new = { unread = [], read = [] }
+
+get_unread_errors : Type -> (List Struct.Error.Type)
+get_unread_errors tracker = tracker.unread
+
+get_read_errors : Type -> (List Struct.Error.Type)
+get_read_errors tracker = tracker.read
+
+mark_errors_as_read : Type -> Type
+mark_errors_as_read tracker =
+   {tracker |
+      read = [],
+      unread = (List.append tracker.read tracker.unread)
+   }
+
+push : Struct.Error.Type -> Type -> Type
+push error tracker = {tracker | read = (error :: tracker.read) }

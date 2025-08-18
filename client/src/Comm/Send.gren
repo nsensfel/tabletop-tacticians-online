@@ -1,36 +1,51 @@
-module Struct.Event exposing (Type(..))
+module Comm.Send exposing (send, Destination(..))
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
-import Browser
+import Json.Encode
 
-import Url
+import Http
 
--- Third Party -----------------------------------------------------------------
+-- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Struct.Event
+import Struct.Model
+
+import Comm.Receive
+
+import Parameters
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
-type Type =
-   None
-   | LoginDebugSignInAs String
-   | LoginFormSubmitted
-   | LoginSetPasswordTo String
-   | LoginSetUsernameTo String
-   | SetSessionTokenTo String
-   | EraseSessionToken
-   | PageURLChangedTo Url.Url
-   | PageURLRequested Browser.UrlRequest
-   | UnknownMessageTypeReceived String
+type Destination = LoginHandler
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
+destination_to_url : Destination -> String
+destination_to_url destination =
+   (
+      (Parameters.get_request_handler_url)
+      ++
+      (
+         when destination is
+            LoginHandler -> "/login/"
+      )
+   )
 
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
+send : Json.Encode.Value -> Destination -> (Cmd Struct.Event.Type)
+send json_body destination =
+   (Http.post
+      {
+         url = (destination_to_url destination),
+         body = (Http.jsonBody json_body),
+         expect = Comm.Receive.expect
+      }
+   )
