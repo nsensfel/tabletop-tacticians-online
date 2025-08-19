@@ -32,8 +32,5 @@ update :
 update model =
    {
       model = model,
-      command =
-         when (Comm.Send.LoginRequest.try model) is
-            (Just cmd) -> cmd
-            Nothing -> Cmd.none
+      command = (Comm.Send.LoginRequest.send model)
    }

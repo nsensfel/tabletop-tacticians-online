@@ -12,16 +12,15 @@ import Url
 
 -- Project ---------------------------------------------------------------------
 import Struct.Error
+import Struct.Page.Login
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
 type Type =
    None
-   | LoginDebugSignInAs String
-   | LoginFormSubmitted
-   | LoginSetPasswordTo String
-   | LoginSetUsernameTo String
+   | Sequence (Array Type)
+   | LoginPage (Struct.Page.Login.Event)
    | SetSessionTokenTo String
    | EraseSessionToken
    | PageURLChangedTo Url.Url

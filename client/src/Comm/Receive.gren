@@ -37,38 +37,34 @@ decoder_step0 =
    (Json.Decode.field "msg" Json.Decode.string)
    |> (Json.Decode.andThen (decoder_step1))
 
-decoder: (Json.Decode.Decoder (Array Struct.Event.Type))
+decoder : (Json.Decode.Decoder (Array Struct.Event.Type))
 decoder = (Json.Decode.array decoder_step0)
 
+result_to_msg :
+   (
+      (Result.Result Http.Error (Array Struct.Event.Type)) ->
+      Struct.Event.Type
+   )
+result_to_msg result =
+   when result is
+      (Result.Ok sequence) -> (Struct.Event.Sequence sequence)
+      (Result.Err error) ->
+         (Struct.Event.ErrorOccurred
+            (Struct.Error.new
+               Struct.Error.Network
+               (
+                  when error is
+                     (Http.BadUrl url) -> ("Invalid URL: " ++ url)
+                     Http.Timeout -> "Request timed out."
+                     Http.NetworkError -> "Network connection error."
+                     (Http.BadBody msg) -> ("Invalid reply: " ++ msg)
+                     (Http.BadStatus num) ->
+                        ("HTTP Error: " ++ (String.fromInt num))
+               )
+            )
+         )
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-expect :
-      (Result.Result Http.Error a) ->
-      (Json.Decode.Decoder (Array Struct.Event.Type)) ->
-      (Http.Expect (Array Struct.Event.Type))
-   )
-expect result =
-   (Http.expectJson
-      when result is
-         (Result.Ok value) -> (decoder)
-         (Result.Err error) ->
-            (Json.Decode.succeed
-               [
-                  (Struct.Event.ErrorOccurred
-                     (Struct.Error.new
-                        Struct.Error.Network
-                        (
-                           when error is
-                              (Http.BadUrl url) -> ("Invalid URL: " ++ url)
-                              Http.Timeout -> "Request timed out."
-                              Http.NetworkError -> "Network connection error."
-                              (Http.BadBody msg) -> ("Invalid reply: " ++ msg)
-                              (Http.BadStatus num) ->
-                                 ("HTTP Error: " ++ (String.fromInt num))
-                        )
-                     )
-                  )
-               ]
-            )
-   )
+expect : (Http.Expect Struct.Event.Type)
+expect = (Http.expectJson (result_to_msg) (decoder))
