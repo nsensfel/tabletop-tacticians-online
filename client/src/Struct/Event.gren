@@ -21,7 +21,7 @@ type Type =
    None
    | Sequence (Array Type)
    | LoginPage (Struct.Page.Login.Event)
-   | SetSessionTokenTo String
+   | SetSessionToken String
    | EraseSessionToken
    | PageURLChangedTo Url.Url
    | PageURLRequested Browser.UrlRequest

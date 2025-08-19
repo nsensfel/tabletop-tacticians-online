@@ -1,4 +1,4 @@
-module Update.Login.SetPasswordTo exposing (update)
+module Update.LoginPage.SetUsernameTo exposing (update)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
@@ -32,12 +32,12 @@ update :
       Struct.Model.Type ->
       { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
    )
-update password login model =
+update username login model =
    {
       command = Cmd.none,
       model =
          (Struct.Model.set_page
-            (Struct.Page.Login (Struct.Page.Login.set_password password login))
+            (Struct.Page.Login (Struct.Page.Login.set_username username login))
             model
          )
    }

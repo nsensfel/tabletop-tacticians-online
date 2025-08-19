@@ -24,7 +24,7 @@ type Category =
    Warning
    | Error
    | Network
-   | ProgrammingError
+   | Programming
 
 type alias Type =
    {
@@ -45,8 +45,8 @@ category_from_text name =
       "wrn" -> Warning
       "err" -> Error
       "net" -> Network
-      "pog" -> ProgrammingError
-      _ -> ProgrammingError
+      "pog" -> Programming
+      _ -> Programming
 
 new : Category -> String -> Type
 new category message = { category = category, message = message }

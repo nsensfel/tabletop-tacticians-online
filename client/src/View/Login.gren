@@ -41,7 +41,13 @@ username_field login =
             (Html.h1 [] [ (Html.text "Username") ]),
             (Html.input
                [
-                  (Html.Events.onInput Struct.Event.LoginSetUsernameTo),
+                  (Html.Events.onInput
+                     ( \new_username ->
+                        (Struct.Event.LoginPage
+                           (Struct.Page.Login.SetUsernameTo new_username)
+                        )
+                     )
+                  ),
                   (Html.Attributes.value username),
                   if (String.isEmpty username)
                   then (Html.Attributes.class "empty-input")
@@ -67,7 +73,13 @@ password_field login =
             (Html.h1 [] [ (Html.text "Password") ]),
             (Html.input
                [
-                  (Html.Events.onInput Struct.Event.LoginSetPasswordTo),
+                  (Html.Events.onInput
+                     ( \new_password ->
+                        (Struct.Event.LoginPage
+                           (Struct.Page.Login.SetPasswordTo new_password)
+                        )
+                     )
+                  ),
                   (Html.Attributes.value password),
                   if (String.isEmpty password)
                   then (Html.Attributes.class "empty-input")
@@ -100,7 +112,9 @@ view model login =
                (password_field login),
                (Html.button
                   [
-                     (Html.Events.onClick Struct.Event.LoginFormSubmitted)
+                     (Html.Events.onClick
+                        (Struct.Event.LoginPage Struct.Page.Login.FormSubmitted)
+                     )
                   ]
                   [
                      (Html.text "Send")
@@ -109,7 +123,11 @@ view model login =
                (Html.button
                   [
                      (Html.Attributes.class "login-debug-button"),
-                     (Html.Events.onClick (Struct.Event.LoginDebugSignInAs "0"))
+                     (Html.Events.onClick
+                        (Struct.Event.LoginPage
+                           (Struct.Page.Login.DebugSignInAs "0")
+                        )
+                     )
                   ]
                   [
                      (Html.text "[PH] Login as Player 1")
@@ -118,7 +136,11 @@ view model login =
                (Html.button
                   [
                      (Html.Attributes.class "login-debug-button"),
-                     (Html.Events.onClick (Struct.Event.LoginDebugSignInAs "1"))
+                     (Html.Events.onClick
+                        (Struct.Event.LoginPage
+                           (Struct.Page.Login.DebugSignInAs "1")
+                        )
+                     )
                   ]
                   [
                      (Html.text "[PH] Login as Player 2")

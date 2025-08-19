@@ -1,4 +1,4 @@
-module Update.Login exposing (update)
+module Update.LoginPage exposing (update)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
@@ -8,15 +8,16 @@ module Update.Login exposing (update)
 -- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Struct.Error
 import Struct.Event
 import Struct.Model
 
 import Struct.Page
 import Struct.Page.Login
 
-import Update.Login.FormSubmitted
-import Update.Login.SetPasswordTo
-import Update.Login.SetUsernameTo
+import Update.LoginPage.FormSubmitted
+import Update.LoginPage.SetPasswordTo
+import Update.LoginPage.SetUsernameTo
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -40,29 +41,28 @@ update login_page_event model =
       (Struct.Page.Login login) ->
          when login_page_event is
             Struct.Page.Login.FormSubmitted ->
-               (Update.Login.FormSubmitted.update login model)
+               (Update.LoginPage.FormSubmitted.update login model)
 
             (Struct.Page.Login.SetPasswordTo val) ->
-               (Update.Login.SetPasswordTo.update val login model)
+               (Update.LoginPage.SetPasswordTo.update val login model)
 
             (Struct.Page.Login.SetUsernameTo val) ->
-               (Update.Login.SetUsernameTo.update val login model)
+               (Update.LoginPage.SetUsernameTo.update val login model)
 
             _ ->
                {
                   model =
                      (Struct.Model.push_error
-                        (Struct.Error.new
-                           Struct.Error.Programming
-                           (
-                              "Cannot handle unimplemented Login Page Event \""
-                              ++
-                              (Struct.Page.Login.event_to_string
-                                 login_page_event
-                              )
-                              ++ "\" ."
+                        Struct.Error.Programming
+                        (
+                           "Cannot handle unimplemented Login Page Event \""
+                           ++
+                           (Struct.Page.Login.event_to_string
+                              login_page_event
                            )
+                           ++ "\" ."
                         )
+                        model
                      ),
                   command = Cmd.none
                }
@@ -70,14 +70,13 @@ update login_page_event model =
          {
             model =
                (Struct.Model.push_error
-                  (Struct.Error.new
-                     Struct.Error.Programming
-                     (
-                        "Cannot handle Login Page Event \""
-                        ++ (Struct.Page.Login.event_to_string login_page_event)
-                        ++ "\" outside of Login Page."
-                     )
+                  Struct.Error.Programming
+                  (
+                     "Cannot handle Login Page Event \""
+                     ++ (Struct.Page.Login.event_to_string login_page_event)
+                     ++ "\" outside of Login Page."
                   )
+                  model
                ),
             command = Cmd.none
          }

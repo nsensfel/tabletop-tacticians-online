@@ -31,8 +31,8 @@ category_decoder =
 --------------------------------------------------------------------------------
 decoder : (Json.Decode.Decoder Struct.Event.Type)
 decoder =
-   (Json.map2
+   (Json.Decode.map2
+      (\a b -> (Struct.Event.ErrorOccurred (Struct.Error.new a b)))
       (Json.Decode.field "cat" category_decoder)
       (Json.Decode.field "txt" Json.Decode.string)
-      (\a b -> (Struct.Event.ErrorOccurred (Struct.Error.new a b)))
    )
