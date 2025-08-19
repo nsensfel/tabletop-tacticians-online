@@ -4,7 +4,8 @@ module Struct.Error exposing
       Type,
       new,
       get_category,
-      get_message
+      get_message,
+      category_from_text
    )
 
 --------------------------------------------------------------------------------
@@ -38,6 +39,15 @@ type alias Type =
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
+category_from_text : String -> Category
+category_from_text name =
+   when name is
+      "wrn" -> Warning
+      "err" -> Error
+      "net" -> Network
+      "pog" -> ProgrammingError
+      _ -> ProgrammingError
+
 new : Category -> String -> Type
 new category message = { category = category, message = message }
 

@@ -14,6 +14,10 @@ import Struct.Model
 import Struct.Page
 import Struct.Page.Login
 
+import Update.Login.FormSubmitted
+import Update.Login.SetPasswordTo
+import Update.Login.SetUsernameTo
+
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -35,7 +39,33 @@ update login_page_event model =
    when (Struct.Model.get_page model) is
       (Struct.Page.Login login) ->
          when login_page_event is
+            Struct.Page.Login.FormSubmitted ->
+               (Update.Login.FormSubmitted.update login model)
 
+            (Struct.Page.Login.SetPasswordTo val) ->
+               (Update.Login.SetPasswordTo.update val login model)
+
+            (Struct.Page.Login.SetUsernameTo val) ->
+               (Update.Login.SetUsernameTo.update val login model)
+
+            _ ->
+               {
+                  model =
+                     (Struct.Model.push_error
+                        (Struct.Error.new
+                           Struct.Error.Programming
+                           (
+                              "Cannot handle unimplemented Login Page Event \""
+                              ++
+                              (Struct.Page.Login.event_to_string
+                                 login_page_event
+                              )
+                              ++ "\" ."
+                           )
+                        )
+                     ),
+                  command = Cmd.none
+               }
       _ ->
          {
             model =
@@ -44,16 +74,10 @@ update login_page_event model =
                      Struct.Error.Programming
                      (
                         "Cannot handle Login Page Event \""
+                        ++ (Struct.Page.Login.event_to_string login_page_event)
+                        ++ "\" outside of Login Page."
                      )
                   )
-               )
+               ),
+            command = Cmd.none
          }
-         (Struct.Model.set_page
-            (Struct.Page.Login
-               (Struct.Page.Login.set_username username login)
-            )
-            model
-         )
-
-            _ -> model
-   }

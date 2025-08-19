@@ -1,4 +1,4 @@
-module Update.LoginSetPasswordTo exposing (update)
+module Update.SetSessionToken exposing (update)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
@@ -10,9 +10,6 @@ module Update.LoginSetPasswordTo exposing (update)
 -- Project ---------------------------------------------------------------------
 import Struct.Event
 import Struct.Model
-
-import Struct.Page
-import Struct.Page.Login
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -31,18 +28,8 @@ update :
       Struct.Model.Type ->
       { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
    )
-update password model =
+update token model =
    {
-      command = Cmd.none,
-      model =
-         when (Struct.Model.get_page model) is
-            (Struct.Page.Login login) ->
-               (Struct.Model.set_page
-                  (Struct.Page.Login
-                     (Struct.Page.Login.set_password password login)
-                  )
-                  model
-               )
-
-            _ -> model
+      model = (Struct.Model.set_session_token tokenpage model),
+      command = Cmd.none
    }

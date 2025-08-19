@@ -7,6 +7,9 @@ module Struct.Model exposing
       get_navigation_key,
       get_error_tracker,
       set_error_tracker,
+      maybe_get_session_token,
+      set_session_token,
+      erase_session_token,
       push_error
    )
 
@@ -30,6 +33,7 @@ import Struct.ErrorTracker
 --------------------------------------------------------------------------------
 type alias Type =
    {
+      session_token : (Maybe String),
       page : Struct.Page.Type,
       nav_key : Browser.Navigation.Key,
       error_tracker : Struct.ErrorTracker.Type
@@ -45,10 +49,20 @@ type alias Type =
 new : Url.Url -> Browser.Navigation.Key -> Type
 new url nav_key =
    {
+      session_token = Nothing,
       page = (Struct.Page.new url),
       nav_key = nav_key,
       error_tracker = (Struct.ErrorTracker.new)
    }
+
+maybe_get_session_token : Type -> (Maybe String)
+maybe_get_session_token model = model.session_token
+
+set_session_token : String -> Type -> Type
+set_session_token token model = {model | session_token = (Just token)}
+
+erase_session_token : Type -> Type
+erase_session_token model = {model | session_token = Nothing}
 
 get_page : Type -> Struct.Page.Type
 get_page model = model.page
