@@ -12,7 +12,13 @@ import Url
 
 -- Project ---------------------------------------------------------------------
 import Struct.Error
+import Struct.Session
+
+import Struct.Page.EditProfile
+import Struct.Page.Game
+import Struct.Page.GameList
 import Struct.Page.Login
+import Struct.Page.Register
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -21,8 +27,12 @@ type Type =
    None
    | Sequence (Array Type)
    | LoginPage (Struct.Page.Login.Event)
-   | SetSessionToken String
-   | EraseSessionToken
+   | RegisterPage (Struct.Page.Register.Event)
+   | EditProfilePage (Struct.Page.EditProfile.Event)
+   | GameListPage (Struct.Page.GameList.Event)
+   | GamePage (Struct.Page.Game.Event)
+   | SetSession Struct.Session.Type
+   | EraseSession
    | PageURLChangedTo Url.Url
    | PageURLRequested Browser.UrlRequest
    | UnknownMessageTypeReceived String

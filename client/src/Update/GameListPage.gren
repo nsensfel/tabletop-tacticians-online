@@ -1,0 +1,74 @@
+module Update.GameListPage exposing (update)
+
+--------------------------------------------------------------------------------
+-- IMPORTS ---------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Standard Library ------------------------------------------------------------
+
+-- Third Party------------------------------------------------------------------
+
+-- Project ---------------------------------------------------------------------
+import Struct.Error
+import Struct.Event
+import Struct.Model
+
+import Struct.Page
+import Struct.Page.GameList
+
+import Update.GameListPage.EnterGame
+
+--------------------------------------------------------------------------------
+-- TYPES -----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- LOCAL FUNCTIONS -------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- EXPORTED FUNCTIONS ----------------------------------------------------------
+--------------------------------------------------------------------------------
+update :
+   (
+      Struct.Page.GameList.Event ->
+      Struct.Model.Type ->
+      { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
+   )
+update game_list_page_event model =
+   when (Struct.Model.get_page model) is
+      (Struct.Page.GameList game_list) ->
+         when game_list_page_event is
+            (Struct.Page.GameList.EnterGame val) ->
+               (Update.GameListPage.EnterGame.update val game_list model)
+
+            _ ->
+               {
+                  model =
+                     (Struct.Model.push_error
+                        Struct.Error.Programming
+                        (
+                           "Cannot handle unimplemented GameList Page Event \""
+                           ++
+                           (Struct.Page.GameList.event_to_string
+                              game_list_page_event
+                           )
+                           ++ "\" ."
+                        )
+                        model
+                     ),
+                  command = Cmd.none
+               }
+      _ ->
+         {
+            model =
+               (Struct.Model.push_error
+                  Struct.Error.Programming
+                  (
+                     "Cannot handle GameList Page Event \""
+                     ++ (Struct.Page.GameList.event_to_string game_list_page_event)
+                     ++ "\" outside of GameList Page."
+                  )
+                  model
+               ),
+            command = Cmd.none
+         }

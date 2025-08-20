@@ -1,0 +1,74 @@
+module Update.GamePage exposing (update)
+
+--------------------------------------------------------------------------------
+-- IMPORTS ---------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Standard Library ------------------------------------------------------------
+
+-- Third Party------------------------------------------------------------------
+
+-- Project ---------------------------------------------------------------------
+import Struct.Error
+import Struct.Event
+import Struct.Model
+
+import Struct.Page
+import Struct.Page.Game
+
+import Update.GamePage.CancelSelection
+
+--------------------------------------------------------------------------------
+-- TYPES -----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- LOCAL FUNCTIONS -------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- EXPORTED FUNCTIONS ----------------------------------------------------------
+--------------------------------------------------------------------------------
+update :
+   (
+      Struct.Page.Game.Event ->
+      Struct.Model.Type ->
+      { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
+   )
+update game_page_event model =
+   when (Struct.Model.get_page model) is
+      (Struct.Page.Game game) ->
+         when game_page_event is
+            Struct.Page.Game.CancelSelection ->
+               (Update.GamePage.CancelSelection.update game model)
+
+            _ ->
+               {
+                  model =
+                     (Struct.Model.push_error
+                        Struct.Error.Programming
+                        (
+                           "Cannot handle unimplemented Game Page Event \""
+                           ++
+                           (Struct.Page.Game.event_to_string
+                              game_page_event
+                           )
+                           ++ "\" ."
+                        )
+                        model
+                     ),
+                  command = Cmd.none
+               }
+      _ ->
+         {
+            model =
+               (Struct.Model.push_error
+                  Struct.Error.Programming
+                  (
+                     "Cannot handle Game Page Event \""
+                     ++ (Struct.Page.Game.event_to_string game_page_event)
+                     ++ "\" outside of Game Page."
+                  )
+                  model
+               ),
+            command = Cmd.none
+         }

@@ -1,0 +1,105 @@
+module Update.RegisterPage exposing (update)
+
+--------------------------------------------------------------------------------
+-- IMPORTS ---------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Standard Library ------------------------------------------------------------
+
+-- Third Party------------------------------------------------------------------
+
+-- Project ---------------------------------------------------------------------
+import Struct.Error
+import Struct.Event
+import Struct.Model
+
+import Struct.Page
+import Struct.Page.Register
+
+import Update.RegisterPage.FormSubmitted
+import Update.RegisterPage.SetDisplayedNameTo
+import Update.RegisterPage.SetEmailTo
+import Update.RegisterPage.SetPasswordConfirmationTo
+import Update.RegisterPage.SetPasswordTo
+import Update.RegisterPage.SetUsernameTo
+
+--------------------------------------------------------------------------------
+-- TYPES -----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- LOCAL FUNCTIONS -------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- EXPORTED FUNCTIONS ----------------------------------------------------------
+--------------------------------------------------------------------------------
+update :
+   (
+      Struct.Page.Register.Event ->
+      Struct.Model.Type ->
+      { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
+   )
+update register_page_event model =
+   when (Struct.Model.get_page model) is
+      (Struct.Page.Register register) ->
+         when register_page_event is
+            Struct.Page.Register.FormSubmitted ->
+               (Update.RegisterPage.FormSubmitted.update register model)
+
+            (Struct.Page.Register.SetPasswordTo val) ->
+               (Update.RegisterPage.SetPasswordTo.update val register model)
+
+            (Struct.Page.Register.SetUsernameTo val) ->
+               (Update.RegisterPage.SetUsernameTo.update val register model)
+
+            (Struct.Page.Register.SetDisplayedNameTo val) ->
+               (Update.RegisterPage.SetDisplayedNameTo.update
+                  val
+                  register
+                  model
+               )
+
+            (Struct.Page.Register.SetEmailTo val) ->
+               (Update.RegisterPage.SetEmailTo.update val register model)
+
+            (Struct.Page.Register.SetPasswordConfirmationTo val) ->
+               (Update.RegisterPage.SetPasswordConfirmationTo.update
+                  val
+                  register
+                  model
+               )
+
+            _ ->
+               {
+                  model =
+                     (Struct.Model.push_error
+                        Struct.Error.Programming
+                        (
+                           "Cannot handle unimplemented Register Page Event \""
+                           ++
+                           (Struct.Page.Register.event_to_string
+                              register_page_event
+                           )
+                           ++ "\" ."
+                        )
+                        model
+                     ),
+                  command = Cmd.none
+               }
+      _ ->
+         {
+            model =
+               (Struct.Model.push_error
+                  Struct.Error.Programming
+                  (
+                     "Cannot handle Register Page Event \""
+                     ++
+                     (Struct.Page.Register.event_to_string
+                        register_page_event
+                     )
+                     ++ "\" outside of Register Page."
+                  )
+                  model
+               ),
+            command = Cmd.none
+         }

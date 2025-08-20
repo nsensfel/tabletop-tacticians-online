@@ -1,26 +1,18 @@
-module Module.View exposing (view)
+module Update.RegisterPage.SetEmailTo exposing (update)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
-import Browser
-
-import Html
 
 -- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
 import Struct.Event
 import Struct.Model
-import Struct.Page
 
-import View.EditProfile
-import View.Game
-import View.GameList
-import View.Home
-import View.Login
-import View.Register
+import Struct.Page
+import Struct.Page.Register
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -33,19 +25,21 @@ import View.Register
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-view : Struct.Model.Type -> (Browser.Document Struct.Event.Type)
-view model =
-   when model.page is
-      Struct.Page.Home -> (View.Home.view model)
-      (Struct.Page.Login login) -> (View.Login.view model login)
-      (Struct.Page.Register register) -> (View.Register.view model register)
-      (Struct.Page.Game game) -> (View.Game.view model game)
-      (Struct.Page.GameList game_list) -> (View.GameList.view model game_list)
-      (Struct.Page.EditProfile edit_profile) ->
-         (View.EditProfile.view model edit_profile)
-
-      _ ->
-         {
-            title = "Not implemented.",
-            body = [ (Html.text "This page is not implemented.") ]
-         }
+update :
+   (
+      String ->
+      Struct.Page.Register.Type ->
+      Struct.Model.Type ->
+      { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
+   )
+update email register model =
+   {
+      command = Cmd.none,
+      model =
+         (Struct.Model.set_page
+            (Struct.Page.Register
+               (Struct.Page.Register.set_email email register)
+            )
+            model
+         )
+   }

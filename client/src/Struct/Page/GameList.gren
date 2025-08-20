@@ -1,30 +1,39 @@
-module Module.View exposing (view)
+module Struct.Page.GameList exposing
+   (
+      Type,
+      Entry,
+      Event(..),
+      new,
+      get_list,
+      set_list,
+      event_to_string
+   )
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
-import Browser
 
-import Html
-
--- Third Party------------------------------------------------------------------
+-- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Struct.Event
-import Struct.Model
-import Struct.Page
-
-import View.EditProfile
-import View.Game
-import View.GameList
-import View.Home
-import View.Login
-import View.Register
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
+type alias Entry =
+   {
+      id : String
+   }
+
+type alias Type =
+   {
+      list : (Array Entry)
+   }
+
+type Event =
+   EnterGame String
+   | LeaveGame String
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
@@ -33,19 +42,17 @@ import View.Register
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-view : Struct.Model.Type -> (Browser.Document Struct.Event.Type)
-view model =
-   when model.page is
-      Struct.Page.Home -> (View.Home.view model)
-      (Struct.Page.Login login) -> (View.Login.view model login)
-      (Struct.Page.Register register) -> (View.Register.view model register)
-      (Struct.Page.Game game) -> (View.Game.view model game)
-      (Struct.Page.GameList game_list) -> (View.GameList.view model game_list)
-      (Struct.Page.EditProfile edit_profile) ->
-         (View.EditProfile.view model edit_profile)
+event_to_string : Event -> String
+event_to_string event =
+   when event is
+      (EnterGame _) -> "EnterGame"
+      | (LeaveGame _) -> "LeaveGame"
 
-      _ ->
-         {
-            title = "Not implemented.",
-            body = [ (Html.text "This page is not implemented.") ]
-         }
+new : Type
+new = { list = [] }
+
+get_list : Type -> (Array Entry)
+get_list game_list = game_list.list
+
+set_list : (Array Entry) -> Type -> Type
+set_list list game_list = {game_list | list = list}

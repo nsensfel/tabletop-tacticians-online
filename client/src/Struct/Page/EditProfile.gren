@@ -1,0 +1,98 @@
+module Struct.Page.EditProfile exposing
+   (
+      Type,
+      Event(..),
+      new,
+      get_displayed_name,
+      set_displayed_name,
+      get_email,
+      set_email,
+      get_password,
+      set_password,
+      get_new_password,
+      set_new_password,
+      get_new_password_confirmation,
+      set_new_password_confirmation,
+      event_to_string
+   )
+
+--------------------------------------------------------------------------------
+-- IMPORTS ---------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Standard Library ------------------------------------------------------------
+
+-- Third Party -----------------------------------------------------------------
+
+-- Project ---------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- TYPES -----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+type alias Type =
+   {
+      password : String,
+      displayed_name : String,
+      email : String,
+      new_password : String,
+      new_password_confirmation : String
+   }
+
+type Event =
+   FormSubmitted
+   | SetPasswordTo String
+   | SetDisplayedNameTo String
+   | SetEmailTo String
+   | SetNewPasswordTo String
+   | SetNewPasswordConfirmationTo String
+
+--------------------------------------------------------------------------------
+-- LOCAL FUNCTIONS -------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- EXPORTED FUNCTIONS ----------------------------------------------------------
+--------------------------------------------------------------------------------
+event_to_string : Event -> String
+event_to_string event =
+   when event is
+      FormSubmitted -> "FormSubmitted"
+      (SetPasswordTo _) -> "SetPasswordTo"
+      (SetDisplayedNameTo _) -> "SetDisplayedNameTo"
+      (SetEmailTo _) -> "SetEmailTo"
+      (SetNewPasswordTo _) -> "SetNewPasswordTo"
+      (SetNewPasswordConfirmationTo _) -> "SetNewPasswordConfirmationTo"
+
+new : Type
+new = { username = "", password = "" }
+
+get_password : Type -> String
+get_password profile = profile.password
+
+set_password : String -> Type -> Type
+set_password password profile = {profile | password = password}
+
+get_displayed_name : Type -> String
+get_displayed_name login = login.displayed_name
+
+set_displayed_name : String -> Type -> Type
+set_displayed_name displayed_name login =
+   {login | displayed_name = displayed_name}
+
+get_email : Type -> String
+get_email login = login.email
+
+set_email : String -> Type -> Type
+set_email email login = {login | email = email}
+
+get_new_password : Type -> String
+get_new_password login = login.new_password
+
+set_new_password : String -> Type -> Type
+set_new_password new_password login = {login | new_password = new_password}
+
+get_new_password_confirmation : Type -> String
+get_new_password_confirmation login = login.new_password_confirmation
+
+set_new_password_confirmation : String -> Type -> Type
+set_new_password_confirmation new_password_confirmation login =
+   {login | new_password_confirmation = new_password_confirmation}

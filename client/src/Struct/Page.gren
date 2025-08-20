@@ -9,19 +9,23 @@ import Url
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Struct.Page.EditProfile
+import Struct.Page.Game
+import Struct.Page.GameList
 import Struct.Page.Login
+import Struct.Page.Register
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
 type Type =
    Home
+   | EditProfile Struct.Page.EditProfile.Type
+   | Game Struct.Page.Game.Type
+   | GameList Struct.Page.GameList.Type
    | Login Struct.Page.Login.Type
-   | Register
-   | EditProfile
-   | GameList
-   | Game
-   | Unknown
+   | Register Struct.Page.Register.Type
+   | Unknown String
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
@@ -35,8 +39,8 @@ new url =
    when url.path is
       "/" -> Home
       "/login" -> (Login (Struct.Page.Login.new))
-      "/register" -> Register
-      "/edit_profile" -> EditProfile
-      "/game_list" -> GameList
-      "/game" -> Game
-      _ -> Unknown
+      "/register" -> (Register (Struct.Page.Register.new))
+      "/edit_profile" -> (EditProfile (Struct.Page.EditProfile.new))
+      "/game_list" -> (GameList (Struct.Page.GameList.new))
+      "/game" -> (Game (Struct.Page.Game.new))
+      other -> (Unknown other)

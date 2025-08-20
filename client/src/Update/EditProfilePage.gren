@@ -1,0 +1,120 @@
+module Update.EditProfilePage exposing (update)
+
+--------------------------------------------------------------------------------
+-- IMPORTS ---------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Standard Library ------------------------------------------------------------
+
+-- Third Party------------------------------------------------------------------
+
+-- Project ---------------------------------------------------------------------
+import Struct.Error
+import Struct.Event
+import Struct.Model
+
+import Struct.Page
+import Struct.Page.EditProfile
+
+import Update.EditProfilePage.FormSubmitted
+import Update.EditProfilePage.SetPasswordTo
+import Update.EditProfilePage.SetDisplayedNameTo
+import Update.EditProfilePage.SetEmailTo
+import Update.EditProfilePage.SetNewPasswordTo
+import Update.EditProfilePage.SetNewPasswordConfirmationTo
+
+--------------------------------------------------------------------------------
+-- TYPES -----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- LOCAL FUNCTIONS -------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- EXPORTED FUNCTIONS ----------------------------------------------------------
+--------------------------------------------------------------------------------
+update :
+   (
+      Struct.Page.EditProfile.Event ->
+      Struct.Model.Type ->
+      { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
+   )
+update edit_profile_page_event model =
+   when (Struct.Model.get_page model) is
+      (Struct.Page.EditProfile edit_profile) ->
+         when edit_profile_page_event is
+            Struct.Page.EditProfile.FormSubmitted ->
+               (Update.EditProfilePage.FormSubmitted.update
+                  edit_profile
+                  model
+               )
+
+            (Struct.Page.EditProfile.SetPasswordTo val) ->
+               (Update.EditProfilePage.SetPasswordTo.update
+                  val
+                  edit_profile
+                  model
+               )
+
+            (Struct.Page.EditProfile.SetDisplayedNameTo val) ->
+               (Update.EditProfilePage.SetDisplayedNameTo.update
+                  val
+                  edit_profile
+                  model
+               )
+
+            (Struct.Page.EditProfile.SetEmailTo val) ->
+               (Update.EditProfilePage.SetEmailTo.update
+                  val
+                  edit_profile
+                  model
+               )
+
+            (Struct.Page.EditProfile.SetNewPasswordTo val) ->
+               (Update.EditProfilePage.SetNewPasswordTo.update
+                  val
+                  edit_profile
+                  model
+               )
+
+            (Struct.Page.EditProfile.SetNewPasswordConfirmationTo val) ->
+               (Update.EditProfilePage.SetNewPasswordConfirmationTo.update
+                  val
+                  edit_profile
+                  model
+               )
+
+            _ ->
+               {
+                  model =
+                     (Struct.Model.push_error
+                        Struct.Error.Programming
+                        (
+                           "Cannot handle unimplemented EditProfile Page Event \""
+                           ++
+                           (Struct.Page.EditProfile.event_to_string
+                              edit_profile_page_event
+                           )
+                           ++ "\" ."
+                        )
+                        model
+                     ),
+                  command = Cmd.none
+               }
+      _ ->
+         {
+            model =
+               (Struct.Model.push_error
+                  Struct.Error.Programming
+                  (
+                     "Cannot handle EditProfile Page Event \""
+                     ++
+                     (Struct.Page.EditProfile.event_to_string
+                        edit_profile_page_event
+                     )
+                     ++ "\" outside of EditProfile Page."
+                  )
+                  model
+               ),
+            command = Cmd.none
+         }

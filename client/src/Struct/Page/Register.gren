@@ -1,0 +1,105 @@
+module Struct.Page.Register exposing
+   (
+      Type,
+      Event(..),
+      new,
+      get_username,
+      set_username,
+      get_displayed_name,
+      set_displayed_name,
+      get_password,
+      set_password,
+      get_password_confirmation,
+      set_password_confirmation,
+      get_email,
+      set_email,
+      event_to_string
+   )
+
+--------------------------------------------------------------------------------
+-- IMPORTS ---------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Standard Library ------------------------------------------------------------
+
+-- Third Party -----------------------------------------------------------------
+
+-- Project ---------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- TYPES -----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+type alias Type =
+   {
+      username : String,
+      displayed_name : String,
+      password : String,
+      password_confirmation : String,
+      email : String
+   }
+
+type Event =
+   FormSubmitted
+   | SetDisplayedNameTo String
+   | SetUsernameTo String
+   | SetEmailTo String
+   | SetPasswordConfirmationTo String
+   | SetPasswordTo String
+
+--------------------------------------------------------------------------------
+-- LOCAL FUNCTIONS -------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- EXPORTED FUNCTIONS ----------------------------------------------------------
+--------------------------------------------------------------------------------
+event_to_string : Event -> String
+event_to_string event =
+   when event is
+      FormSubmitted -> "FormSubmitted"
+      (SetDisplayedNameTo _) -> "SetDisplayedNameTo"
+      (SetUsernameTo _) -> "SetUsernameTo"
+      (SetEmailTo _) -> "SetEmailTo"
+      (SetPasswordConfirmationTo _) -> "SetPasswordConfirmationTo"
+      (SetPasswordTo _) -> "SetPasswordTo"
+
+new : Type
+new =
+   {
+      username = "",
+      displayed_name = "",
+      password = "",
+      password_confirmation = "",
+      email = ""
+   }
+
+get_username : Type -> String
+get_username register = register.username
+
+set_username : String -> Type -> Type
+set_username username register = {register | username = username}
+
+get_displayed_name : Type -> String
+get_displayed_name register = register.displayed_name
+
+set_displayed_name : String -> Type -> Type
+set_displayed_name displayed_name register =
+   {register | displayed_name = displayed_name}
+
+get_password : Type -> String
+get_password register = register.password
+
+set_password : String -> Type -> Type
+set_password password register = {register | password = password}
+
+get_password_confirmation : Type -> String
+get_password_confirmation register = register.password_confirmation
+
+set_password_confirmation : String -> Type -> Type
+set_password_confirmation password_confirmation register =
+   {register | password_confirmation = password_confirmation}
+
+get_email : Type -> String
+get_email register = register.email
+
+set_email : String -> Type -> Type
+set_email email register = {register | email = email}
