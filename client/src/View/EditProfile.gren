@@ -1,4 +1,4 @@
-module View.Register exposing (view)
+module View.EditProfile exposing (view)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
@@ -18,7 +18,7 @@ import String
 import Struct.Model
 import Struct.Event
 
-import Struct.Page.Register
+import Struct.Page.EditProfile
 
 import View.ErrorTracker
 --------------------------------------------------------------------------------
@@ -28,29 +28,35 @@ import View.ErrorTracker
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
-username_field : Struct.Page.Register.Type -> (Html.Html Struct.Event.Type)
-username_field register =
+new_password_field :
+   (
+      Struct.Page.EditProfile.Type ->
+      (Html.Html Struct.Event.Type)
+   )
+new_password_field edit_profile =
    let
-      username = (Struct.Page.Register.get_username register)
+      new_password = (Struct.Page.EditProfile.get_new_password edit_profile)
    in
       (Html.div
          [
             (Html.Attributes.class "user-input"),
-            (Html.Attributes.class "register-username")
+            (Html.Attributes.class "edit-profile-new-password")
          ]
          [
-            (Html.h1 [] [ (Html.text "Username") ]),
+            (Html.h1 [] [ (Html.text "New Password") ]),
             (Html.input
                [
                   (Html.Events.onInput
-                     ( \new_username ->
-                        (Struct.Event.RegisterPage
-                           (Struct.Page.Register.SetUsernameTo new_username)
+                     ( \new_new_password ->
+                        (Struct.Event.EditProfilePage
+                           (Struct.Page.EditProfile.SetNewPasswordTo
+                              new_new_password
+                           )
                         )
                      )
                   ),
-                  (Html.Attributes.value username),
-                  if (String.isEmpty username)
+                  (Html.Attributes.value new_password),
+                  if (String.isEmpty new_password)
                   then (Html.Attributes.class "empty-input")
                   else (Html.Attributes.class "")
                ]
@@ -60,15 +66,15 @@ username_field register =
          ]
       )
 
-password_field : Struct.Page.Register.Type -> (Html.Html Struct.Event.Type)
-password_field register =
+password_field : Struct.Page.EditProfile.Type -> (Html.Html Struct.Event.Type)
+password_field edit_profile =
    let
-      password = (Struct.Page.Register.get_password register)
+      password = (Struct.Page.EditProfile.get_password edit_profile)
    in
       (Html.div
          [
             (Html.Attributes.class "user-input"),
-            (Html.Attributes.class "register-password")
+            (Html.Attributes.class "edit-profile-password")
          ]
          [
             (Html.h1 [] [ (Html.text "Password") ]),
@@ -76,8 +82,8 @@ password_field register =
                [
                   (Html.Events.onInput
                      ( \new_password ->
-                        (Struct.Event.RegisterPage
-                           (Struct.Page.Register.SetPasswordTo new_password)
+                        (Struct.Event.EditProfilePage
+                           (Struct.Page.EditProfile.SetPasswordTo new_password)
                         )
                      )
                   ),
@@ -92,25 +98,25 @@ password_field register =
          ]
       )
 
-password_confirmation_field : Struct.Page.Register.Type -> (Html.Html Struct.Event.Type)
-password_confirmation_field register =
+new_password_confirmation_field : Struct.Page.EditProfile.Type -> (Html.Html Struct.Event.Type)
+new_password_confirmation_field edit_profile =
    let
       password_confirmation =
-         (Struct.Page.Register.get_password_confirmation register)
+         (Struct.Page.EditProfile.get_new_password_confirmation edit_profile)
    in
       (Html.div
          [
             (Html.Attributes.class "user-input"),
-            (Html.Attributes.class "register-password_confirmation")
+            (Html.Attributes.class "edit-profile-new-password-confirmation")
          ]
          [
-            (Html.h1 [] [ (Html.text "Password Confirmation") ]),
+            (Html.h1 [] [ (Html.text "New Password Confirmation") ]),
             (Html.input
                [
                   (Html.Events.onInput
                      ( \new_password_confirmation ->
-                        (Struct.Event.RegisterPage
-                           (Struct.Page.Register.SetPasswordConfirmationTo
+                        (Struct.Event.EditProfilePage
+                           (Struct.Page.EditProfile.SetNewPasswordConfirmationTo
                               new_password_confirmation
                            )
                         )
@@ -127,15 +133,15 @@ password_confirmation_field register =
          ]
       )
 
-displayed_name_field : Struct.Page.Register.Type -> (Html.Html Struct.Event.Type)
-displayed_name_field register =
+displayed_name_field : Struct.Page.EditProfile.Type -> (Html.Html Struct.Event.Type)
+displayed_name_field edit_profile =
    let
-      displayed_name = (Struct.Page.Register.get_displayed_name register)
+      displayed_name = (Struct.Page.EditProfile.get_displayed_name edit_profile)
    in
       (Html.div
          [
             (Html.Attributes.class "user-input"),
-            (Html.Attributes.class "register-displayed_name")
+            (Html.Attributes.class "edit-profile-displayed_name")
          ]
          [
             (Html.h1 [] [ (Html.text "DisplayedName") ]),
@@ -143,8 +149,8 @@ displayed_name_field register =
                [
                   (Html.Events.onInput
                      ( \new_displayed_name ->
-                        (Struct.Event.RegisterPage
-                           (Struct.Page.Register.SetDisplayedNameTo
+                        (Struct.Event.EditProfilePage
+                           (Struct.Page.EditProfile.SetDisplayedNameTo
                               new_displayed_name
                            )
                         )
@@ -161,15 +167,15 @@ displayed_name_field register =
          ]
       )
 
-email_field : Struct.Page.Register.Type -> (Html.Html Struct.Event.Type)
-email_field register =
+email_field : Struct.Page.EditProfile.Type -> (Html.Html Struct.Event.Type)
+email_field edit_profile =
    let
-      email = (Struct.Page.Register.get_email register)
+      email = (Struct.Page.EditProfile.get_email edit_profile)
    in
       (Html.div
          [
             (Html.Attributes.class "user-input"),
-            (Html.Attributes.class "register-email")
+            (Html.Attributes.class "edit-profile-email")
          ]
          [
             (Html.h1 [] [ (Html.text "Email") ]),
@@ -177,8 +183,8 @@ email_field register =
                [
                   (Html.Events.onInput
                      ( \new_email ->
-                        (Struct.Event.RegisterPage
-                           (Struct.Page.Register.SetEmailTo new_email)
+                        (Struct.Event.EditProfilePage
+                           (Struct.Page.EditProfile.SetEmailTo new_email)
                         )
                      )
                   ),
@@ -199,27 +205,27 @@ email_field register =
 view :
    (
       Struct.Model.Type ->
-      Struct.Page.Register.Type ->
+      Struct.Page.EditProfile.Type ->
       (Browser.Document Struct.Event.Type)
    )
-view model register =
+view model edit_profile =
    {
-      title = "Register",
+      title = "Edit Profile",
       body =
       [
          (Html.article
             []
             [
-               (username_field register),
-               (password_field register),
-               (password_confirmation_field register),
-               (displayed_name_field register),
-               (email_field register),
+               (password_field edit_profile),
+               (new_password_field edit_profile),
+               (new_password_confirmation_field edit_profile),
+               (displayed_name_field edit_profile),
+               (email_field edit_profile),
                (Html.button
                   [
                      (Html.Events.onClick
-                        (Struct.Event.RegisterPage
-                           Struct.Page.Register.FormSubmitted
+                        (Struct.Event.EditProfilePage
+                           Struct.Page.EditProfile.FormSubmitted
                         )
                      )
                   ]

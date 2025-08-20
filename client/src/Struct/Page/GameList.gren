@@ -46,7 +46,7 @@ event_to_string : Event -> String
 event_to_string event =
    when event is
       (EnterGame _) -> "EnterGame"
-      | (LeaveGame _) -> "LeaveGame"
+      (LeaveGame _) -> "LeaveGame"
 
 new : Type
 new = { list = [] }

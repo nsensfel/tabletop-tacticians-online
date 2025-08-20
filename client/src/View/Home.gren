@@ -14,6 +14,8 @@ import Html
 import Struct.Model
 import Struct.Event
 
+import View.ErrorTracker
+
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -28,6 +30,6 @@ import Struct.Event
 view : Struct.Model.Type -> (Browser.Document Struct.Event.Type)
 view model =
    {
-      title = "Home.",
-      body = [ (Html.text "Home Page.") ]
+      title = "Home",
+      body = [ (Html.text "Home Page."), (View.ErrorTracker.get_html model) ]
    }

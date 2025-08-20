@@ -84,23 +84,23 @@ update edit_profile_page_event model =
                   model
                )
 
-            _ ->
-               {
-                  model =
-                     (Struct.Model.push_error
-                        Struct.Error.Programming
-                        (
-                           "Cannot handle unimplemented EditProfile Page Event \""
-                           ++
-                           (Struct.Page.EditProfile.event_to_string
-                              edit_profile_page_event
-                           )
-                           ++ "\" ."
-                        )
-                        model
-                     ),
-                  command = Cmd.none
-               }
+--            _ ->
+--               {
+--                  model =
+--                     (Struct.Model.push_error
+--                        Struct.Error.Programming
+--                        (
+--                           "Cannot handle unimplemented EditProfile Page Event \""
+--                           ++
+--                           (Struct.Page.EditProfile.event_to_string
+--                              edit_profile_page_event
+--                           )
+--                           ++ "\" ."
+--                        )
+--                        model
+--                     ),
+--                  command = Cmd.none
+--               }
       _ ->
          {
             model =

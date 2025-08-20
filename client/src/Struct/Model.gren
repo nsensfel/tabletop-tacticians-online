@@ -10,6 +10,9 @@ module Struct.Model exposing
       maybe_get_session,
       set_session,
       erase_session,
+      maybe_get_confirmation,
+      set_confirmation,
+      erase_confirmation,
       push_error
    )
 
@@ -27,6 +30,7 @@ import Url
 import Struct.Page
 import Struct.Error
 import Struct.Session
+import Struct.Confirmation
 import Struct.ErrorTracker
 
 --------------------------------------------------------------------------------
@@ -34,6 +38,7 @@ import Struct.ErrorTracker
 --------------------------------------------------------------------------------
 type alias Type =
    {
+      confirmation : (Maybe Struct.Confirmation.Type),
       session : (Maybe Struct.Session.Type),
       page : Struct.Page.Type,
       nav_key : Browser.Navigation.Key,
@@ -50,6 +55,7 @@ type alias Type =
 new : Url.Url -> Browser.Navigation.Key -> Type
 new url nav_key =
    {
+      confirmation = Nothing,
       session = Nothing,
       page = (Struct.Page.new url),
       nav_key = nav_key,
@@ -64,6 +70,16 @@ set_session session model = {model | session = (Just session)}
 
 erase_session : Type -> Type
 erase_session model = {model | session = Nothing}
+
+maybe_get_confirmation : Type -> (Maybe Struct.Confirmation.Type)
+maybe_get_confirmation model = model.confirmation
+
+set_confirmation : Struct.Confirmation.Type -> Type -> Type
+set_confirmation confirmation model =
+   {model | confirmation = (Just confirmation)}
+
+erase_confirmation : Type -> Type
+erase_confirmation model = {model | confirmation = Nothing}
 
 get_page : Type -> Struct.Page.Type
 get_page model = model.page

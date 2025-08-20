@@ -1,15 +1,20 @@
-module Comm.Receive.SetSessionToken exposing (decoder)
+module Comm.Send.RegisterRequest exposing (send)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
-import Json.Decode
+import Json.Encode
 
 -- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
 import Struct.Event
+import Struct.Model
+
+import Struct.Page.Register
+
+import Comm.Send
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -18,16 +23,48 @@ import Struct.Event
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
+encode : Struct.Page.Register.Type -> Json.Encode.Value
+encode register =
+   (Json.Encode.object
+      [
+         {
+            key = "usr",
+            value =
+               (Json.Encode.string (Struct.Page.Register.get_username register))
+         },
+         {
+            key = "pwd",
+            value =
+               (Json.Encode.string (Struct.Page.Register.get_password register))
+         },
+         {
+            key = "dnm",
+            value =
+               (Json.Encode.string
+                  (Struct.Page.Register.get_displayed_name register)
+               )
+         },
+         {
+            key = "eml",
+            value =
+               (Json.Encode.string
+                  (Struct.Page.Register.get_email register)
+               )
+         }
+      ]
+   )
 
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-decoder : (Json.Decode.Decoder Struct.Event.Type)
-decoder =
-   (Json.Decode.field
-      "tkn"
-      (Json.Decode.map
-         ( \tkn -> (Struct.Event.SetSessionToken tkn) )
-         Json.Decode.string
-      )
+send :
+   (
+      Struct.Page.Register.Type ->
+      Struct.Model.Type ->
+      { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
    )
+send register model =
+   {
+      model = model,
+      command = (Comm.Send.send (encode register) Comm.Send.RegisterHandler)
+   }

@@ -1,9 +1,10 @@
-module Update.EditProfilePage.SetDisplayedNameTo exposing (update)
+module Comm.Send.EditProfileRequest exposing (send)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
+import Json.Encode
 
 -- Third Party------------------------------------------------------------------
 
@@ -11,8 +12,9 @@ module Update.EditProfilePage.SetDisplayedNameTo exposing (update)
 import Struct.Event
 import Struct.Model
 
-import Struct.Page
 import Struct.Page.EditProfile
+
+import Comm.Send
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -21,25 +23,53 @@ import Struct.Page.EditProfile
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
+encode : Struct.Page.EditProfile.Type -> Json.Encode.Value
+encode edit_profile =
+   (Json.Encode.object
+      [
+         {
+            key = "pwd",
+            value =
+               (Json.Encode.string
+                  (Struct.Page.EditProfile.get_password edit_profile)
+               )
+         },
+         {
+            key = "dnm",
+            value =
+               (Json.Encode.string
+                  (Struct.Page.EditProfile.get_displayed_name edit_profile)
+               )
+         },
+         {
+            key = "eml",
+            value =
+               (Json.Encode.string
+                  (Struct.Page.EditProfile.get_email edit_profile)
+               )
+         },
+         {
+            key = "npd",
+            value =
+               (Json.Encode.string
+                  (Struct.Page.EditProfile.get_new_password edit_profile)
+               )
+         }
+      ]
+   )
 
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-update :
+send :
    (
-      String ->
       Struct.Page.EditProfile.Type ->
       Struct.Model.Type ->
       { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
    )
-update displayed_name login model =
+send edit_profile model =
    {
-      command = Cmd.none,
-      model =
-         (Struct.Model.set_page
-            (Struct.Page.EditProfile
-               (Struct.Page.EditProfile.set_displayed_name displayed_name login)
-            )
-            model
-         )
+      model = model,
+      command =
+         (Comm.Send.send (encode edit_profile) Comm.Send.EditProfileHandler)
    }

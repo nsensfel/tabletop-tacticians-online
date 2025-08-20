@@ -15,8 +15,8 @@ import Struct.Event
 import Struct.Error
 
 import Comm.Receive.Error
-import Comm.Receive.SetSessionToken
-import Comm.Receive.EraseSessionToken
+import Comm.Receive.SetSession
+import Comm.Receive.EraseSession
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -29,8 +29,8 @@ decoder_step1 : String -> (Json.Decode.Decoder Struct.Event.Type)
 decoder_step1 reply_type =
    when reply_type is
       "err" -> (Comm.Receive.Error.decoder)
-      "est" -> (Comm.Receive.EraseSessionToken.decoder)
-      "sst" -> (Comm.Receive.SetSessionToken.decoder)
+      "est" -> (Comm.Receive.EraseSession.decoder)
+      "sst" -> (Comm.Receive.SetSession.decoder)
       other ->
          (Json.Decode.succeed
             (Struct.Event.UnknownMessageTypeReceived other)

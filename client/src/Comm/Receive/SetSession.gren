@@ -1,18 +1,16 @@
-module Update.EditProfilePage.SetDisplayedNameTo exposing (update)
+module Comm.Receive.SetSession exposing (decoder)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
+import Json.Decode
 
 -- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
 import Struct.Event
-import Struct.Model
-
-import Struct.Page
-import Struct.Page.EditProfile
+import Struct.Session
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -25,21 +23,12 @@ import Struct.Page.EditProfile
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-update :
-   (
-      String ->
-      Struct.Page.EditProfile.Type ->
-      Struct.Model.Type ->
-      { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
+decoder : (Json.Decode.Decoder Struct.Event.Type)
+decoder =
+   (Json.Decode.map2
+      ( \tkn id ->
+         (Struct.Event.SetSession (Struct.Session.new tkn id))
+      )
+      (Json.Decode.field "tkn" Json.Decode.string)
+      (Json.Decode.field "id" Json.Decode.string)
    )
-update displayed_name login model =
-   {
-      command = Cmd.none,
-      model =
-         (Struct.Model.set_page
-            (Struct.Page.EditProfile
-               (Struct.Page.EditProfile.set_displayed_name displayed_name login)
-            )
-            model
-         )
-   }

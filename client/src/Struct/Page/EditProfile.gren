@@ -63,7 +63,14 @@ event_to_string event =
       (SetNewPasswordConfirmationTo _) -> "SetNewPasswordConfirmationTo"
 
 new : Type
-new = { username = "", password = "" }
+new =
+   {
+      password = "",
+      displayed_name = "",
+      email = "",
+      new_password = "",
+      new_password_confirmation = ""
+   }
 
 get_password : Type -> String
 get_password profile = profile.password

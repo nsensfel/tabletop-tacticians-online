@@ -52,4 +52,4 @@ mark_errors_as_read tracker =
    }
 
 push : Struct.Error.Type -> Type -> Type
-push error tracker = {tracker | read = (Array.append [error] tracker.read) }
+push error tracker = {tracker | unread = (Array.append [error] tracker.unread) }

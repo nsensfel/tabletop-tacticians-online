@@ -21,7 +21,12 @@ import Parameters
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
-type Destination = LoginHandler
+type Destination =
+   LoginHandler
+   | RegisterHandler
+   | EditProfileHandler
+   | GameListHandler
+   | GameHandler
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
@@ -34,6 +39,10 @@ destination_to_url destination =
       (
          when destination is
             LoginHandler -> "/login/"
+            RegisterHandler -> "/register/"
+            EditProfileHandler -> "/edit_profile/"
+            GameListHandler -> "/game_list/"
+            GameHandler -> "/game/"
       )
    )
 

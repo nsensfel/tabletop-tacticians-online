@@ -39,7 +39,7 @@ type Event =
 event_to_string : Event -> String
 event_to_string event =
    when event is
-      (SelectCard Int) -> "SelectCard"
+      (SelectCard _) -> "SelectCard"
       CancelSelection -> "CancelSelection"
 
 new : Type

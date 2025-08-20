@@ -1,4 +1,4 @@
-module Struct.Event exposing (Type(..))
+module Struct.Event exposing (Type(..), to_string)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
@@ -37,6 +37,7 @@ type Type =
    | PageURLRequested Browser.UrlRequest
    | UnknownMessageTypeReceived String
    | ErrorOccurred Struct.Error.Type
+   | Confirm
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
@@ -45,3 +46,52 @@ type Type =
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
+to_string : Type -> String
+to_string event =
+   when event is
+      None -> "None"
+      (Sequence seq) -> ("(Sequence: " ++ "..." ++ ")")
+      (LoginPage login_event) ->
+         (
+            "(Login Event: "
+            ++ (Struct.Page.Login.event_to_string login_event)
+            ++ ")"
+         )
+
+      (RegisterPage register_event) ->
+         (
+            "(Register Event: "
+            ++ (Struct.Page.Register.event_to_string register_event)
+            ++ ")"
+         )
+
+      (EditProfilePage edit_profile_event) ->
+         (
+            "(EditProfile Event: "
+            ++ (Struct.Page.EditProfile.event_to_string edit_profile_event)
+            ++ ")"
+         )
+
+      (GameListPage game_list_event) ->
+         (
+            "(GameList Event: "
+            ++ (Struct.Page.GameList.event_to_string game_list_event)
+            ++ ")"
+         )
+
+      (GamePage game_event) ->
+         (
+            "(Game Event: "
+            ++ (Struct.Page.Game.event_to_string game_event)
+            ++ ")"
+         )
+
+      (SetSession _) -> "SetSession"
+      EraseSession -> "EraseSession"
+      (PageURLChangedTo _) -> "PageURLChangedTo"
+      (PageURLRequested _) -> "PageURLRequested"
+      (UnknownMessageTypeReceived str) ->
+         ("UnknownMessageTypeReceived: " ++ str)
+
+      (ErrorOccurred _) -> "ErrorOccurred"
+      Confirm -> "Confirm"

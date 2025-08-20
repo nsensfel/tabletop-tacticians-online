@@ -1,18 +1,26 @@
-module Update.EditProfilePage.SetDisplayedNameTo exposing (update)
+module View.GameList exposing (view)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
+import Browser
+
+import Html
+import Html.Attributes
+import Html.Events
+
+import String
 
 -- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Struct.Event
 import Struct.Model
+import Struct.Event
 
-import Struct.Page
-import Struct.Page.EditProfile
+import Struct.Page.GameList
+
+import View.ErrorTracker
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -21,25 +29,21 @@ import Struct.Page.EditProfile
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
-
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-update :
+view :
    (
-      String ->
-      Struct.Page.EditProfile.Type ->
       Struct.Model.Type ->
-      { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
+      Struct.Page.GameList.Type ->
+      (Browser.Document Struct.Event.Type)
    )
-update displayed_name login model =
+view model login =
    {
-      command = Cmd.none,
-      model =
-         (Struct.Model.set_page
-            (Struct.Page.EditProfile
-               (Struct.Page.EditProfile.set_displayed_name displayed_name login)
-            )
-            model
-         )
+      title = "Login",
+      body =
+      [
+         (Html.text "Not implemented."),
+         (View.ErrorTracker.get_html model)
+      ]
    }
