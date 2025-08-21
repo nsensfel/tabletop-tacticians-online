@@ -101,7 +101,8 @@ password_field edit_profile =
 new_password_confirmation_field : Struct.Page.EditProfile.Type -> (Html.Html Struct.Event.Type)
 new_password_confirmation_field edit_profile =
    let
-      password_confirmation =
+      new_password = (Struct.Page.EditProfile.get_new_password edit_profile)
+      new_password_confirmation =
          (Struct.Page.EditProfile.get_new_password_confirmation edit_profile)
    in
       (Html.div
@@ -125,7 +126,10 @@ new_password_confirmation_field edit_profile =
                   (Html.Attributes.value password_confirmation),
                   if (String.isEmpty password_confirmation)
                   then (Html.Attributes.class "empty-input")
-                  else (Html.Attributes.class "")
+                  else (Html.Attributes.class ""),
+                  if (new_password == new_password_confirmation)
+                  then (Html.Attributes.class "validated-input")
+                  else (Html.Attributes.class "erroneous-input")
                ]
                [
                ]

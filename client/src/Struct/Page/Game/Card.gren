@@ -1,0 +1,136 @@
+module Struct.Page.Game.Card exposing
+   (
+      Type,
+      new,
+      get_id,
+      set_id,
+      get_is_locked,
+      set_is_locked,
+      get_is_displayed,
+      set_is_displayed,
+      set_width,
+      get_height,
+      set_height,
+      get_displayed_image,
+      set_displayed_image,
+      get_other_side_image,
+      set_other_side_image,
+      get_attitude,
+      set_attitude,
+      get_tags,
+      set_tags,
+      flip
+   )
+
+--------------------------------------------------------------------------------
+-- IMPORTS ---------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Standard Library ------------------------------------------------------------
+
+-- Third Party -----------------------------------------------------------------
+
+-- Project ---------------------------------------------------------------------
+import Struct.Page.Game.Attitude
+import Struct.Page.Game.TagCollection
+
+--------------------------------------------------------------------------------
+-- TYPES -----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+type alias Type =
+   {
+      id : String,
+      is_locked : Boolean,
+      is_displayed : Boolean,
+      is_flipped : Boolean,
+      width : Int,
+      height : Int,
+      displayed_side_image : String,
+      other_side_image : String,
+      attitude : Struct.Page.Game.Attitude.Type,
+      tags : (Set String)
+   }
+
+--------------------------------------------------------------------------------
+-- LOCAL FUNCTIONS -------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- EXPORTED FUNCTIONS ----------------------------------------------------------
+--------------------------------------------------------------------------------
+new : Type
+new =
+   {
+      id = "",
+      is_locked = False,
+      is_displayed = Flase,
+      is_flipped = False,
+      width = 0,
+      height = 0,
+      displayed_side_image = "",
+      other_side_image = "",
+      attitude = (Struct.Page.Game.Attitude.new),
+      tags = (Set.empty)
+   }
+
+get_id : Type -> String
+get_id card = card.id
+
+set_id : String -> Type -> Type
+set_id id card = {card | id = id}
+
+get_is_locked : Type -> Boolean
+get_is_locked card = card.is_locked
+
+set_is_locked : Boolean -> Type -> Type
+set_is_locked val card = {card | is_locked = val}
+
+get_is_displayed : Type -> Boolean
+get_is_displayed card = card.is_displayed
+
+set_is_displayed : Boolean -> Type -> Type
+set_is_displayed val card = {card | is_displayed = val}
+
+get_displayed_image : Type -> String
+get_displayed_image card =
+   if ((!card.is_flipped) or (String.empty card.other_side_image))
+   then card.displayed_side_image
+   else card.other_side_image
+
+set_displayed_image : String -> Type -> Type
+set_displayed_image url card = {card | displayed_image = url}
+
+get_other_side_image : Type -> String
+get_other_side_image card =
+   if (card.is_flipped or (String.empty card.other_side_image))
+   then card.displayed_side_image
+   else card.other_side_image
+
+set_other_side_image : String -> Type -> Type
+set_other_side_image url card = {card | other_side_image = url}
+
+get_attitude : Type -> Struct.Page.Game.Attitude.Type
+get_attitude card = card.attitude
+
+set_attitude : Struct.Page.Game.Attitude.Type -> Type
+set_attitude attitude card = {card | attitude = attitude}
+
+get_height : Type -> Int
+get_height card = card.height
+
+set_height : Int -> Type -> Type
+set_height height card = {card | height = height}
+
+get_width : Type -> Int
+get_width card = card.width
+
+set_width : Int -> Type -> Type
+set_width width card = {card | width = width}
+
+get_tags : Type -> (Set String)
+get_tags card = card.tags
+
+set_tags : (Set String) -> Type -> Type
+set_tags tags card = {card | tags = tags}
+
+flip : Type -> Type
+flip card = {card | is_flipped = !(card.is_flipped)}

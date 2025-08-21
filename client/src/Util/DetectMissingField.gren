@@ -1,29 +1,14 @@
-module View.Game exposing (view)
+module Util.DetectMissingField exposing (apply)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
-import Browser
 
-import Html
-import Html.Attributes
-import Html.Events
-
-import String
-
--- Third Party------------------------------------------------------------------
+-- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Struct.Model
-import Struct.Event
-
-import Struct.Page.Game
-
-import View.ErrorTracker
-
-import View.Game.Deck
-import View.Game.Card
+import Util.Array
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -32,30 +17,13 @@ import View.Game.Card
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-view :
-   (
-      Struct.Model.Type ->
-      Struct.Page.Game.Type ->
-      (Browser.Document Struct.Event.Type)
+apply : (Array String) -> (Array String) -> (Maybe String)
+apply values names =
+   (Array.get
+      (Util.Array.findFirstIndex (\a -> (String.empty a)) values)
+      names
    )
-view model game =
-   {
-      title = "Game",
-      body =
-         (
-            (Array.map
-               (View.Game.Deck.get_html)
-               (Dict.values (Struct.Page.Game.get_decks game))
-            )
-            ++
-            (Array.map
-               (View.Game.Card.get_html)
-               (Dict.values (Struct.Page.Game.get_cards game))
-            )
-            ++
-            [(View.ErrorTracker.get_html model)]
-         )
-   }

@@ -3,6 +3,10 @@ module Struct.Page.Game exposing
       Type,
       Event(..),
       new,
+      get_decks,
+      set_decks,
+      get_cards,
+      set_cards,
       event_to_string
    )
 
@@ -20,7 +24,9 @@ module Struct.Page.Game exposing
 --------------------------------------------------------------------------------
 type alias Type =
    {
-      id : String
+      id : String,
+      decks : (Dict String Struct.Page.Game.Deck.Type),
+      cards : (Dict String Struct.Page.Game.Card.Type)
    }
 
 -- Events here are how the user interact with the client. Not the puppeteer's
@@ -43,4 +49,21 @@ event_to_string event =
       CancelSelection -> "CancelSelection"
 
 new : Type
-new = { id = "" }
+new =
+   {
+      id = "",
+      decks = (Dict.empty),
+      cards = (Dict.empty)
+   }
+
+get_decks : Type -> (Dict String Struct.Page.Game.Deck.Type)
+get_decks game = game.decks
+
+set_decks : (Dict String Struct.Page.Game.Card.Type) -> Type -> Type
+set_decks decks game = {game | decks = decks}
+
+get_cards : Type -> (Dict String Struct.Page.Game.Card.Type)
+get_cards game = game.cards
+
+set_cards : (Dict String Struct.Page.Game.Card.Type) -> Type -> Type
+set_cards cards game = {game | cards = cards}

@@ -95,6 +95,7 @@ password_field register =
 password_confirmation_field : Struct.Page.Register.Type -> (Html.Html Struct.Event.Type)
 password_confirmation_field register =
    let
+      password = (Struct.Page.Register.get_password register)
       password_confirmation =
          (Struct.Page.Register.get_password_confirmation register)
    in
@@ -119,7 +120,10 @@ password_confirmation_field register =
                   (Html.Attributes.value password_confirmation),
                   if (String.isEmpty password_confirmation)
                   then (Html.Attributes.class "empty-input")
-                  else (Html.Attributes.class "")
+                  else (Html.Attributes.class ""),
+                  if (password == password_confirmation)
+                  then (Html.Attributes.class "validated-input")
+                  else (Html.Attributes.class "erroneous-input")
                ]
                [
                ]

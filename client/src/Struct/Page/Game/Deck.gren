@@ -1,0 +1,134 @@
+module Struct.Page.Game.Deck exposing
+   (
+      Type,
+      new,
+      get_id,
+      set_id,
+      get_is_locked,
+      set_is_locked,
+      get_is_browsable,
+      set_is_browsable,
+      get_name,
+      set_name,
+      get_width,
+      set_width,
+      get_height,
+      set_height,
+      get_image,
+      set_image,
+      get_content_count,
+      get_attitude,
+      set_attitude,
+      get_tags,
+      set_tags
+   )
+
+--------------------------------------------------------------------------------
+-- IMPORTS ---------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Standard Library ------------------------------------------------------------
+
+-- Third Party -----------------------------------------------------------------
+
+-- Project ---------------------------------------------------------------------
+import Struct.Page.Game.Attitude
+import Struct.Page.Game.TagCollection
+
+--------------------------------------------------------------------------------
+-- TYPES -----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+type alias Type =
+   {
+      id : String,
+      is_locked : Boolean,
+      is_browsable : Boolean,
+      width : Int,
+      height : Int,
+      image : String,
+      name : String,
+      content_count : Int,
+      attitude : Struct.Page.Game.Attitude.Type,
+      tags : (Set String)
+   }
+
+--------------------------------------------------------------------------------
+-- LOCAL FUNCTIONS -------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- EXPORTED FUNCTIONS ----------------------------------------------------------
+--------------------------------------------------------------------------------
+new : Type
+new =
+   {
+      id = "",
+      is_locked = False,
+      is_browsable = False,
+      width = 0,
+      height = 0,
+      image = "",
+      name = "",
+      content_count = 0,
+      attitude = (Struct.Page.Game.Attitude.new),
+      tags = (Set.empty)
+   }
+
+get_id : Type -> String
+get_id deck = deck.id
+
+set_id : String -> Type -> Type
+set_id id deck = {deck | id = id}
+
+get_name : Type -> String
+get_name deck = deck.name
+
+set_name : String -> Type -> Type
+set_name name deck = {deck | name = name}
+
+get_is_locked : Type -> Boolean
+get_is_locked deck = deck.is_locked
+
+set_is_locked : Boolean -> Type -> Type
+set_is_locked val deck = {deck | is_locked = val}
+
+get_is_browsable : Type -> Boolean
+get_is_browsable deck = deck.is_browsable
+
+set_is_browsable : Boolean -> Type -> Type
+set_is_browsable val deck = {deck | is_browsable = val}
+
+get_image : Type -> String
+get_image deck = deck.image
+
+set_image : String -> Type -> Type
+set_image url deck = {deck | image = url}
+
+get_attitude : Type -> Struct.Page.Game.Attitude.Type
+get_attitude deck = deck.attitude
+
+set_attitude : Struct.Page.Game.Attitude.Type -> Type
+set_attitude attitude deck = {deck | attitude = attitude}
+
+get_height : Type -> Int
+get_height deck = deck.height
+
+set_height : Int -> Type -> Type
+set_height height deck = {deck | height = height}
+
+get_width : Type -> Int
+get_width deck = deck.width
+
+set_width : Int -> Type -> Type
+set_width width deck = {deck | width = width}
+
+get_tags : Type -> (Set String)
+get_tags deck = deck.tags
+
+set_tags : (Set String) -> Type -> Type
+set_tags tags deck = {deck | tags = tags}
+
+get_content_count : Type -> String
+get_content_count deck = deck.content_count
+
+set_content_count : String -> Type -> Type
+set_content_count content_count deck = {deck | content_count = content_count}

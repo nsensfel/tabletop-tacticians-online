@@ -1,0 +1,82 @@
+module View.Game.Deck exposing (get_html)
+
+--------------------------------------------------------------------------------
+-- IMPORTS ---------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Standard Library ------------------------------------------------------------
+import Html
+import Html.Attributes
+import Html.Events
+
+import String
+
+-- Third Party------------------------------------------------------------------
+
+-- Project ---------------------------------------------------------------------
+import Struct.Model
+import Struct.Event
+
+import Struct.Page.Game.Deck
+
+--------------------------------------------------------------------------------
+-- TYPES -----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- LOCAL FUNCTIONS -------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- EXPORTED FUNCTIONS ----------------------------------------------------------
+--------------------------------------------------------------------------------
+get_html : Struct.Page.Game.Deck.Type -> (Html.Html Struct.Event.Type)
+get_html deck =
+   let
+      attitude = (Struct.Page.Game.Deck.get_attitude deck)
+   in
+      (Html.img
+         [
+            (Html.Attributes.class "game-deck"),
+            (Html.Attributes.style
+               "width"
+               (Struct.Page.Game.Deck.get_width deck)
+            ),
+            (Html.Attributes.style
+               "height"
+               (Struct.Page.Game.Deck.get_height deck)
+            ),
+            (Html.Attributes.style
+               "top"
+               (
+                  (Struct.Page.Game.Attitude.get_y attitude)
+                  ++ "px"
+               )
+            ),
+            (Html.Attributes.style
+               "left"
+               (
+                  (Struct.Page.Game.Attitude.get_x attitude)
+                  ++ "px"
+               )
+            ),
+            (Html.Attributes.style
+               "z-index"
+               (Struct.Page.Game.Attitude.get_z attitude)
+            ),
+            (Html.Attributes.style
+               "transform"
+               (
+                  "rotate("
+                  ++ (Struct.Page.Game.Attitude.get_rotation attitude)
+                  ++ "deg)"
+               )
+            ),
+            (Html.Attributes.src
+               (Struct.Page.Game.Deck.get_image deck)
+            ),
+            (Html.Events.onClick (Struct.Page.Game.SelectedDeck
+(Struct.Page.Game.Deck.get_id deck)))
+         ]
+         [
+         ]
+      )
