@@ -32,13 +32,13 @@ update :
       Struct.Model.Type ->
       { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
    )
-update avatar login model =
+update avatar edit_profile model =
    {
       command = Cmd.none,
       model =
          (Struct.Model.set_page
             (Struct.Page.EditProfile
-               (Struct.Page.EditProfile.set_avatar avatar login)
+               (Struct.Page.EditProfile.set_avatar avatar edit_profile)
             )
             model
          )

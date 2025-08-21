@@ -5,8 +5,7 @@ module Struct.Error exposing
       new,
       get_category,
       get_message,
-      category_from_text,
-      maybe_missing_input
+      category_from_text
    )
 
 --------------------------------------------------------------------------------
@@ -48,6 +47,7 @@ category_from_text name =
       "err" -> Error
       "net" -> Network
       "pog" -> Programming
+      "msi" -> MissingInput
       _ -> Programming
 
 new : Category -> String -> Type

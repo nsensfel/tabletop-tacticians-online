@@ -1,19 +1,39 @@
-module Util.DetectMissingField exposing (apply)
+module Struct.Page.CreateGame.Game exposing
+   (
+      Type,
+      new,
+      get_id,
+      set_id,
+      get_name,
+      set_name,
+      get_image,
+      set_image,
+      get_description,
+      set_description,
+      get_url,
+      set_url
+   )
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
-import String
 
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Util.Array
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
+type alias Type =
+   {
+      id : String,
+      name : String,
+      image : String,
+      description : String,
+      url : String
+   }
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
@@ -22,9 +42,42 @@ import Util.Array
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-apply : (Array String) -> (Array String) -> (Maybe String)
-apply values names =
-   (Array.get
-      (Util.Array.findFirstIndex (\a -> (String.isEmpty a)) values)
-      names
-   )
+new : Type
+new =
+   {
+      id = "",
+      name = "",
+      image = "",
+      description = "",
+      url = ""
+   }
+
+get_name : Type -> String
+get_name game = game.name
+
+set_name : String -> Type -> Type
+set_name name game = {game | name = name}
+
+get_id : Type -> String
+get_id game = game.id
+
+set_id : String -> Type -> Type
+set_id id game = {game | id = id}
+
+get_image : Type -> String
+get_image game = game.image
+
+set_image : String -> Type -> Type
+set_image image game = {game | image = image}
+
+get_description : Type -> String
+get_description game = game.description
+
+set_description : String -> Type -> Type
+set_description description game = {game | description = description}
+
+get_url : Type -> String
+get_url game = game.url
+
+set_url : String -> Type -> Type
+set_url url game = {game | url = url}

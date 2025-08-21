@@ -63,6 +63,7 @@ event_to_string event =
       (SetDisplayedNameTo _) -> "SetDisplayedNameTo"
       (SetUsernameTo _) -> "SetUsernameTo"
       (SetEmailTo _) -> "SetEmailTo"
+      (SetAvatarTo _) -> "SetAvatarTo"
       (SetPasswordConfirmationTo _) -> "SetPasswordConfirmationTo"
       (SetPasswordTo _) -> "SetPasswordTo"
 

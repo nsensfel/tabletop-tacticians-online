@@ -44,6 +44,6 @@ new url =
       "/register" -> (Register (Struct.Page.Register.new))
       "/edit_profile" -> (EditProfile (Struct.Page.EditProfile.new))
       "/game_list" -> (GameList (Struct.Page.GameList.new))
-      "/create_game" -> (GameList (Struct.Page.CreateGame.new))
+      "/create_game" -> (CreateGame (Struct.Page.CreateGame.new))
       "/game" -> (Game (Struct.Page.Game.new))
       other -> (Unknown other)

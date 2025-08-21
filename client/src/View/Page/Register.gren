@@ -1,4 +1,4 @@
-module View.Register exposing (view)
+module View.Page.Register exposing (view)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
@@ -20,7 +20,9 @@ import Struct.Event
 
 import Struct.Page.Register
 
+import View.Avatar
 import View.ErrorTracker
+
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -57,6 +59,39 @@ username_field register =
                [
                ]
             )
+         ]
+      )
+
+avatar_field : Struct.Page.Register.Type -> (Html.Html Struct.Event.Type)
+avatar_field register =
+   let
+      avatar = (Struct.Page.Register.get_avatar register)
+   in
+      (Html.div
+         [
+            (Html.Attributes.class "user-input"),
+            (Html.Attributes.class "register-avatar")
+         ]
+         [
+            (Html.h1 [] [ (Html.text "Avatar") ]),
+            (Html.input
+               [
+                  (Html.Events.onInput
+                     ( \new_avatar ->
+                        (Struct.Event.RegisterPage
+                           (Struct.Page.Register.SetAvatarTo new_avatar)
+                        )
+                     )
+                  ),
+                  (Html.Attributes.value avatar),
+                  if (String.isEmpty avatar)
+                  then (Html.Attributes.class "empty-input")
+                  else (Html.Attributes.class "")
+               ]
+               [
+               ]
+            ),
+            (View.Avatar.get_html avatar)
          ]
       )
 
@@ -219,6 +254,7 @@ view model register =
                (password_confirmation_field register),
                (displayed_name_field register),
                (email_field register),
+               (avatar_field register),
                (Html.button
                   [
                      (Html.Events.onClick

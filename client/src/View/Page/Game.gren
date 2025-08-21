@@ -1,4 +1,4 @@
-module View.Game exposing (view)
+module View.Page.Game exposing (view)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
@@ -11,6 +11,8 @@ import Html.Attributes
 import Html.Events
 
 import String
+
+import Dict
 
 -- Third Party------------------------------------------------------------------
 

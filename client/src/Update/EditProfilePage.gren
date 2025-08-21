@@ -17,6 +17,7 @@ import Struct.Page.EditProfile
 
 import Update.EditProfilePage.FormSubmitted
 import Update.EditProfilePage.SetPasswordTo
+import Update.EditProfilePage.SetAvatarTo
 import Update.EditProfilePage.SetDisplayedNameTo
 import Update.EditProfilePage.SetEmailTo
 import Update.EditProfilePage.SetNewPasswordTo
@@ -51,6 +52,13 @@ update edit_profile_page_event model =
 
             (Struct.Page.EditProfile.SetPasswordTo val) ->
                (Update.EditProfilePage.SetPasswordTo.update
+                  val
+                  edit_profile
+                  model
+               )
+
+            (Struct.Page.EditProfile.SetAvatarTo val) ->
+               (Update.EditProfilePage.SetAvatarTo.update
                   val
                   edit_profile
                   model

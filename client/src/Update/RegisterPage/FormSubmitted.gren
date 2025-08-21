@@ -35,22 +35,24 @@ update :
       Struct.Model.Type ->
       { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
    )
-update login model =
+update register model =
    when
-      (Util.DetectMissingField
+      (Util.DetectMissingField.apply
          [
-            (Struct.Page.Register.get_username login),
-            (Struct.Page.Register.get_password login),
-            (Struct.Page.Register.get_displayed_name login),
-            (Struct.Page.Register.get_email login),
-            (Struct.Page.Register.get_password_confirmation login),
+            (Struct.Page.Register.get_username register),
+            (Struct.Page.Register.get_password register),
+            (Struct.Page.Register.get_displayed_name register),
+            (Struct.Page.Register.get_email register),
+            (Struct.Page.Register.get_password_confirmation register),
+            (Struct.Page.Register.get_avatar register)
          ]
          [
             "username",
             "password",
             "displayed name",
             "email",
-            "password confirmation"
+            "password confirmation",
+            "avatar"
          ]
       )
    is
@@ -68,10 +70,10 @@ update login model =
       Nothing ->
          if
          (
-            (Struct.Page.Register.get_password login)
-            == (Struct.Page.Register.get_password_confirmation login)
+            (Struct.Page.Register.get_password register)
+            == (Struct.Page.Register.get_password_confirmation register)
          )
-         then (Comm.Send.RegisterRequest.send login model)
+         then (Comm.Send.RegisterRequest.send register model)
          else
          {
             model =

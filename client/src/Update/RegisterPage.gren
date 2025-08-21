@@ -17,6 +17,7 @@ import Struct.Page.Register
 
 import Update.RegisterPage.FormSubmitted
 import Update.RegisterPage.SetDisplayedNameTo
+import Update.RegisterPage.SetAvatarTo
 import Update.RegisterPage.SetEmailTo
 import Update.RegisterPage.SetPasswordConfirmationTo
 import Update.RegisterPage.SetPasswordTo
@@ -48,6 +49,9 @@ update register_page_event model =
 
             (Struct.Page.Register.SetPasswordTo val) ->
                (Update.RegisterPage.SetPasswordTo.update val register model)
+
+            (Struct.Page.Register.SetAvatarTo val) ->
+               (Update.RegisterPage.SetAvatarTo.update val register model)
 
             (Struct.Page.Register.SetUsernameTo val) ->
                (Update.RegisterPage.SetUsernameTo.update val register model)

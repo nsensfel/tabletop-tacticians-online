@@ -14,10 +14,13 @@ module Struct.Page.Game exposing
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
+import Dict
 
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Struct.Page.Game.Card
+import Struct.Page.Game.Deck
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -25,14 +28,15 @@ module Struct.Page.Game exposing
 type alias Type =
    {
       id : String,
-      decks : (Dict String Struct.Page.Game.Deck.Type),
-      cards : (Dict String Struct.Page.Game.Card.Type)
+      decks : (Dict.Dict String Struct.Page.Game.Deck.Type),
+      cards : (Dict.Dict String Struct.Page.Game.Card.Type)
    }
 
 -- Events here are how the user interact with the client. Not the puppeteer's
 -- actions.
 type Event =
-   SelectCard Int
+   SelectCard String
+   | SelectDeck String
    | CancelSelection
 
 --------------------------------------------------------------------------------
@@ -46,6 +50,7 @@ event_to_string : Event -> String
 event_to_string event =
    when event is
       (SelectCard _) -> "SelectCard"
+      (SelectDeck _) -> "SelectDeck"
       CancelSelection -> "CancelSelection"
 
 new : Type
@@ -56,14 +61,14 @@ new =
       cards = (Dict.empty)
    }
 
-get_decks : Type -> (Dict String Struct.Page.Game.Deck.Type)
+get_decks : Type -> (Dict.Dict String Struct.Page.Game.Deck.Type)
 get_decks game = game.decks
 
-set_decks : (Dict String Struct.Page.Game.Card.Type) -> Type -> Type
+set_decks : (Dict.Dict String Struct.Page.Game.Deck.Type) -> Type -> Type
 set_decks decks game = {game | decks = decks}
 
-get_cards : Type -> (Dict String Struct.Page.Game.Card.Type)
+get_cards : Type -> (Dict.Dict String Struct.Page.Game.Card.Type)
 get_cards game = game.cards
 
-set_cards : (Dict String Struct.Page.Game.Card.Type) -> Type -> Type
+set_cards : (Dict.Dict String Struct.Page.Game.Card.Type) -> Type -> Type
 set_cards cards game = {game | cards = cards}

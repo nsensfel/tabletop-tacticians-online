@@ -25,3 +25,6 @@ base_url = "https://tabletop.tacticians.online/"
 
 request_handler_url : String
 request_handler_url = (base_url ++ "request/")
+
+default_avatar : String
+default_avatar = "https://noot-noot.org/share/perso/avatar/chesya_50_x10.gif"

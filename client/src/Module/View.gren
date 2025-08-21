@@ -15,12 +15,12 @@ import Struct.Event
 import Struct.Model
 import Struct.Page
 
-import View.EditProfile
-import View.Game
-import View.GameList
-import View.Home
-import View.Login
-import View.Register
+import View.Page.EditProfile
+import View.Page.Game
+import View.Page.GameList
+import View.Page.Home
+import View.Page.Login
+import View.Page.Register
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -36,13 +36,17 @@ import View.Register
 view : Struct.Model.Type -> (Browser.Document Struct.Event.Type)
 view model =
    when model.page is
-      Struct.Page.Home -> (View.Home.view model)
-      (Struct.Page.Login login) -> (View.Login.view model login)
-      (Struct.Page.Register register) -> (View.Register.view model register)
-      (Struct.Page.Game game) -> (View.Game.view model game)
-      (Struct.Page.GameList game_list) -> (View.GameList.view model game_list)
+      Struct.Page.Home -> (View.Page.Home.view model)
+      (Struct.Page.Login login) -> (View.Page.Login.view model login)
+      (Struct.Page.Register register) ->
+         (View.Page.Register.view model register)
+
+      (Struct.Page.Game game) -> (View.Page.Game.view model game)
+      (Struct.Page.GameList game_list) ->
+         (View.Page.GameList.view model game_list)
+
       (Struct.Page.EditProfile edit_profile) ->
-         (View.EditProfile.view model edit_profile)
+         (View.Page.EditProfile.view model edit_profile)
 
       _ ->
          {

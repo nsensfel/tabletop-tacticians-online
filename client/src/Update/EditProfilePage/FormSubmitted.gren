@@ -32,4 +32,5 @@ update :
       Struct.Model.Type ->
       { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
    )
-update login model = (Comm.Send.EditProfileRequest.send login model)
+update edit_profile model =
+   (Comm.Send.EditProfileRequest.send edit_profile model)

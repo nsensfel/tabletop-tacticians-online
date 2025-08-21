@@ -1,4 +1,4 @@
-module View.EditProfile exposing (view)
+module View.Page.EditProfile exposing (view)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
@@ -20,7 +20,9 @@ import Struct.Event
 
 import Struct.Page.EditProfile
 
+import View.Avatar
 import View.ErrorTracker
+
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -115,16 +117,16 @@ new_password_confirmation_field edit_profile =
             (Html.input
                [
                   (Html.Events.onInput
-                     ( \new_password_confirmation ->
+                     ( \new_value ->
                         (Struct.Event.EditProfilePage
                            (Struct.Page.EditProfile.SetNewPasswordConfirmationTo
-                              new_password_confirmation
+                              new_value
                            )
                         )
                      )
                   ),
-                  (Html.Attributes.value password_confirmation),
-                  if (String.isEmpty password_confirmation)
+                  (Html.Attributes.value new_password_confirmation),
+                  if (String.isEmpty new_password_confirmation)
                   then (Html.Attributes.class "empty-input")
                   else (Html.Attributes.class ""),
                   if (new_password == new_password_confirmation)
@@ -134,6 +136,39 @@ new_password_confirmation_field edit_profile =
                [
                ]
             )
+         ]
+      )
+
+avatar_field : Struct.Page.EditProfile.Type -> (Html.Html Struct.Event.Type)
+avatar_field edit_profile =
+   let
+      avatar = (Struct.Page.EditProfile.get_avatar edit_profile)
+   in
+      (Html.div
+         [
+            (Html.Attributes.class "user-input"),
+            (Html.Attributes.class "edit-profile-avatar")
+         ]
+         [
+            (Html.h1 [] [ (Html.text "Avatar") ]),
+            (Html.input
+               [
+                  (Html.Events.onInput
+                     ( \new_avatar ->
+                        (Struct.Event.EditProfilePage
+                           (Struct.Page.EditProfile.SetAvatarTo new_avatar)
+                        )
+                     )
+                  ),
+                  (Html.Attributes.value avatar),
+                  if (String.isEmpty avatar)
+                  then (Html.Attributes.class "empty-input")
+                  else (Html.Attributes.class "")
+               ]
+               [
+               ]
+            ),
+            (View.Avatar.get_html avatar)
          ]
       )
 
@@ -220,11 +255,12 @@ view model edit_profile =
          (Html.article
             []
             [
-               (password_field edit_profile),
                (new_password_field edit_profile),
                (new_password_confirmation_field edit_profile),
                (displayed_name_field edit_profile),
                (email_field edit_profile),
+               (avatar_field edit_profile),
+               (password_field edit_profile),
                (Html.button
                   [
                      (Html.Events.onClick

@@ -16,7 +16,9 @@ import String
 import Struct.Model
 import Struct.Event
 
+import Struct.Page.Game
 import Struct.Page.Game.Card
+import Struct.Page.Game.Attitude
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -25,6 +27,8 @@ import Struct.Page.Game.Card
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
+int_to_px : Int -> String
+int_to_px i = ((String.fromInt i) ++ "px")
 
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
@@ -39,46 +43,48 @@ get_html card =
             (Html.Attributes.class "game-card"),
             (Html.Attributes.style
                "width"
-               (Struct.Page.Game.Card.get_width card)
+               (int_to_px (Struct.Page.Game.Card.get_width card))
             ),
             (Html.Attributes.style
                "height"
-               (Struct.Page.Game.Card.get_height card)
+               (int_to_px (Struct.Page.Game.Card.get_height card))
             ),
             (Html.Attributes.style
                "top"
-               (
-                  (Struct.Page.Game.Attitude.get_y attitude)
-                  ++ "px"
-               )
+               (int_to_px (Struct.Page.Game.Attitude.get_y attitude))
             ),
             (Html.Attributes.style
                "left"
-               (
-                  (Struct.Page.Game.Attitude.get_x attitude)
-                  ++ "px"
-               )
+               (int_to_px (Struct.Page.Game.Attitude.get_x attitude))
             ),
             (Html.Attributes.style
                "z-index"
-               (Struct.Page.Game.Attitude.get_z attitude)
+               (String.fromInt (Struct.Page.Game.Attitude.get_z attitude))
             ),
             (Html.Attributes.style
                "transform"
                (
                   "rotate("
-                  ++ (Struct.Page.Game.Attitude.get_rotation attitude)
+                  ++
+                  (String.fromInt
+                     (Struct.Page.Game.Attitude.get_rotation attitude)
+                  )
                   ++ "deg)"
                )
             ),
             (Html.Attributes.hidden
-               !(Struct.Page.Game.Card.get_is_displayed card)
+               (not (Struct.Page.Game.Card.get_is_displayed card))
             ),
             (Html.Attributes.src
                (Struct.Page.Game.Card.get_displayed_image card)
             ),
-            (Html.Events.onClick (Struct.Page.Game.SelectedCard
-(Struct.Page.Game.Card.get_id card)))
+            (Html.Events.onClick
+               (Struct.Event.GamePage
+                  (Struct.Page.Game.SelectCard
+                     (Struct.Page.Game.Card.get_id card)
+                  )
+               )
+            )
          ]
          [
          ]

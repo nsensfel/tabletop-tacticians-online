@@ -16,10 +16,12 @@ module Struct.Page.CreateGame exposing
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
+import Dict
 
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Struct.Page.CreateGame.Game
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -28,7 +30,7 @@ type alias Type =
    {
       name : String,
       selected_game : String,
-      available_games : (Dict String Struct.Page.CreateGame.Game.Type)
+      available_games : (Dict.Dict String Struct.Page.CreateGame.Game.Type)
    }
 
 type Event =
@@ -71,12 +73,16 @@ set_selected_game : String -> Type -> Type
 set_selected_game selected_game create_game =
    {create_game | selected_game = selected_game}
 
-get_available_games : Type -> (Dict String Struct.Page.CreateGame.Game.Type)
+get_available_games :
+   (
+      Type ->
+      (Dict.Dict String Struct.Page.CreateGame.Game.Type)
+   )
 get_available_games create_game = create_game.available_games
 
 set_available_games :
    (
-      (Dict String Struct.Page.CreateGame.Game.Type) ->
+      (Dict.Dict String Struct.Page.CreateGame.Game.Type) ->
       Type ->
       Type
    )

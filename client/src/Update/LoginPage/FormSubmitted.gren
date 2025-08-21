@@ -37,7 +37,7 @@ update :
    )
 update login model =
    when
-      (Util.DetectMissingField
+      (Util.DetectMissingField.apply
          [
             (Struct.Page.Login.get_username login),
             (Struct.Page.Login.get_password login)
