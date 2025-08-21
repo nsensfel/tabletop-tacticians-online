@@ -5,6 +5,8 @@ module Struct.Page.Register exposing
       new,
       get_username,
       set_username,
+      get_avatar,
+      set_avatar,
       get_displayed_name,
       set_displayed_name,
       get_password,
@@ -31,6 +33,7 @@ module Struct.Page.Register exposing
 type alias Type =
    {
       username : String,
+      avatar : String,
       displayed_name : String,
       password : String,
       password_confirmation : String,
@@ -42,6 +45,7 @@ type Event =
    | SetDisplayedNameTo String
    | SetUsernameTo String
    | SetEmailTo String
+   | SetAvatarTo String
    | SetPasswordConfirmationTo String
    | SetPasswordTo String
 
@@ -67,6 +71,7 @@ new =
    {
       username = "",
       displayed_name = "",
+      avatar = "",
       password = "",
       password_confirmation = "",
       email = ""
@@ -77,6 +82,12 @@ get_username register = register.username
 
 set_username : String -> Type -> Type
 set_username username register = {register | username = username}
+
+get_avatar : Type -> String
+get_avatar register = register.avatar
+
+set_avatar : String -> Type -> Type
+set_avatar avatar register = {register | avatar = avatar}
 
 get_displayed_name : Type -> String
 get_displayed_name register = register.displayed_name

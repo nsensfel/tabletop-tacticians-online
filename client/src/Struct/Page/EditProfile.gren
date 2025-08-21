@@ -7,6 +7,8 @@ module Struct.Page.EditProfile exposing
       set_displayed_name,
       get_email,
       set_email,
+      get_avatar,
+      set_avatar,
       get_password,
       set_password,
       get_new_password,
@@ -33,6 +35,7 @@ type alias Type =
       password : String,
       displayed_name : String,
       email : String,
+      avatar : String,
       new_password : String,
       new_password_confirmation : String
    }
@@ -42,6 +45,7 @@ type Event =
    | SetPasswordTo String
    | SetDisplayedNameTo String
    | SetEmailTo String
+   | SetAvatarTo String
    | SetNewPasswordTo String
    | SetNewPasswordConfirmationTo String
 
@@ -67,6 +71,7 @@ new =
    {
       password = "",
       displayed_name = "",
+      avatar = "",
       email = "",
       new_password = "",
       new_password_confirmation = ""
@@ -79,27 +84,35 @@ set_password : String -> Type -> Type
 set_password password profile = {profile | password = password}
 
 get_displayed_name : Type -> String
-get_displayed_name login = login.displayed_name
+get_displayed_name edit_profile = edit_profile.displayed_name
 
 set_displayed_name : String -> Type -> Type
-set_displayed_name displayed_name login =
-   {login | displayed_name = displayed_name}
+set_displayed_name displayed_name edit_profile =
+   {edit_profile | displayed_name = displayed_name}
 
 get_email : Type -> String
-get_email login = login.email
+get_email edit_profile = edit_profile.email
 
 set_email : String -> Type -> Type
-set_email email login = {login | email = email}
+set_email email edit_profile = {edit_profile | email = email}
+
+get_avatar : Type -> String
+get_avatar edit_profile = edit_profile.avatar
+
+set_avatar : String -> Type -> Type
+set_avatar avatar edit_profile = {edit_profile | avatar = avatar}
 
 get_new_password : Type -> String
-get_new_password login = login.new_password
+get_new_password edit_profile = edit_profile.new_password
 
 set_new_password : String -> Type -> Type
-set_new_password new_password login = {login | new_password = new_password}
+set_new_password new_password edit_profile =
+   {edit_profile | new_password = new_password}
 
 get_new_password_confirmation : Type -> String
-get_new_password_confirmation login = login.new_password_confirmation
+get_new_password_confirmation edit_profile =
+   edit_profile.new_password_confirmation
 
 set_new_password_confirmation : String -> Type -> Type
-set_new_password_confirmation new_password_confirmation login =
-   {login | new_password_confirmation = new_password_confirmation}
+set_new_password_confirmation new_password_confirmation edit_profile =
+   {edit_profile | new_password_confirmation = new_password_confirmation}

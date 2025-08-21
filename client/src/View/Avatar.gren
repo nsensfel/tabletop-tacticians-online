@@ -1,33 +1,26 @@
-module Struct.Page exposing (Type(..), new)
+module View.Avatar exposing (get_html)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
-import Url
+import Browser
 
--- Third Party -----------------------------------------------------------------
+import Html
+import Html.Attributes
+import Html.Events
+
+import String
+
+-- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Struct.Page.CreateGame
-import Struct.Page.EditProfile
-import Struct.Page.Game
-import Struct.Page.GameList
-import Struct.Page.Login
-import Struct.Page.Register
+import Struct.Model
+import Struct.Event
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
-type Type =
-   Home
-   | EditProfile Struct.Page.EditProfile.Type
-   | Game Struct.Page.Game.Type
-   | GameList Struct.Page.GameList.Type
-   | CreateGame Struct.Page.CreateGame.Type
-   | Login Struct.Page.Login.Type
-   | Register Struct.Page.Register.Type
-   | Unknown String
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
@@ -36,14 +29,14 @@ type Type =
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-new : Url.Url -> Type
-new url =
-   when url.path is
-      "/" -> Home
-      "/login" -> (Login (Struct.Page.Login.new))
-      "/register" -> (Register (Struct.Page.Register.new))
-      "/edit_profile" -> (EditProfile (Struct.Page.EditProfile.new))
-      "/game_list" -> (GameList (Struct.Page.GameList.new))
-      "/create_game" -> (GameList (Struct.Page.CreateGame.new))
-      "/game" -> (Game (Struct.Page.Game.new))
-      other -> (Unknown other)
+get_html : String -> (Html.Html Struct.Event.Type)
+get_html url =
+   (Html.img
+      [
+         (Html.Attributes.class "avatar")
+         (Html.Events.on "error" -- And now it's awkward to edit the element... Use JS?
+         )
+      ]
+      [
+      ]
+   )

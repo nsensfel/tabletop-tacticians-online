@@ -106,3 +106,5 @@ on cards.
 Separate players and roles: permissions are attributed to roles, roles are
 claimed / relinquished by players. Probably can't handle hidden roles a la
 loup-garou, but oh well... I'm not sure most generic simulators can, anyway.
+
+Use ballback image for avatars in case of errors. Gren equivalent to onerror="this.onerror=null; this.src='backup-image.png'"
