@@ -1,4 +1,4 @@
-module Main exposing (main)
+port module Main exposing (main)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
@@ -23,6 +23,17 @@ import Struct.Event
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
+port set_page_title : String -> Cmd msg
+port url_param_read_all : Cmd msg
+port url_param_read : String -> Cmd msg
+port url_param_write : String -> Cmd msg
+port url_param_delete : String -> Cmd msg
+port url_param_delete_all : Cmd msg
+port local_read_all : Cmd msg
+port local_read : String -> Cmd msg
+port local_write : String -> Cmd msg
+port local_delete : String -> Cmd msg
+port local_delete_all : Cmd msg
 
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------

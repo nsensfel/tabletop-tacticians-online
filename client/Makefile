@@ -1,5 +1,8 @@
-build:
-	gren make Main
+build: public
+	gren make Main --output=public/Gren.js
 
 serve:
-	npx serve -s
+	npx serve public
+
+public:
+	mkdir -p public
