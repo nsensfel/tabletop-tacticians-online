@@ -12,6 +12,7 @@ import Struct.Event
 import Struct.Model
 import Struct.Error
 
+import Update.Dirty
 import Update.LoginPage
 import Update.EditProfilePage
 import Update.GameListPage
@@ -36,40 +37,44 @@ update :
       { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
    )
 update event model =
-   when event is
-      (Struct.Event.LoginPage login_page_event) ->
-         (Update.LoginPage.update login_page_event model)
+   (Update.Dirty.handle
+      (
+         when event is
+            (Struct.Event.LoginPage login_page_event) ->
+               (Update.LoginPage.update login_page_event model)
 
-      (Struct.Event.EditProfilePage edit_profile_page_event) ->
-         (Update.EditProfilePage.update edit_profile_page_event model)
+            (Struct.Event.EditProfilePage edit_profile_page_event) ->
+               (Update.EditProfilePage.update edit_profile_page_event model)
 
-      (Struct.Event.RegisterPage register_page_event) ->
-         (Update.RegisterPage.update register_page_event model)
+            (Struct.Event.RegisterPage register_page_event) ->
+               (Update.RegisterPage.update register_page_event model)
 
-      (Struct.Event.GameListPage game_list_page_event) ->
-         (Update.GameListPage.update game_list_page_event model)
+            (Struct.Event.GameListPage game_list_page_event) ->
+               (Update.GameListPage.update game_list_page_event model)
 
-      (Struct.Event.GamePage game_page_event) ->
-         (Update.GamePage.update game_page_event model)
+            (Struct.Event.GamePage game_page_event) ->
+               (Update.GamePage.update game_page_event model)
 
-      (Struct.Event.ErrorOccurred error) ->
-         {
-            model =
-               (Struct.Model.push_error
-                  (Struct.Error.get_category error)
-                  (Struct.Error.get_message error)
-                  model
-               ),
-            command = Cmd.none
-         }
+            (Struct.Event.ErrorOccurred error) ->
+               {
+                  model =
+                     (Struct.Model.push_error
+                        (Struct.Error.get_category error)
+                        (Struct.Error.get_message error)
+                        model
+                     ),
+                  command = Cmd.none
+               }
 
-      other ->
-         {
-            model =
-               (Struct.Model.push_error
-                  Struct.Error.Programming
-                  ("Unhandled event: " ++ (Struct.Event.to_string other))
-                  model
-               ),
-            command = Cmd.none
-         }
+            other ->
+               {
+                  model =
+                     (Struct.Model.push_error
+                        Struct.Error.Programming
+                        ("Unhandled event: " ++ (Struct.Event.to_string other))
+                        model
+                     ),
+                  command = Cmd.none
+               }
+      )
+   )

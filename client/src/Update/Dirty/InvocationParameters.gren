@@ -1,0 +1,107 @@
+module Update.Dirty.InvocationParameters exposing (update_if_dirty)
+
+--------------------------------------------------------------------------------
+-- IMPORTS ---------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Standard Library ------------------------------------------------------------
+import Array
+
+-- Third Party------------------------------------------------------------------
+
+-- Project ---------------------------------------------------------------------
+import Module.Port
+
+import Struct.Event
+import Struct.Model
+import Struct.InvocationParameters
+
+--------------------------------------------------------------------------------
+-- TYPES -----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- LOCAL FUNCTIONS -------------------------------------------------------------
+--------------------------------------------------------------------------------
+update_local_values_if_dirty :
+   (
+      { model : Struct.Model.Type, commands : (Array (Cmd Struct.Event.Type)) } ->
+      { model : Struct.Model.Type, commands : (Array (Cmd Struct.Event.Type)) }
+   )
+update_local_values_if_dirty chain =
+   let
+      invocation_parameters =
+         (Struct.Model.get_invocation_parameters chain.model)
+   in
+      if
+         (Struct.InvocationParameters.get_local_values_dirty_flag
+            invocation_parameters
+         )
+      then
+         {
+            model =
+               (Struct.Model.set_invocation_parameters
+                  (Struct.InvocationParameters.clear_local_values_dirty_flag
+                     invocation_parameters
+                  )
+                  chain.model
+               ),
+            commands =
+               (Array.pushLast
+                  (Module.Port.set_local_values_command
+                     (Struct.InvocationParameters.get_local_values
+                        invocation_parameters
+                     )
+                  )
+                  chain.commands
+               )
+         }
+      else chain
+
+update_url_parameters_if_dirty :
+   (
+      { model : Struct.Model.Type, commands : (Array (Cmd Struct.Event.Type)) } ->
+      { model : Struct.Model.Type, commands : (Array (Cmd Struct.Event.Type)) }
+   )
+update_url_parameters_if_dirty chain =
+   let
+      invocation_parameters =
+         (Struct.Model.get_invocation_parameters chain.model)
+   in
+      if
+         (Struct.InvocationParameters.get_url_parameters_dirty_flag
+            invocation_parameters
+         )
+      then
+         {
+            model =
+               (Struct.Model.set_invocation_parameters
+                  (Struct.InvocationParameters.clear_url_parameters_dirty_flag
+                     invocation_parameters
+                  )
+                  chain.model
+               ),
+            commands =
+               (Array.pushLast
+                  (Module.Port.set_url_parameters_command
+                     (Struct.InvocationParameters.get_url_parameters
+                        invocation_parameters
+                     )
+                  )
+                  chain.commands
+               )
+         }
+      else chain
+
+
+--------------------------------------------------------------------------------
+-- EXPORTED FUNCTIONS ----------------------------------------------------------
+--------------------------------------------------------------------------------
+update_if_dirty :
+   (
+      { model : Struct.Model.Type, commands : (Array (Cmd Struct.Event.Type)) } ->
+      { model : Struct.Model.Type, commands : (Array (Cmd Struct.Event.Type)) }
+   )
+update_if_dirty chain =
+   (update_local_values_if_dirty
+      (update_url_parameters_if_dirty chain)
+   )

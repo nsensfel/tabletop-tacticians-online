@@ -5,7 +5,9 @@ port module Module.Port exposing (..)
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
 import Json.Decode
+import Json.Encode
 import Task
+import Dict
 
 -- Third Party------------------------------------------------------------------
 
@@ -26,11 +28,40 @@ port get_local_values : String -> (Task.Task (Json.Decode.Value) (Json.Decode.Va
 port set_local_values : String -> (Task.Task (Json.Decode.Value) String)
 port clear_local_values : String -> (Task.Task (Json.Decode.Value) String)
 
-port other_name : String -> Cmd msg
-
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
+set_url_parameters_command : (Dict.Dict String String) -> (Cmd Struct.Event.Type)
+set_url_parameters_command url_params =
+   (Task.attempt
+      (\x -> (Struct.Event.None))
+      (set_url_params
+         (Json.Encode.encode
+            0
+            (Json.Encode.dict
+               (\k -> k)
+               (\v -> (Json.Encode.string v))
+               url_params
+            )
+         )
+      )
+   )
+
+set_local_values_command : (Dict.Dict String String) -> (Cmd Struct.Event.Type)
+set_local_values_command local_values =
+   (Task.attempt
+      (\x -> (Struct.Event.None))
+      (set_local_values
+         (Json.Encode.encode
+            0
+            (Json.Encode.dict
+               (\k -> k)
+               (\v -> (Json.Encode.string v))
+               local_values
+            )
+         )
+      )
+   )
 test : (Cmd Struct.Event.Type)
 test = (Task.attempt (\x -> (Struct.Event.None)) (set_page_title "lol"))
 

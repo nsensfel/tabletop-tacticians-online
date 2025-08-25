@@ -6,6 +6,8 @@ module Struct.Model exposing
       set_page,
       get_error_tracker,
       set_error_tracker,
+      get_invocation_parameters,
+      set_invocation_parameters,
       maybe_get_session,
       set_session,
       erase_session,
@@ -98,6 +100,13 @@ get_error_tracker model = model.error_tracker
 
 set_error_tracker : Struct.ErrorTracker.Type -> Type -> Type
 set_error_tracker error_tracker model = {model | error_tracker = error_tracker}
+
+get_invocation_parameters : Type -> Struct.InvocationParameters.Type
+get_invocation_parameters model = model.invocation_parameters
+
+set_invocation_parameters : Struct.InvocationParameters.Type -> Type -> Type
+set_invocation_parameters invocation_parameters model =
+   {model | invocation_parameters = invocation_parameters}
 
 push_error : Struct.Error.Category -> String -> Type -> Type
 push_error category message model =

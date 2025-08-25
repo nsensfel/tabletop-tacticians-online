@@ -84,7 +84,7 @@ password_field login =
                      )
                   ),
                   (Html.Attributes.value password),
-                  (Html.Attributes.type_ password),
+                  (Html.Attributes.type_ "password"),
                   (Html.Attributes.placeholder "password"),
                   if (String.isEmpty password)
                   then (Html.Attributes.class "empty-input")

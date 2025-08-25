@@ -3,10 +3,14 @@ module Struct.InvocationParameters exposing
       Encoded,
       Type,
       new,
+      get_url_parameters_dirty_flag,
+      clear_url_parameters_dirty_flag,
       get_url_parameters,
       get_url_parameter,
       set_url_parameters,
       set_url_parameter,
+      get_local_values_dirty_flag,
+      clear_local_values_dirty_flag,
       get_local_values,
       get_local_value,
       set_local_values,
@@ -31,7 +35,9 @@ type alias Encoded = (Json.Decode.Value)
 
 type alias Type =
    {
+      url_params_are_dirty: Bool,
       url_params: (Dict.Dict String String),
+      local_values_are_dirty : Bool,
       local_values: (Dict.Dict String String)
    }
 
@@ -55,9 +61,19 @@ decode_dict name encoded =
 new : Encoded -> Type
 new encoded =
    {
+      url_params_are_dirty = False,
       url_params = (decode_dict "url_params" encoded),
+      local_values_are_dirty = False,
       local_values = (decode_dict "local_values" encoded)
    }
+
+get_url_parameters_dirty_flag : Type -> Bool
+get_url_parameters_dirty_flag invocation_parameters =
+   invocation_parameters.url_params_are_dirty
+
+clear_url_parameters_dirty_flag : Type -> Type
+clear_url_parameters_dirty_flag invocation_parameters =
+   {invocation_parameters | url_params_are_dirty = False}
 
 get_url_parameters : Type -> (Dict.Dict String String)
 get_url_parameters invocation_parameters = invocation_parameters.url_params
@@ -70,12 +86,16 @@ get_url_parameter name invocation_parameters =
 
 set_url_parameters : (Dict.Dict String String) -> Type -> Type
 set_url_parameters url_params invocation_parameters =
-   {invocation_parameters | url_params = url_params}
+   {invocation_parameters |
+      url_params = url_params,
+      url_params_are_dirty = True
+   }
 
 set_url_parameter : String -> String -> Type -> Type
 set_url_parameter name value invocation_parameters =
    {invocation_parameters |
-      url_params = (Dict.set name value invocation_parameters.url_params)
+      url_params = (Dict.set name value invocation_parameters.url_params),
+      url_params_are_dirty = True
    }
 
 get_local_values : Type -> (Dict.Dict String String)
@@ -87,13 +107,24 @@ get_local_value name invocation_parameters =
       (Just result) -> result
       _ -> ""
 
+get_local_values_dirty_flag : Type -> Bool
+get_local_values_dirty_flag invocation_parameters =
+   invocation_parameters.local_values_are_dirty
+
+clear_local_values_dirty_flag : Type -> Type
+clear_local_values_dirty_flag invocation_parameters =
+   {invocation_parameters | local_values_are_dirty = False}
+
 set_local_values : (Dict.Dict String String) -> Type -> Type
 set_local_values local_values invocation_parameters =
-   {invocation_parameters | local_values = local_values}
+   {invocation_parameters |
+      local_values = local_values,
+      local_values_are_dirty = True
+   }
 
 set_local_value : String -> String -> Type -> Type
 set_local_value name value invocation_parameters =
    {invocation_parameters |
-      local_values =
-         (Dict.set name value invocation_parameters.local_values)
+      local_values = (Dict.set name value invocation_parameters.local_values),
+      local_values_are_dirty = True
    }
