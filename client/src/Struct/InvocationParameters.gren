@@ -1,0 +1,99 @@
+module Struct.InvocationParameters exposing
+   (
+      Encoded,
+      Type,
+      new,
+      get_url_parameters,
+      get_url_parameter,
+      set_url_parameters,
+      set_url_parameter,
+      get_local_values,
+      get_local_value,
+      set_local_values,
+      set_local_value
+   )
+
+--------------------------------------------------------------------------------
+-- IMPORTS ---------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Standard Library ------------------------------------------------------------
+import Dict
+import Json.Decode
+
+-- Third Party -----------------------------------------------------------------
+
+-- Project ---------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- TYPES -----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+type alias Encoded = (Json.Decode.Value)
+
+type alias Type =
+   {
+      url_params: (Dict.Dict String String),
+      local_values: (Dict.Dict String String)
+   }
+
+--------------------------------------------------------------------------------
+-- LOCAL FUNCTIONS -------------------------------------------------------------
+--------------------------------------------------------------------------------
+decode_dict : String -> Encoded -> (Dict.Dict String String)
+decode_dict name encoded =
+   when
+      (Json.Decode.decodeValue
+         (Json.Decode.field name (Json.Decode.dict (Json.Decode.string)))
+         encoded
+      )
+   is
+      (Result.Ok dict) -> dict
+      other -> (Debug.log (Debug.toString other) (Dict.empty))
+
+--------------------------------------------------------------------------------
+-- EXPORTED FUNCTIONS ----------------------------------------------------------
+--------------------------------------------------------------------------------
+new : Encoded -> Type
+new encoded =
+   {
+      url_params = (decode_dict "url_params" encoded),
+      local_values = (decode_dict "local_values" encoded)
+   }
+
+get_url_parameters : Type -> (Dict.Dict String String)
+get_url_parameters invocation_parameters = invocation_parameters.url_params
+
+get_url_parameter : String -> Type -> String
+get_url_parameter name invocation_parameters =
+   when (Dict.get name invocation_parameters.url_params) is
+      (Just result) -> result
+      _ -> ""
+
+set_url_parameters : (Dict.Dict String String) -> Type -> Type
+set_url_parameters url_params invocation_parameters =
+   {invocation_parameters | url_params = url_params}
+
+set_url_parameter : String -> String -> Type -> Type
+set_url_parameter name value invocation_parameters =
+   {invocation_parameters |
+      url_params = (Dict.set name value invocation_parameters.url_params)
+   }
+
+get_local_values : Type -> (Dict.Dict String String)
+get_local_values invocation_parameters = invocation_parameters.local_values
+
+get_local_value : String -> Type -> String
+get_local_value name invocation_parameters =
+   when (Dict.get name invocation_parameters.local_values) is
+      (Just result) -> result
+      _ -> ""
+
+set_local_values : (Dict.Dict String String) -> Type -> Type
+set_local_values local_values invocation_parameters =
+   {invocation_parameters | local_values = local_values}
+
+set_local_value : String -> String -> Type -> Type
+set_local_value name value invocation_parameters =
+   {invocation_parameters |
+      local_values =
+         (Dict.set name value invocation_parameters.local_values)
+   }

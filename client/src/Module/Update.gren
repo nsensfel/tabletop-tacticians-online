@@ -17,8 +17,6 @@ import Update.EditProfilePage
 import Update.GameListPage
 import Update.GamePage
 import Update.RegisterPage
-import Update.PageURLChangedTo
-import Update.PageURLRequested
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -53,12 +51,6 @@ update event model =
 
       (Struct.Event.GamePage game_page_event) ->
          (Update.GamePage.update game_page_event model)
-
-      (Struct.Event.PageURLChangedTo url) ->
-         (Update.PageURLChangedTo.update url model)
-
-      (Struct.Event.PageURLRequested url_request) ->
-         (Update.PageURLRequested.update url_request model)
 
       (Struct.Event.ErrorOccurred error) ->
          {

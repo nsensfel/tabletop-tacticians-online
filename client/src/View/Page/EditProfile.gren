@@ -58,6 +58,8 @@ new_password_field edit_profile =
                      )
                   ),
                   (Html.Attributes.value new_password),
+                  (Html.Attributes.type_ "password"),
+                  (Html.Attributes.placeholder "password"),
                   if (String.isEmpty new_password)
                   then (Html.Attributes.class "empty-input")
                   else (Html.Attributes.class "")
@@ -90,6 +92,8 @@ password_field edit_profile =
                      )
                   ),
                   (Html.Attributes.value password),
+                  (Html.Attributes.type_ "password"),
+                  (Html.Attributes.placeholder "password"),
                   if (String.isEmpty password)
                   then (Html.Attributes.class "empty-input")
                   else (Html.Attributes.class "")
@@ -126,6 +130,8 @@ new_password_confirmation_field edit_profile =
                      )
                   ),
                   (Html.Attributes.value new_password_confirmation),
+                  (Html.Attributes.type_ "password"),
+                  (Html.Attributes.placeholder "password"),
                   if (String.isEmpty new_password_confirmation)
                   then (Html.Attributes.class "empty-input")
                   else (Html.Attributes.class ""),
@@ -196,6 +202,7 @@ displayed_name_field edit_profile =
                      )
                   ),
                   (Html.Attributes.value displayed_name),
+                  (Html.Attributes.placeholder "Displayed Name"),
                   if (String.isEmpty displayed_name)
                   then (Html.Attributes.class "empty-input")
                   else (Html.Attributes.class "")
@@ -228,6 +235,7 @@ email_field edit_profile =
                      )
                   ),
                   (Html.Attributes.value email),
+                  (Html.Attributes.placeholder "email@domain.com"),
                   if (String.isEmpty email)
                   then (Html.Attributes.class "empty-input")
                   else (Html.Attributes.class "")

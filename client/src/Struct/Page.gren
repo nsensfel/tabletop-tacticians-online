@@ -36,14 +36,14 @@ type Type =
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-new : Url.Url -> Type
-new url =
-   when url.path is
-      "/" -> Home
-      "/login" -> (Login (Struct.Page.Login.new))
-      "/register" -> (Register (Struct.Page.Register.new))
-      "/edit_profile" -> (EditProfile (Struct.Page.EditProfile.new))
-      "/game_list" -> (GameList (Struct.Page.GameList.new))
-      "/create_game" -> (CreateGame (Struct.Page.CreateGame.new))
-      "/game" -> (Game (Struct.Page.Game.new))
+new : String -> Type
+new name =
+   when name is
+      "" -> Home
+      "login" -> (Login (Struct.Page.Login.new))
+      "register" -> (Register (Struct.Page.Register.new))
+      "edit_profile" -> (EditProfile (Struct.Page.EditProfile.new))
+      "game_list" -> (GameList (Struct.Page.GameList.new))
+      "create_game" -> (CreateGame (Struct.Page.CreateGame.new))
+      "game" -> (Game (Struct.Page.Game.new))
       other -> (Unknown other)

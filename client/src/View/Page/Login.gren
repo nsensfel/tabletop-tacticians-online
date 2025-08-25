@@ -51,6 +51,7 @@ username_field login =
                      )
                   ),
                   (Html.Attributes.value username),
+                  (Html.Attributes.placeholder "username"),
                   if (String.isEmpty username)
                   then (Html.Attributes.class "empty-input")
                   else (Html.Attributes.class "")
@@ -83,6 +84,8 @@ password_field login =
                      )
                   ),
                   (Html.Attributes.value password),
+                  (Html.Attributes.type_ password),
+                  (Html.Attributes.placeholder "password"),
                   if (String.isEmpty password)
                   then (Html.Attributes.class "empty-input")
                   else (Html.Attributes.class "")

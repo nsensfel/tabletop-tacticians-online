@@ -18,6 +18,8 @@ import Comm.Send.LoginRequest
 
 import Util.DetectMissingField
 
+import Module.Port
+
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -56,7 +58,7 @@ update login model =
                   ("Missing " ++ name)
                   model
                ),
-            command = Cmd.none
+            command = (Module.Port.any_test 0) --Cmd.none
          }
 
       Nothing ->

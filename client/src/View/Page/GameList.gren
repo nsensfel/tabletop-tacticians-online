@@ -40,7 +40,7 @@ view :
    )
 view model login =
    {
-      title = "Login",
+      title = "Game List",
       body =
       [
          (Html.text "Not implemented."),

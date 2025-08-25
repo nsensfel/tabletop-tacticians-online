@@ -1,0 +1,64 @@
+port module Module.Port exposing (..)
+
+--------------------------------------------------------------------------------
+-- IMPORTS ---------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Standard Library ------------------------------------------------------------
+import Json.Decode
+import Task
+
+-- Third Party------------------------------------------------------------------
+
+-- Project ---------------------------------------------------------------------
+import Struct.Event
+--------------------------------------------------------------------------------
+-- TYPES -----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- LOCAL FUNCTIONS -------------------------------------------------------------
+--------------------------------------------------------------------------------
+port set_page_title : String -> (Task.Task (Json.Decode.Value) String)
+port get_url_params : String -> (Task.Task (Json.Decode.Value) (Json.Decode.Value))
+port set_url_params : String -> (Task.Task (Json.Decode.Value) String)
+port clear_url_params : String -> (Task.Task (Json.Decode.Value) String)
+port get_local_values : String -> (Task.Task (Json.Decode.Value) (Json.Decode.Value))
+port set_local_values : String -> (Task.Task (Json.Decode.Value) String)
+port clear_local_values : String -> (Task.Task (Json.Decode.Value) String)
+
+port other_name : String -> Cmd msg
+
+--------------------------------------------------------------------------------
+-- EXPORTED FUNCTIONS ----------------------------------------------------------
+--------------------------------------------------------------------------------
+test : (Cmd Struct.Event.Type)
+test = (Task.attempt (\x -> (Struct.Event.None)) (set_page_title "lol"))
+
+testB : (Cmd Struct.Event.Type)
+testB = (Task.attempt (\x -> (Struct.Event.None)) (get_url_params "lol"))
+
+testC : (Cmd Struct.Event.Type)
+testC = (Task.attempt (\x -> (Struct.Event.None)) (set_url_params "lol"))
+
+testD : (Cmd Struct.Event.Type)
+testD = (Task.attempt (\x -> (Struct.Event.None)) (clear_url_params "lol"))
+
+testE : (Cmd Struct.Event.Type)
+testE = (Task.attempt (\x -> (Struct.Event.None)) (get_local_values "lol"))
+
+testF : (Cmd Struct.Event.Type)
+testF = (Task.attempt (\x -> (Struct.Event.None)) (set_local_values "lol"))
+
+testG : (Cmd Struct.Event.Type)
+testG = (Task.attempt (\x -> (Struct.Event.None)) (clear_local_values "lol"))
+
+any_test : Int -> (Cmd Struct.Event.Type)
+any_test i =
+   when i is
+      0 -> (test)
+      1 -> (testB)
+      2 -> (testC)
+      3 -> (testD)
+      4 -> (testE)
+      5 -> (testF)
+      _ -> (testG)

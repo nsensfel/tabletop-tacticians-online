@@ -1,10 +1,16 @@
-port module Main exposing (main)
+module Main exposing
+   (
+      main
+   )
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
 import Browser
+import Dict
+import Json.Decode
+import Task
 
 -- Third Party------------------------------------------------------------------
 
@@ -13,6 +19,7 @@ import Module.Init
 import Module.Subscriptions
 import Module.Update
 import Module.View
+import Module.Port
 
 import Struct.Event
 
@@ -23,29 +30,16 @@ import Struct.Event
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
-port set_page_title : String -> Cmd msg
-port url_param_read_all : Cmd msg
-port url_param_read : String -> Cmd msg
-port url_param_write : String -> Cmd msg
-port url_param_delete : String -> Cmd msg
-port url_param_delete_all : Cmd msg
-port local_read_all : Cmd msg
-port local_read : String -> Cmd msg
-port local_write : String -> Cmd msg
-port local_delete : String -> Cmd msg
-port local_delete_all : Cmd msg
 
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
 main =
-   (Browser.application
+   (Browser.document
       {
          init = Module.Init.init,
          update = Module.Update.update,
          view = Module.View.view,
-         subscriptions = Module.Subscriptions.subscriptions,
-         onUrlRequest = Struct.Event.PageURLRequested,
-         onUrlChange = Struct.Event.PageURLChangedTo
+         subscriptions = Module.Subscriptions.subscriptions
       }
    )

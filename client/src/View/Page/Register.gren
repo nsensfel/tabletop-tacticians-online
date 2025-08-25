@@ -52,6 +52,7 @@ username_field register =
                      )
                   ),
                   (Html.Attributes.value username),
+                  (Html.Attributes.placeholder "username"),
                   if (String.isEmpty username)
                   then (Html.Attributes.class "empty-input")
                   else (Html.Attributes.class "")
@@ -117,6 +118,8 @@ password_field register =
                      )
                   ),
                   (Html.Attributes.value password),
+                  (Html.Attributes.type_ "password"),
+                  (Html.Attributes.placeholder "password"),
                   if (String.isEmpty password)
                   then (Html.Attributes.class "empty-input")
                   else (Html.Attributes.class "")
@@ -153,6 +156,8 @@ password_confirmation_field register =
                      )
                   ),
                   (Html.Attributes.value password_confirmation),
+                  (Html.Attributes.type_ "password"),
+                  (Html.Attributes.placeholder "password"),
                   if (String.isEmpty password_confirmation)
                   then (Html.Attributes.class "empty-input")
                   else (Html.Attributes.class ""),
@@ -190,6 +195,7 @@ displayed_name_field register =
                      )
                   ),
                   (Html.Attributes.value displayed_name),
+                  (Html.Attributes.placeholder "Displayed Name"),
                   if (String.isEmpty displayed_name)
                   then (Html.Attributes.class "empty-input")
                   else (Html.Attributes.class "")
@@ -222,6 +228,7 @@ email_field register =
                      )
                   ),
                   (Html.Attributes.value email),
+                  (Html.Attributes.placeholder "email@domain.com"),
                   if (String.isEmpty email)
                   then (Html.Attributes.class "empty-input")
                   else (Html.Attributes.class "")
