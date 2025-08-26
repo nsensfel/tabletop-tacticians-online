@@ -1,0 +1,74 @@
+module Struct.Page.Game.Player exposing
+   (
+      Type,
+      new,
+      get_username,
+      set_username,
+      get_displayed_name,
+      set_displayed_name,
+      get_avatar,
+      set_avatar,
+      get_is_pinged,
+      set_is_pinged
+   )
+
+--------------------------------------------------------------------------------
+-- IMPORTS ---------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Standard Library ------------------------------------------------------------
+
+-- Third Party -----------------------------------------------------------------
+
+-- Project ---------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- TYPES -----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+type alias Type =
+   {
+      username : String,
+      displayed_name : String,
+      avatar : String,
+      is_pinged : Bool
+   }
+
+--------------------------------------------------------------------------------
+-- LOCAL FUNCTIONS -------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- EXPORTED FUNCTIONS ----------------------------------------------------------
+--------------------------------------------------------------------------------
+new : Type
+new =
+   {
+      username = "",
+      displayed_name = "",
+      avatar = "",
+      is_pinged = False
+   }
+
+get_username : Type -> String
+get_username player = player.username
+
+set_username : String -> Type -> Type
+set_username username player = {player | username = username}
+
+get_displayed_name : Type -> String
+get_displayed_name player = player.displayed_name
+
+set_displayed_name : String -> Type -> Type
+set_displayed_name displayed_name player =
+   {player | displayed_name = displayed_name}
+
+get_avatar : Type -> String
+get_avatar player = player.avatar
+
+set_avatar : String -> Type -> Type
+set_avatar avatar player = {player | avatar = avatar}
+
+get_is_pinged : Type -> Bool
+get_is_pinged player = player.is_pinged
+
+set_is_pinged : Bool -> Type -> Type
+set_is_pinged val player = {player | is_pinged = val}

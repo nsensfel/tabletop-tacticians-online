@@ -1,0 +1,81 @@
+module Struct.Page.Game.Chat exposing
+   (
+      Type,
+      Message,
+      new,
+      toggle_is_opened,
+      get_messages,
+      set_messages,
+      new_message,
+      get_author_username,
+      set_author_username,
+      get_content,
+      set_content
+   )
+
+--------------------------------------------------------------------------------
+-- IMPORTS ---------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Standard Library ------------------------------------------------------------
+
+-- Third Party -----------------------------------------------------------------
+
+-- Project ---------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- TYPES -----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+type alias Message =
+   {
+      author_username : String,
+      content : String
+   }
+
+type alias Type =
+   {
+      is_opened : Bool,
+      messages : (Array Message)
+   }
+
+--------------------------------------------------------------------------------
+-- LOCAL FUNCTIONS -------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- EXPORTED FUNCTIONS ----------------------------------------------------------
+--------------------------------------------------------------------------------
+new : Type
+new =
+   {
+      is_opened = False,
+      messages = []
+   }
+
+toggle_is_opened : Type -> Type
+toggle_is_opened chat = {chat | is_opened = (not chat.is_opened) }
+
+get_messages : Type -> (Array Message)
+get_messages chat = chat.messages
+
+set_messages : (Array Message) -> Type -> Type
+set_messages messages chat = {chat | messages = messages}
+
+new_message : String -> String -> Message
+new_message author_username content =
+   {
+      author_username = author_username,
+      content = content
+   }
+
+get_author_username : Message -> String
+get_author_username message = message.author_username
+
+set_author_username : String -> Message -> Message
+set_author_username author_username message =
+   {message | author_username = author_username}
+
+get_content : Message -> String
+get_content message = message.content
+
+set_content : String -> Message -> Message
+set_content content message = {message | content = content}

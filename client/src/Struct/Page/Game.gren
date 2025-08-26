@@ -5,6 +5,8 @@ module Struct.Page.Game exposing
       new,
       get_decks,
       set_decks,
+      get_players,
+      set_players,
       get_cards,
       set_cards,
       event_to_string
@@ -21,6 +23,10 @@ import Dict
 -- Project ---------------------------------------------------------------------
 import Struct.Page.Game.Card
 import Struct.Page.Game.Deck
+import Struct.Page.Game.Player
+import Struct.Page.Game.Chat
+import Struct.Page.Game.Selection
+import Struct.Page.Game.DeckBrowser
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -28,8 +34,13 @@ import Struct.Page.Game.Deck
 type alias Type =
    {
       id : String,
+      name : String,
+      players : (Dict.Dict String Struct.Page.Game.Player.Type),
       decks : (Dict.Dict String Struct.Page.Game.Deck.Type),
-      cards : (Dict.Dict String Struct.Page.Game.Card.Type)
+      cards : (Dict.Dict String Struct.Page.Game.Card.Type),
+      chat : Struct.Page.Game.Chat.Type,
+      selection : Struct.Page.Game.Selection.Type,
+      deck_browser : Struct.Page.Game.DeckBrowser.Type
    }
 
 -- Events here are how the user interact with the client. Not the puppeteer's
@@ -38,6 +49,30 @@ type Event =
    SelectCard String
    | SelectDeck String
    | CancelSelection
+   | Rotate
+   | Flip
+   | Peek
+   | ToggleLock
+   | SendTo String
+   | Shuffle
+   | Regroup
+   | Pop
+   | PopTop
+   | PopBottom
+   | PeekN Int
+   | Ping
+   | PingPlayer String
+   | SendAllTo String
+   | SendTopTo String
+   | SendBottomTo String
+   | Browse
+   | BrowseN Int
+   -- Missing: move cards around in deck.
+   | ZIndexMin
+   | ZIndexLess
+   | ZIndexMore
+   | ZIndexMax
+   | SendChatMessage
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
@@ -52,13 +87,20 @@ event_to_string event =
       (SelectCard _) -> "SelectCard"
       (SelectDeck _) -> "SelectDeck"
       CancelSelection -> "CancelSelection"
+      Rotate -> "Rotate"
+      _ -> "other"
 
 new : Type
 new =
    {
       id = "",
+      name = "",
+      players = (Dict.empty),
       decks = (Dict.empty),
-      cards = (Dict.empty)
+      cards = (Dict.empty),
+      chat = (Struct.Page.Game.Chat.new),
+      selection = (Struct.Page.Game.Selection.new),
+      deck_browser = (Struct.Page.Game.DeckBrowser.new)
    }
 
 get_decks : Type -> (Dict.Dict String Struct.Page.Game.Deck.Type)
@@ -67,8 +109,38 @@ get_decks game = game.decks
 set_decks : (Dict.Dict String Struct.Page.Game.Deck.Type) -> Type -> Type
 set_decks decks game = {game | decks = decks}
 
+get_players : Type -> (Dict.Dict String Struct.Page.Game.Player.Type)
+get_players game = game.players
+
+set_players : (Dict.Dict String Struct.Page.Game.Player.Type) -> Type -> Type
+set_players players game = {game | players = players}
+
 get_cards : Type -> (Dict.Dict String Struct.Page.Game.Card.Type)
 get_cards game = game.cards
 
 set_cards : (Dict.Dict String Struct.Page.Game.Card.Type) -> Type -> Type
 set_cards cards game = {game | cards = cards}
+
+get_name : Type -> String
+get_name game = game.name
+
+get_chat : Type -> Struct.Page.Game.Chat.Type
+get_chat game = game.chat
+
+get_selection : Type -> Struct.Page.Game.Selection.Type
+get_selection game = game.selection
+
+get_deck_browser : Type -> Struct.Page.Game.DeckBrowser.Type
+get_deck_browser game = game.deck_browser
+
+set_name : String -> Type -> Type
+set_name name game = {game | name = name}
+
+set_chat : Struct.Page.Game.Chat.Type -> Type -> Type
+set_chat chat game = {game | chat = chat}
+
+set_selection : Struct.Page.Game.Selection.Type -> Type -> Type
+set_selection selection game = {game | selection = selection}
+
+set_deck_browser : Struct.Page.Game.DeckBrowser.Type -> Type -> Type
+set_deck_browser deck_browser game = {game | deck_browser = deck_browser}

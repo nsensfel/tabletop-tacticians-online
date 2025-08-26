@@ -1,0 +1,73 @@
+module Struct.Page.Game.Selection exposing
+   (
+      Type,
+      new,
+      add_deck,
+      add_card,
+      clear,
+      get_id_list,
+      get_is_selecting_deck,
+      get_is_active
+   )
+
+--------------------------------------------------------------------------------
+-- IMPORTS ---------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Standard Library ------------------------------------------------------------
+import Set
+
+-- Third Party -----------------------------------------------------------------
+
+-- Project ---------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- TYPES -----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+type alias Type =
+   {
+      is_selecting_deck : Bool,
+      id_list : (Set.Set String)
+   }
+
+--------------------------------------------------------------------------------
+-- LOCAL FUNCTIONS -------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- EXPORTED FUNCTIONS ----------------------------------------------------------
+--------------------------------------------------------------------------------
+new : Type
+new =
+   {
+      is_selecting_deck = False,
+      id_list = (Set.empty)
+   }
+
+add_deck : String -> Type -> Type
+add_deck deck_id selection =
+   {selection |
+      is_selecting_deck = True,
+      id_list = (Set.singleton deck_id)
+   }
+
+add_card : String -> Type -> Type
+add_card card_id selection =
+   {selection |
+      is_selecting_deck = False,
+      id_list =
+         if selection.is_selecting_deck
+         then (Set.singleton card_id)
+         else (Set.toggle card_id selection.id_list)
+   }
+
+clear : Type -> Type
+clear _selection = (new)
+
+get_id_list : Type -> (Set.Set String)
+get_id_list selection = selection.id_list
+
+get_is_selecting_deck : Type -> Bool
+get_is_selecting_deck selection = selection.is_selecting_deck
+
+get_is_active : Type -> Bool
+get_is_active selection = (not (Set.isEmpty selection.id_list))
