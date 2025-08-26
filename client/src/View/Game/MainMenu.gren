@@ -1,18 +1,13 @@
-module View.Page.Game exposing (view)
+module View.Game.MainMenu exposing (get_html)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
-import Browser
-
 import Html
 import Html.Attributes
-import Html.Events
 
 import String
-
-import Dict
 
 -- Third Party------------------------------------------------------------------
 
@@ -22,12 +17,6 @@ import Struct.Event
 
 import Struct.Page.Game
 
-import View.ErrorTracker
-
-import View.Game.Deck
-import View.Game.Card
-import View.Game.MainMenu
-
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -35,45 +24,16 @@ import View.Game.MainMenu
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
-game_view_html :
-   (
-      Struct.Model.Type ->
-      Struct.Page.Game.Type ->
-      (Html.Html Struct.Event.Type)
-   )
-game_view_html model game =
-   (Html.div
-      [
-         (Html.Attributes.class "game-page")
-      ]
-      (
-         (Array.map
-            (View.Game.Deck.get_html)
-            (Dict.values (Struct.Page.Game.get_decks game))
-         )
-         ++
-         (Array.map
-            (View.Game.Card.get_html)
-            (Dict.values (Struct.Page.Game.get_cards game))
-         )
-      )
-   )
+
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-view :
-   (
-      Struct.Model.Type ->
-      Struct.Page.Game.Type ->
-      (Browser.Document Struct.Event.Type)
+get_html : Struct.Page.Game.Type -> (Html.Html Struct.Event.Type)
+get_html game =
+   (Html.header
+      [
+         (Html.Attributes.class "game-main-menu")
+      ]
+      [
+      ]
    )
-view model game =
-   {
-      title = "Game",
-      body =
-         [
-            (View.Game.MainMenu.get_html game),
-            (game_view_html model game),
-            (View.ErrorTracker.get_html model)
-         ]
-   }
