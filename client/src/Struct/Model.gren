@@ -8,9 +8,6 @@ module Struct.Model exposing
       set_error_tracker,
       get_invocation_parameters,
       set_invocation_parameters,
-      maybe_get_session,
-      set_session,
-      erase_session,
       maybe_get_confirmation,
       set_confirmation,
       erase_confirmation,
@@ -30,7 +27,6 @@ import Url
 -- Project ---------------------------------------------------------------------
 import Struct.Page
 import Struct.Error
-import Struct.Session
 import Struct.Confirmation
 import Struct.InvocationParameters
 import Struct.ErrorTracker
@@ -42,7 +38,6 @@ type alias Type =
    {
       invocation_parameters : Struct.InvocationParameters.Type,
       confirmation : (Maybe Struct.Confirmation.Type),
-      session : (Maybe Struct.Session.Type),
       page : Struct.Page.Type,
       error_tracker : Struct.ErrorTracker.Type
    }
@@ -59,7 +54,6 @@ new invocation_parameters =
    {
       invocation_parameters = invocation_parameters,
       confirmation = Nothing,
-      session = Nothing,
       page =
          (Struct.Page.new
             (Struct.InvocationParameters.get_url_parameter
@@ -69,15 +63,6 @@ new invocation_parameters =
          ),
       error_tracker = (Struct.ErrorTracker.new)
    }
-
-maybe_get_session : Type -> (Maybe Struct.Session.Type)
-maybe_get_session model = model.session
-
-set_session : Struct.Session.Type -> Type -> Type
-set_session session model = {model | session = (Just session)}
-
-erase_session : Type -> Type
-erase_session model = {model | session = Nothing}
 
 maybe_get_confirmation : Type -> (Maybe Struct.Confirmation.Type)
 maybe_get_confirmation model = model.confirmation

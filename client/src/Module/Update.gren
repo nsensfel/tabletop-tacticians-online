@@ -18,6 +18,10 @@ import Update.EditProfilePage
 import Update.GameListPage
 import Update.GamePage
 import Update.RegisterPage
+import Update.SetLocalValue
+import Update.EraseLocalValue
+import Update.SetUrlParam
+import Update.EraseUrlParam
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -26,6 +30,89 @@ import Update.RegisterPage
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
+handle_sequence :
+   (
+      (Array Struct.Event.Type) ->
+      Struct.Model.Type ->
+      { model : Struct.Model.Type, commands : (Array (Cmd Struct.Event.Type)) }
+   )
+handle_sequence events model =
+   (Array.foldl
+      (\event current ->
+         let
+            added = (handle_event event current.model)
+         in
+            {
+               model = added.model,
+               commands = (Array.pushLast added.command current.commands)
+            }
+      )
+      {model = model, commands = []}
+      events
+   )
+
+handle_event :
+   (
+      Struct.Event.Type ->
+      Struct.Model.Type ->
+      { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
+   )
+handle_event event model =
+   when event is
+      (Struct.Event.LoginPage login_page_event) ->
+         (Update.LoginPage.update login_page_event model)
+
+      (Struct.Event.EditProfilePage edit_profile_page_event) ->
+         (Update.EditProfilePage.update edit_profile_page_event model)
+
+      (Struct.Event.RegisterPage register_page_event) ->
+         (Update.RegisterPage.update register_page_event model)
+
+      (Struct.Event.GameListPage game_list_page_event) ->
+         (Update.GameListPage.update game_list_page_event model)
+
+      (Struct.Event.GamePage game_page_event) ->
+         (Update.GamePage.update game_page_event model)
+
+      (Struct.Event.SetLocalValue key_value) ->
+         (Update.SetLocalValue.update key_value model)
+
+      (Struct.Event.EraseLocalValue key) ->
+         (Update.EraseLocalValue.update key model)
+
+      (Struct.Event.SetUrlParam key_value) ->
+         (Update.SetUrlParam.update key_value model)
+
+      (Struct.Event.EraseUrlParam key) ->
+         (Update.EraseUrlParam.update key model)
+
+      (Struct.Event.ErrorOccurred error) ->
+         {
+            model =
+               (Struct.Model.push_error
+                  (Struct.Error.get_category error)
+                  (Struct.Error.get_message error)
+                  model
+               ),
+            command = Cmd.none
+         }
+
+      (Struct.Event.Sequence events) ->
+         let
+            result = (handle_sequence events model)
+         in
+            {model = result.model, command = (Cmd.batch result.commands)}
+
+      other ->
+         {
+            model =
+               (Struct.Model.push_error
+                  Struct.Error.Programming
+                  ("Unhandled event: " ++ (Struct.Event.to_string other))
+                  model
+               ),
+            command = Cmd.none
+         }
 
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
@@ -36,45 +123,4 @@ update :
       Struct.Model.Type ->
       { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
    )
-update event model =
-   (Update.Dirty.handle
-      (
-         when event is
-            (Struct.Event.LoginPage login_page_event) ->
-               (Update.LoginPage.update login_page_event model)
-
-            (Struct.Event.EditProfilePage edit_profile_page_event) ->
-               (Update.EditProfilePage.update edit_profile_page_event model)
-
-            (Struct.Event.RegisterPage register_page_event) ->
-               (Update.RegisterPage.update register_page_event model)
-
-            (Struct.Event.GameListPage game_list_page_event) ->
-               (Update.GameListPage.update game_list_page_event model)
-
-            (Struct.Event.GamePage game_page_event) ->
-               (Update.GamePage.update game_page_event model)
-
-            (Struct.Event.ErrorOccurred error) ->
-               {
-                  model =
-                     (Struct.Model.push_error
-                        (Struct.Error.get_category error)
-                        (Struct.Error.get_message error)
-                        model
-                     ),
-                  command = Cmd.none
-               }
-
-            other ->
-               {
-                  model =
-                     (Struct.Model.push_error
-                        Struct.Error.Programming
-                        ("Unhandled event: " ++ (Struct.Event.to_string other))
-                        model
-                     ),
-                  command = Cmd.none
-               }
-      )
-   )
+update event model = (Update.Dirty.handle (handle_event event model))

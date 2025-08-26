@@ -1,30 +1,21 @@
-module Struct.Session exposing
-   (
-      Type,
-      new,
-      get_id,
-      set_id,
-      get_token,
-      set_token
-   )
+module Update.SetUrlParam exposing (update)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
 
--- Third Party -----------------------------------------------------------------
+-- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Struct.Event
+import Struct.Model
+import Struct.KeyValue
+import Struct.InvocationParameters
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
-type alias Type =
-   {
-      id : String,
-      token : String
-   }
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
@@ -33,21 +24,24 @@ type alias Type =
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-new : String -> String -> Type
-new id token =
+update :
+   (
+      Struct.KeyValue.Type ->
+      Struct.Model.Type ->
+      { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
+   )
+update key_value model =
    {
-      id = id,
-      token = token
+      model =
+         (Struct.Model.set_invocation_parameters
+            (Struct.InvocationParameters.set_url_parameter
+               (Struct.KeyValue.get_key key_value)
+               (Struct.KeyValue.get_value key_value)
+               (Struct.Model.get_invocation_parameters
+                  model
+               )
+            )
+            model
+         ),
+      command = Cmd.none
    }
-
-get_id : Type -> String
-get_id session = session.id
-
-set_id : String -> Type -> Type
-set_id id session = {session | id = id}
-
-get_token : Type -> String
-get_token session = session.token
-
-set_token : String -> Type -> Type
-set_token token session = {session | token = token}

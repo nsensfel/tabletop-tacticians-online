@@ -23,4 +23,12 @@ import Struct.Event
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
 decoder : (Json.Decode.Decoder Struct.Event.Type)
-decoder = (Json.Decode.succeed Struct.Event.EraseSession)
+decoder =
+   (Json.Decode.succeed
+      (Struct.Event.Sequence
+         [
+            (Struct.Event.EraseLocalValue "session_id"),
+            (Struct.Event.EraseLocalValue "session_token")
+         ]
+      )
+   )
