@@ -28,7 +28,7 @@ encode login =
    (Json.Encode.object
       [
          {
-            key = "usr",
+            key = "uid",
             value = (Json.Encode.string (Struct.Page.Login.get_username login))
          },
          {

@@ -5,15 +5,21 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -type id() :: ataxia_id:type().
 
+-define(TOKEN_COUNT_LIMIT, 10).
+
 -record
 (
 	user,
 	{
-		username :: binary(),
+		username :: binary(), % This is also the ID.
 		% {salt(crypto:strong_rand_bytes(128)), hash(sha384)}
 		password :: {binary(), binary()},
 		tokens :: ordsets:ordset(binary()), % salt(crypto:strong_rand_bytes(512))
-		email :: binary()
+		email :: binary(),
+		displayed_name :: binary(),
+		avatar :: binary()
+		% Might want the room list here:
+		% {Room Name, Game Name, Room ID, is_being_pinged}.
 	}
 ).
 
@@ -39,12 +45,16 @@
 		get_password/1,
 		get_token/1,
 		get_email/1,
+		get_displayed_name/1,
+		get_avatar/1,
 
 		set_username/2,
 		set_password/2,
 		add_token/1,
 		remove_token/1,
 		set_email/2,
+		set_avatar/2,
+		set_displayed_name/2,
 
 		ataxia_set_username/2,
 		ataxia_set_password/2,
@@ -61,6 +71,8 @@
 		get_password_field/0,
 		get_tokens_field/0,
 		get_email_field/0,
+		get_avatar_field/0,
+		get_displayed_name_field/0,
 	]
 ).
 
@@ -84,22 +96,28 @@ secure_value (Salt, Val) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% EXPORTED FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec new (binary(), binary(), binary()) -> type().
-new (Username, Password, Email) ->
+-spec new
+	(
+		binary(),
+		binary(),
+		binary(),
+		binary(),
+		binary()
+	)
+	-> type().
+new (Username, Password, Email, DisplayedName, Avatar) ->
 	Result =
 		#user
 		{
 			username = Username,
 			password = {<<"">>, <<"">>},
 			tokens = ordsets:new(),
-			email = Email
+			email = Email,
+			displayed_name = DisplayedName,
+			avatar = Avatar
 		},
 
-	S0Result = set_password(Password, Result),
-	S1Result = add_token(S0Result),
-	S2Result = refresh_active(S1Result),
-
-	S2Result.
+	set_password(Password, Result).
 
 %%%% Accessors
 -spec get_username (type()) -> binary().
@@ -114,8 +132,11 @@ get_token (User) -> User#user.token.
 -spec get_email (type()) -> binary().
 get_email (User) -> User#user.email.
 
--spec set_username (binary(), type()) -> type().
-set_username (Val, User) -> User#user{ username = Val }.
+-spec get_displayed_name (type()) -> binary().
+get_displayed_name (User) -> User#user.displayed_name.
+
+-spec get_avatar (type()) -> binary().
+get_avatar (User) -> User#user.avatar.
 
 -spec set_password (binary(), type()) -> type().
 set_password (Val, User) ->
@@ -127,56 +148,45 @@ set_password (Val, User) ->
 		password = {NewSalt, HashedSaltedVal}
 	}.
 
--spec add_token (type()) -> {type(), binary(), boolean()}
-add_token (User) ->
-	CurrentTokens = User#user.tokens,
-	NewToken = base64:encode(crypto:strong_rand_bytes(512)),
-	case ordsets:size(User#user.tokens) > ?TOKEN_COUNT_LIMIT of
-		true ->
-			{
-				User#user
-				{
-					tokens = ordsets:add_element(NewToken, ordsets:new())
-				},
-				NewToken,
-				true
-			};
-
-		_ ->
-			{
-				User#user
-				{
-					tokens = ordsets:add_element(NewToken, CurrentTokens)
-				},
-				NewToken,
-				false
-			}
-	end.
-
--spec ataxia_add_token (type()) -> {ataxic:type(), type(), binary(), boolean()}.
-ataxia_add_token (S0User) ->
-	{S1User, NewToken, Reset} = add_token(S0User),
+-spec ataxia_set_password (binary(), type()) -> {ataxic:type(), type()}.
+ataxia_set_password (Val, User) ->
+	S1User = set_password(Val, S0User),
 	{
 		ataxic:update_field
 		(
 			get_tokens_field(),
-			case Reset of
-				true -> ataxic:constant(S1User#user.tokens);
-				_ ->
-					ataxic:apply_function
-					(
-						ordsets,
-						add_element,
-						[
-							ataxic:current_value(),
-							ataxic:constant(NewToken)
-						]
-					)
-			end
+			ataxic:constant(Val)
+		),
+		S1User
+	}.
+
+-spec add_token (type()) -> {type() binary()}.
+add_token (User) ->
+	CurrentTokens = User#user.tokens,
+	NewToken = base64:encode(crypto:strong_rand_bytes(512)),
+	TokensList =
+		case ordsets:size(User#user.tokens) == ?TOKEN_COUNT_LIMIT of
+			false -> ordsets:add_element(NewToken, User#user.tokens);
+			true ->
+				ordsets:del_element
+				(
+					lists:last(ordsets:to_list(User#user.tokens)),
+					User#user.tokens
+				)
+		end,
+	{ User#user{ tokens = TokensList }, NewToken }.
+
+-spec ataxia_add_token (type()) -> {ataxic:type(), type(), binary(), boolean()}.
+ataxia_add_token (S0User) ->
+	{S1User, NewToken} = add_token(S0User),
+	{
+		ataxic:update_field
+		(
+			get_tokens_field(),
+			ataxic:constant(S1User#user.tokens)
 		),
 		S1User,
-		NewToken,
-		Reset
+		NewToken
 	}.
 
 -spec set_email (binary(), type()) -> type().
@@ -184,11 +194,35 @@ set_email (Val, User) -> User#user{ email = Val }.
 
 -spec ataxia_set_email (binary(), type()) -> {ataxic:type(), type()}.
 ataxia_set_email (Val, S0User) ->
-	S1User = ataxia_set_email(Val, S0User),
+	S1User = set_email(Val, S0User),
 	{
 		ataxic:update_field
 		(
-			get_tokens_field(),
+			get_email_field(),
+			ataxic:constant(Val)
+		),
+		S1User
+	}.
+
+-spec ataxia_set_displayed_name (binary(), type()) -> {ataxic:type(), type()}.
+ataxia_set_displayed_name (Val, S0User) ->
+	S1User = set_displayed_name(Val, S0User),
+	{
+		ataxic:update_field
+		(
+			get_displayed_name_field(),
+			ataxic:constant(Val)
+		),
+		S1User
+	}.
+
+-spec ataxia_set_avatar (binary(), type()) -> {ataxic:type(), type()}.
+ataxia_set_avatar (Val, S0User) ->
+	S1User = set_avatar(Val, S0User),
+	{
+		ataxic:update_field
+		(
+			get_avatar_field(),
 			ataxic:constant(Val)
 		),
 		S1User
@@ -205,6 +239,12 @@ get_tokens_field () -> #user.tokens.
 
 -spec get_email_field () -> non_neg_integer().
 get_email_field () -> #user.email.
+
+-spec get_displayed_name_field () -> non_neg_integer().
+get_displayed_name_field () -> #user.displayed_name.
+
+-spec get_avatar_field () -> non_neg_integer().
+get_avatar_field () -> #user.avatar.
 
 -spec password_is (binary(), type()) -> boolean().
 password_is (Val, User) ->
