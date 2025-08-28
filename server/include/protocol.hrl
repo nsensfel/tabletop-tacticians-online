@@ -14,8 +14,11 @@
 -define(HISTORY_INDEX_FIELD, <<"hix">>).
 -define(MESSAGE_FIELD, <<"msg">>).
 -define(PASSWORD_FIELD, <<"pwd">>).
+-define(PENDING_ROOMS_FIELD, <<"prs">>).
 -define(REPLY_ID_FIELD, <<"rep">>).
 -define(ROOM_ID_FIELD, <<"rid">>).
+-define(ROOM_NAME_FIELD, <<"rnm">>).
+-define(ROOM_GAME_ID_FIELD, <<"rgi">>).
 -define(SESSION_TOKEN_FIELD, <<"sto">>).
 -define(TARGETS_FIELD, <<"tar">>).
 -define(USER_ID_FIELD, <<"uid">>).
@@ -29,6 +32,7 @@
 -define(ERROR_ID, <<"err">>).
 -define(FAILED_REPLY_ID, <<"fai">>).
 -define(HISTORY_UPDATE_REPLY_ID, <<"hup">>).
+-define(PENDING_ROOM_LIST_UPDATE_ID, <<"pru">>).
 -define(ROOM_DATA_REPLY_ID, <<"rda">>).
 -define(SET_SESSION_ID, <<"sst">>).
 

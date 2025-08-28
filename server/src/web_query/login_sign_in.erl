@@ -194,23 +194,27 @@ release_resources (_Other) -> ok.
 		{'ok', request(), binary()}
 		| {'error', binary()}
 	)
-	-> 'ok'.
+	-> list(any()).
 generate_reply ({ok, Request, SessionToken}) ->
-	{
-		[
-			{?MESSAGE_FIELD, ?SET_SESSION_ID},
-			{?USER_ID_FIELD, get_request_username(Request)},
-			{?SESSION_TOKEN_FIELD, SessionToken}
-		]
-	};
+	[
+		{
+			[
+				{?MESSAGE_FIELD, ?SET_SESSION_ID},
+				{?USER_ID_FIELD, get_request_username(Request)},
+				{?SESSION_TOKEN_FIELD, SessionToken}
+			]
+		}
+	];
 generate_reply ({error, ErrorMessage}) ->
-	{
-		[
-			{?MESSAGE_FIELD, ?ERROR_ID},
-			{?CATEGORY_FIELD, ?ERROR_ERROR_ID},
-			{?CONTENT_FIELD, ErrorMessage}
-		]
-	}.
+	[
+		{
+			[
+				{?MESSAGE_FIELD, ?ERROR_ID},
+				{?CATEGORY_FIELD, ?ERROR_ERROR_ID},
+				{?CONTENT_FIELD, ErrorMessage}
+			]
+		}
+	].
 
 %%%% MAIN LOGIC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -spec handle (web_query:type()) -> binary().

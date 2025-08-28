@@ -111,4 +111,12 @@ Use ballback image for avatars in case of errors. Gren equivalent to onerror="th
 
 When receiving a request, keep user_db entry.
 localData has user_db entry version, sends it along with uid.
-If version mismatches, send room_list data, so client can notify of active pings.
+If version mismatches, send _pending_ room_list, so client can notify of active pings.
+
+Room list is
+{
+	id: To generate link.
+	name: Personalized (by host) name for it.
+	game_id: to display an image corresponding to the game.
+	is_pending: whether the user is currently being pinged.
+}

@@ -200,20 +200,20 @@ fetch_data (Error) -> Error.
 
 -spec create_new_user
 	(
-		ataxia_lock_janitor:type(),
-		ataxia_client:type(),
-		request()
+			request()
 	)
 	->
 	(
 		{'ok', non_neg_integer(), binary(), binary()}
 		| {'error', binary()}
 	).
-create_new_user (LockJanitor, S0AtaxiaClient, Request) ->
+create_new_user (Request) ->
+	S0AtaxiaClient = get_request_ataxia_client(Request),
+	Username = get_request_username(Request),
 	S0User =
 		user_db_entry:new
 		(
-			get_request_username(Request),
+			Username,
 			get_request_password(Request),
 			get_request_email(Request),
 			get_request_displayed_name(Request),
@@ -238,102 +238,33 @@ create_new_user (LockJanitor, S0AtaxiaClient, Request) ->
 		{error, _} -> {error, ataxia_error:to_string(AddAtResult)}
 	end.
 
-	ataxia_lock_janitor:release_lock(Lock, LockJanitor),
-
-	case UpdateResult of
-		{ok, _NewVersion} -> {ok, SessionToken};
-		{error, _} -> {error, ataxia_error:to_string(UpdateResult)}
-	end.
-
--spec update_data
-	(
-		{'ok', request(), ataxia_client_data:type()}
-		| {'error', binary()}
-	)
-	->
-	(
-		{'ok', request(), binary()}
-		| {'error', binary()}
-	).
-update_data ({ok, Request, S0DBData}) ->
-	Username = get_request_username(Request),
-	LockJanitor = get_request_lock_janitor(Request),
-	S0AtaxiaClient = get_request_ataxia_client(Request),
-	S0User = ataxia_client_data:get_value(S0DBData),
-	S0Version = ataxia_client_data:get_version(S0DBData),
-	case user_db_entry:password_is(get_request_password(Request), S0User) of
-		false -> {error, "Invalid password."};
-		true ->
-			{S1AtaxiaClient, FetchResult} =
-				ataxia_client:fetch_if_new
-				(
-					S0AtaxiaClient,
-					user_db,
-					Username,
-					write,
-					S0Version,
-					S0User
-				),
-
-			case FetchResult of
-				{ok, Lock} ->
-					ataxia_lock_janitor:store_lock(Lock, LockJanitor),
-					S1DBData = ataxia_client_data:set_lock(Lock, S0DBData),
-					generate_session_token(LockJanitor, S1AtaxiaClient, S1DBData);
-
-				{ok, Lock, S1Version, S1User} ->
-					ataxia_lock_janitor:store_lock(Lock, LockJanitor),
-					S1DBData =
-						ataxia_client_data:update_to
-						(
-							Lock,
-							S1Version,
-							S1User,
-							S0DBData
-						),
-					generate_session_token(LockJanitor, S1AtaxiaClient, S1DBData);
-
-				{error, _} ->
-					ataxia_lock_janitor:release_all(LockJanitor),
-					{error, ataxia_error:to_string(FetchResult)}
-			end
-	end;
-update_data (Error) -> Error.
-
--spec release_resources
-	(
-		{'ok', request(), binary()}
-		| {'error', binary()}
-	)
-	-> 'ok'.
-release_resources ({ok, Request, _}) ->
-	ataxia_lock_janitor:release_all(get_request_lock_janitor(Request)),
-	ok;
-release_resources (_Other) -> ok.
-
 -spec generate_reply
 	(
-		{'ok', request(), binary()}
+		{'ok', non_neg_integer(), binary(), binary()}
 		| {'error', binary()}
 	)
-	-> 'ok'.
-generate_reply ({ok, Request, SessionToken}) ->
-	{
-		[
-			{?MESSAGE_FIELD, ?SET_SESSION_ID},
-			{?USER_VERSION_FIELD, Version},
-			{?USER_ID_FIELD, get_request_username(Request)},
-			{?SESSION_TOKEN_FIELD, SessionToken}
-		]
-	};
+	-> list(any()).
+generate_reply ({ok, Version, Username, SessionToken}) ->
+	[
+		{
+			[
+				{?MESSAGE_FIELD, ?SET_SESSION_ID},
+				{?USER_VERSION_FIELD, Version},
+				{?USER_ID_FIELD, Username},
+				{?SESSION_TOKEN_FIELD, SessionToken}
+			]
+		}
+	];
 generate_reply ({error, ErrorMessage}) ->
-	{
-		[
-			{?MESSAGE_FIELD, ?ERROR_ID},
-			{?CATEGORY_FIELD, ?ERROR_ERROR_ID},
-			{?CONTENT_FIELD, ErrorMessage}
-		]
-	}.
+	[
+		{
+			[
+				{?MESSAGE_FIELD, ?ERROR_ID},
+				{?CATEGORY_FIELD, ?ERROR_ERROR_ID},
+				{?CONTENT_FIELD, ErrorMessage}
+			]
+		}
+	].
 
 %%%% MAIN LOGIC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -spec handle (web_query:type()) -> binary().
@@ -341,7 +272,7 @@ handle (Query) ->
 	{ok, Request} = decode_request(Query),
 	ValidateRequestResult = validate_request(Request),
 	FetchResult = fetch_data(ValidateRequestResult),
-	UpdateResult = update_data(FetchResult),
+	CreateNewUserResult = create_new_user(FetchResult),
 	release_resources(UpdateResult),
 	generate_reply(UpdateResult).
 
