@@ -157,7 +157,13 @@ validate (displayed_name, {ok, Request}) ->
 		{_, false} -> {error, <<"Displayed Name is too long (max 64 chars).">>}
 	end;
 validate (avatar, {ok, Request}) ->
-	{ok, Request};
+	Avatar = get_request_avatar(Request),
+	Length = string:length(Avatar),
+	case {Length > 0, uri_string:parse(Avatar)} of
+		{false, _} -> {error, <<"Avatar missing.">>};
+		{_, {error, _, _}} -> {error, <<"Avatar URL invalid.">>};
+		_ -> {ok, Request}
+	end;
 validate (_, Error) -> Error.
 
 -spec validate_request (request()) -> {'ok', request()} | {'error', binary()}).
@@ -192,35 +198,45 @@ fetch_data ({ok, Request}) ->
 	end;
 fetch_data (Error) -> Error.
 
--spec generate_session_token
+-spec create_new_user
 	(
 		ataxia_lock_janitor:type(),
 		ataxia_client:type(),
-		ataxia_client_data:type()
+		request()
 	)
 	->
 	(
-		{'ok', binary()}
+		{'ok', non_neg_integer(), binary(), binary()}
 		| {'error', binary()}
 	).
-generate_session_token(LockJanitor, S0AtaxiaClient, S0DBData) ->
-	Username = ataxia_client_data:get_id(S0DBData),
-	Lock = ataxia_client_data:get_lock(S0DBData),
-	Version = ataxia_client_data:get_version(S0DBData),
-	S0User = ataxia_client_data:get_value(S0DBData),
-	{AtaxicUpdate, S1User, SessionToken} =
-		user_db_entry:ataxia_add_token(S0User),
-	{_S1AtaxiaClient, UpdateResult} =
-		ataxia_client:safe_update
+create_new_user (LockJanitor, S0AtaxiaClient, Request) ->
+	S0User =
+		user_db_entry:new
+		(
+			get_request_username(Request),
+			get_request_password(Request),
+			get_request_email(Request),
+			get_request_displayed_name(Request),
+			get_request_avatar(Request)
+		),
+
+	{S1User, SessionToken} = ataxia_client_data:add_token(S0User),
+
+	{_S1AtaxiaClient, AddAtResult} =
+		ataxia_client:add_at
 		(
 			S0AtaxiaClient,
 			user_db,
 			Username,
-			Lock,
+			{temp, write},
 			AtaxicUpdate,
-			Version,
 			S1User
 		),
+
+	case AddAtResult of
+		{ok, Version} -> {ok, Version, Username, SessionToken};
+		{error, _} -> {error, ataxia_error:to_string(AddAtResult)}
+	end.
 
 	ataxia_lock_janitor:release_lock(Lock, LockJanitor),
 
@@ -305,6 +321,7 @@ generate_reply ({ok, Request, SessionToken}) ->
 	{
 		[
 			{?MESSAGE_FIELD, ?SET_SESSION_ID},
+			{?USER_VERSION_FIELD, Version},
 			{?USER_ID_FIELD, get_request_username(Request)},
 			{?SESSION_TOKEN_FIELD, SessionToken}
 		]

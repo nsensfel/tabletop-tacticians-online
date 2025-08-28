@@ -19,6 +19,7 @@
 -define(SESSION_TOKEN_FIELD, <<"sto">>).
 -define(TARGETS_FIELD, <<"tar">>).
 -define(USER_ID_FIELD, <<"uid">>).
+-define(USER_VERSION_FIELD, <<"uvr">>).
 
 %%%% ACTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -define(FLIP_ACTION_ID, <<"fli">>).

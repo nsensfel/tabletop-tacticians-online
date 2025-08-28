@@ -33,7 +33,7 @@
 -export
 (
 	[
-		new/3
+		new/5
 	]
 ).
 
