@@ -9,10 +9,10 @@ import Url
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Struct.Page.CreateGame
+import Struct.Page.CreateRoom
 import Struct.Page.EditProfile
-import Struct.Page.Game
-import Struct.Page.GameList
+import Struct.Page.Room
+import Struct.Page.RoomList
 import Struct.Page.Login
 import Struct.Page.Register
 
@@ -22,9 +22,9 @@ import Struct.Page.Register
 type Type =
    Home
    | EditProfile Struct.Page.EditProfile.Type
-   | Game Struct.Page.Game.Type
-   | GameList Struct.Page.GameList.Type
-   | CreateGame Struct.Page.CreateGame.Type
+   | Room Struct.Page.Room.Type
+   | RoomList Struct.Page.RoomList.Type
+   | CreateRoom Struct.Page.CreateRoom.Type
    | Login Struct.Page.Login.Type
    | Register Struct.Page.Register.Type
    | Unknown String
@@ -43,7 +43,7 @@ new name =
       "login" -> (Login (Struct.Page.Login.new))
       "register" -> (Register (Struct.Page.Register.new))
       "edit_profile" -> (EditProfile (Struct.Page.EditProfile.new))
-      "game_list" -> (GameList (Struct.Page.GameList.new))
-      "create_game" -> (CreateGame (Struct.Page.CreateGame.new))
-      "game" -> (Game (Struct.Page.Game.new))
+      "room_list" -> (RoomList (Struct.Page.RoomList.new))
+      "create_room" -> (CreateRoom (Struct.Page.CreateRoom.new))
+      "room" -> (Room (Struct.Page.Room.new))
       other -> (Unknown other)

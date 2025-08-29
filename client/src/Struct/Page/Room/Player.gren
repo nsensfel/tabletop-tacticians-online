@@ -1,4 +1,4 @@
-module Struct.Page.Game.Player exposing
+module Struct.Page.Room.Player exposing
    (
       Type,
       new,

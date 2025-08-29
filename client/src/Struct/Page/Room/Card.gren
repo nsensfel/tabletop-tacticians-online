@@ -1,4 +1,4 @@
-module Struct.Page.Game.Card exposing
+module Struct.Page.Room.Card exposing
    (
       Type,
       new,
@@ -32,7 +32,7 @@ import Set
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Struct.Page.Game.Attitude
+import Struct.Page.Room.Attitude
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -47,7 +47,7 @@ type alias Type =
       height : Int,
       displayed_image : String,
       other_side_image : String,
-      attitude : Struct.Page.Game.Attitude.Type,
+      attitude : Struct.Page.Room.Attitude.Type,
       tags : (Set.Set String)
    }
 
@@ -69,7 +69,7 @@ new =
       height = 0,
       displayed_image = "",
       other_side_image = "",
-      attitude = (Struct.Page.Game.Attitude.new),
+      attitude = (Struct.Page.Room.Attitude.new),
       tags = (Set.empty)
    }
 
@@ -109,10 +109,10 @@ get_other_side_image card =
 set_other_side_image : String -> Type -> Type
 set_other_side_image url card = {card | other_side_image = url}
 
-get_attitude : Type -> Struct.Page.Game.Attitude.Type
+get_attitude : Type -> Struct.Page.Room.Attitude.Type
 get_attitude card = card.attitude
 
-set_attitude : Struct.Page.Game.Attitude.Type -> Type -> Type
+set_attitude : Struct.Page.Room.Attitude.Type -> Type -> Type
 set_attitude attitude card = {card | attitude = attitude}
 
 get_height : Type -> Int

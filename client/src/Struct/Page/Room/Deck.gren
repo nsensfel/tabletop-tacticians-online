@@ -1,4 +1,4 @@
-module Struct.Page.Game.Deck exposing
+module Struct.Page.Room.Deck exposing
    (
       Type,
       new,
@@ -32,7 +32,7 @@ import Set
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Struct.Page.Game.Attitude
+import Struct.Page.Room.Attitude
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -47,7 +47,7 @@ type alias Type =
       image : String,
       name : String,
       content_count : Int,
-      attitude : Struct.Page.Game.Attitude.Type,
+      attitude : Struct.Page.Room.Attitude.Type,
       tags : (Set.Set String)
    }
 
@@ -69,7 +69,7 @@ new =
       image = "",
       name = "",
       content_count = 0,
-      attitude = (Struct.Page.Game.Attitude.new),
+      attitude = (Struct.Page.Room.Attitude.new),
       tags = (Set.empty)
    }
 
@@ -103,10 +103,10 @@ get_image deck = deck.image
 set_image : String -> Type -> Type
 set_image url deck = {deck | image = url}
 
-get_attitude : Type -> Struct.Page.Game.Attitude.Type
+get_attitude : Type -> Struct.Page.Room.Attitude.Type
 get_attitude deck = deck.attitude
 
-set_attitude : Struct.Page.Game.Attitude.Type -> Type -> Type
+set_attitude : Struct.Page.Room.Attitude.Type -> Type -> Type
 set_attitude attitude deck = {deck | attitude = attitude}
 
 get_height : Type -> Int

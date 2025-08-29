@@ -1,4 +1,4 @@
-module Struct.Page.CreateGame.Game exposing
+module Struct.Page.CreateRoom.Room exposing
    (
       Type,
       new,
@@ -53,31 +53,31 @@ new =
    }
 
 get_name : Type -> String
-get_name game = game.name
+get_name room = room.name
 
 set_name : String -> Type -> Type
-set_name name game = {game | name = name}
+set_name name room = {room | name = name}
 
 get_id : Type -> String
-get_id game = game.id
+get_id room = room.id
 
 set_id : String -> Type -> Type
-set_id id game = {game | id = id}
+set_id id room = {room | id = id}
 
 get_image : Type -> String
-get_image game = game.image
+get_image room = room.image
 
 set_image : String -> Type -> Type
-set_image image game = {game | image = image}
+set_image image room = {room | image = image}
 
 get_description : Type -> String
-get_description game = game.description
+get_description room = room.description
 
 set_description : String -> Type -> Type
-set_description description game = {game | description = description}
+set_description description room = {room | description = description}
 
 get_url : Type -> String
-get_url game = game.url
+get_url room = room.url
 
 set_url : String -> Type -> Type
-set_url url game = {game | url = url}
+set_url url room = {room | url = url}

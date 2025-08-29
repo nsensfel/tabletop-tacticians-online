@@ -25,8 +25,8 @@ type Destination =
    LoginHandler
    | RegisterHandler
    | EditProfileHandler
-   | GameListHandler
-   | GameHandler
+   | RoomListHandler
+   | RoomHandler
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
@@ -41,8 +41,8 @@ destination_to_url destination =
             LoginHandler -> "/login/"
             RegisterHandler -> "/register/"
             EditProfileHandler -> "/edit_profile/"
-            GameListHandler -> "/game_list/"
-            GameHandler -> "/game/"
+            RoomListHandler -> "/room_list/"
+            RoomHandler -> "/room/"
       )
    )
 

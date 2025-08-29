@@ -1,16 +1,16 @@
-module Struct.Page.Game.Chat exposing
+module Struct.Page.Room.Attitude exposing
    (
       Type,
-      Message,
       new,
-      toggle_is_opened,
-      get_messages,
-      set_messages,
-      new_message,
-      get_author_username,
-      set_author_username,
-      get_content,
-      set_content
+      get_x,
+      set_x,
+      get_y,
+      set_y,
+      get_z,
+      set_z,
+      get_rotation,
+      set_rotation,
+      merge
    )
 
 --------------------------------------------------------------------------------
@@ -25,21 +25,24 @@ module Struct.Page.Game.Chat exposing
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
-type alias Message =
-   {
-      author_username : String,
-      content : String
-   }
-
 type alias Type =
    {
-      is_opened : Bool,
-      messages : (Array Message)
+      x : Int,
+      y : Int,
+      z : Int,
+      rotation : Int
    }
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
+sanitize_rotation : Int -> Int
+sanitize_rotation i =
+   if (i < -360)
+   then (sanitize_rotation (i + 360))
+   else if (i > 360)
+   then (sanitize_rotation (i - 360))
+   else i
 
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
@@ -47,35 +50,42 @@ type alias Type =
 new : Type
 new =
    {
-      is_opened = False,
-      messages = []
+      x = 0,
+      y = 0,
+      z = 0,
+      rotation = 0
    }
 
-toggle_is_opened : Type -> Type
-toggle_is_opened chat = {chat | is_opened = (not chat.is_opened) }
+get_x : Type -> Int
+get_x attitude = attitude.x
 
-get_messages : Type -> (Array Message)
-get_messages chat = chat.messages
+set_x : Int -> Type -> Type
+set_x x attitude = {attitude | x = x}
 
-set_messages : (Array Message) -> Type -> Type
-set_messages messages chat = {chat | messages = messages}
+get_y : Type -> Int
+get_y attitude = attitude.y
 
-new_message : String -> String -> Message
-new_message author_username content =
+set_y : Int -> Type -> Type
+set_y y attitude = {attitude | y = y}
+
+get_z : Type -> Int
+get_z attitude = attitude.x
+
+set_z : Int -> Type -> Type
+set_z z attitude = {attitude | z = z}
+
+get_rotation : Type -> Int
+get_rotation attitude = attitude.rotation
+
+set_rotation : Int -> Type -> Type
+set_rotation rotation attitude =
+   {attitude | rotation = (sanitize_rotation rotation)}
+
+merge : Type -> Type -> Type
+merge a b =
    {
-      author_username = author_username,
-      content = content
+      x = (a.x + b.x),
+      y = (a.y + b.y),
+      z = (a.z + b.z),
+      rotation = (sanitize_rotation (a.rotation + b.rotation))
    }
-
-get_author_username : Message -> String
-get_author_username message = message.author_username
-
-set_author_username : String -> Message -> Message
-set_author_username author_username message =
-   {message | author_username = author_username}
-
-get_content : Message -> String
-get_content message = message.content
-
-set_content : String -> Message -> Message
-set_content content message = {message | content = content}

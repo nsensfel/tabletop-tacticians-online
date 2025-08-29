@@ -1,14 +1,14 @@
-module Struct.Page.CreateGame exposing
+module Struct.Page.CreateRoom exposing
    (
       Type,
       Event(..),
       new,
       get_name,
       set_name,
-      get_selected_game,
-      set_selected_game,
-      get_available_games,
-      set_available_games,
+      get_selected_room,
+      set_selected_room,
+      get_available_rooms,
+      set_available_rooms,
       event_to_string
    )
 
@@ -21,7 +21,7 @@ import Dict
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Struct.Page.CreateGame.Game
+import Struct.Page.CreateRoom.Room
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -29,14 +29,14 @@ import Struct.Page.CreateGame.Game
 type alias Type =
    {
       name : String,
-      selected_game : String,
-      available_games : (Dict.Dict String Struct.Page.CreateGame.Game.Type)
+      selected_room : String,
+      available_rooms : (Dict.Dict String Struct.Page.CreateRoom.Room.Type)
    }
 
 type Event =
    FormSubmitted
    | SetNameTo String
-   | SetSelectedGameTo String
+   | SetSelectedRoomTo String
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
@@ -50,41 +50,41 @@ event_to_string event =
    when event is
       FormSubmitted -> "FormSubmitted"
       (SetNameTo _) -> "SetNameTo"
-      (SetSelectedGameTo _) -> "SetSelectedGameTo"
+      (SetSelectedRoomTo _) -> "SetSelectedRoomTo"
 
 new : Type
 new =
    {
       name = "",
-      selected_game = "",
-      available_games = (Dict.empty)
+      selected_room = "",
+      available_rooms = (Dict.empty)
    }
 
 get_name : Type -> String
-get_name create_game = create_game.name
+get_name create_room = create_room.name
 
 set_name : String -> Type -> Type
-set_name name create_game = {create_game | name = name}
+set_name name create_room = {create_room | name = name}
 
-get_selected_game : Type -> String
-get_selected_game create_game = create_game.selected_game
+get_selected_room : Type -> String
+get_selected_room create_room = create_room.selected_room
 
-set_selected_game : String -> Type -> Type
-set_selected_game selected_game create_game =
-   {create_game | selected_game = selected_game}
+set_selected_room : String -> Type -> Type
+set_selected_room selected_room create_room =
+   {create_room | selected_room = selected_room}
 
-get_available_games :
+get_available_rooms :
    (
       Type ->
-      (Dict.Dict String Struct.Page.CreateGame.Game.Type)
+      (Dict.Dict String Struct.Page.CreateRoom.Room.Type)
    )
-get_available_games create_game = create_game.available_games
+get_available_rooms create_room = create_room.available_rooms
 
-set_available_games :
+set_available_rooms :
    (
-      (Dict.Dict String Struct.Page.CreateGame.Game.Type) ->
+      (Dict.Dict String Struct.Page.CreateRoom.Room.Type) ->
       Type ->
       Type
    )
-set_available_games available_games create_game =
-   {create_game | available_games = available_games}
+set_available_rooms available_rooms create_room =
+   {create_room | available_rooms = available_rooms}

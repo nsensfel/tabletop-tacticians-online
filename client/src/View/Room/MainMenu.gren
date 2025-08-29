@@ -1,14 +1,11 @@
-module View.Page.GameList exposing (view)
+module View.Room.MainMenu exposing (get_html)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
-import Browser
-
 import Html
 import Html.Attributes
-import Html.Events
 
 import String
 
@@ -18,9 +15,7 @@ import String
 import Struct.Model
 import Struct.Event
 
-import Struct.Page.GameList
-
-import View.ErrorTracker
+import Struct.Page.Room
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -29,21 +24,16 @@ import View.ErrorTracker
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-view :
-   (
-      Struct.Model.Type ->
-      Struct.Page.GameList.Type ->
-      (Browser.Document Struct.Event.Type)
-   )
-view model login =
-   {
-      title = "Game List",
-      body =
+get_html : Struct.Page.Room.Type -> (Html.Html Struct.Event.Type)
+get_html room =
+   (Html.header
       [
-         (Html.text "Not implemented."),
-         (View.ErrorTracker.get_html model)
+         (Html.Attributes.class "room-main-menu")
       ]
-   }
+      [
+      ]
+   )

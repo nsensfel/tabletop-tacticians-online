@@ -1,4 +1,4 @@
-module Update.GameListPage exposing (update)
+module Update.RoomListPage exposing (update)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
@@ -13,9 +13,9 @@ import Struct.Event
 import Struct.Model
 
 import Struct.Page
-import Struct.Page.GameList
+import Struct.Page.RoomList
 
-import Update.GameListPage.EnterGame
+import Update.RoomListPage.EnterRoom
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -30,16 +30,16 @@ import Update.GameListPage.EnterGame
 --------------------------------------------------------------------------------
 update :
    (
-      Struct.Page.GameList.Event ->
+      Struct.Page.RoomList.Event ->
       Struct.Model.Type ->
       { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
    )
-update game_list_page_event model =
+update room_list_page_event model =
    when (Struct.Model.get_page model) is
-      (Struct.Page.GameList game_list) ->
-         when game_list_page_event is
-            (Struct.Page.GameList.EnterGame val) ->
-               (Update.GameListPage.EnterGame.update val game_list model)
+      (Struct.Page.RoomList room_list) ->
+         when room_list_page_event is
+            (Struct.Page.RoomList.EnterRoom val) ->
+               (Update.RoomListPage.EnterRoom.update val room_list model)
 
             _ ->
                {
@@ -47,10 +47,10 @@ update game_list_page_event model =
                      (Struct.Model.push_error
                         Struct.Error.Programming
                         (
-                           "Cannot handle unimplemented GameList Page Event \""
+                           "Cannot handle unimplemented RoomList Page Event \""
                            ++
-                           (Struct.Page.GameList.event_to_string
-                              game_list_page_event
+                           (Struct.Page.RoomList.event_to_string
+                              room_list_page_event
                            )
                            ++ "\" ."
                         )
@@ -64,9 +64,9 @@ update game_list_page_event model =
                (Struct.Model.push_error
                   Struct.Error.Programming
                   (
-                     "Cannot handle GameList Page Event \""
-                     ++ (Struct.Page.GameList.event_to_string game_list_page_event)
-                     ++ "\" outside of GameList Page."
+                     "Cannot handle RoomList Page Event \""
+                     ++ (Struct.Page.RoomList.event_to_string room_list_page_event)
+                     ++ "\" outside of RoomList Page."
                   )
                   model
                ),

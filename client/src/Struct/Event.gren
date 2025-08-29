@@ -15,8 +15,8 @@ import Struct.Error
 import Struct.KeyValue
 
 import Struct.Page.EditProfile
-import Struct.Page.Game
-import Struct.Page.GameList
+import Struct.Page.Room
+import Struct.Page.RoomList
 import Struct.Page.Login
 import Struct.Page.Register
 
@@ -29,8 +29,8 @@ type Type =
    | LoginPage Struct.Page.Login.Event
    | RegisterPage Struct.Page.Register.Event
    | EditProfilePage Struct.Page.EditProfile.Event
-   | GameListPage Struct.Page.GameList.Event
-   | GamePage Struct.Page.Game.Event
+   | RoomListPage Struct.Page.RoomList.Event
+   | RoomPage Struct.Page.Room.Event
    | SetLocalValue Struct.KeyValue.Type
    | EraseLocalValue String
    | SetUrlParam Struct.KeyValue.Type
@@ -72,17 +72,17 @@ to_string event =
             ++ ")"
          )
 
-      (GameListPage game_list_event) ->
+      (RoomListPage room_list_event) ->
          (
-            "(GameList Event: "
-            ++ (Struct.Page.GameList.event_to_string game_list_event)
+            "(RoomList Event: "
+            ++ (Struct.Page.RoomList.event_to_string room_list_event)
             ++ ")"
          )
 
-      (GamePage game_event) ->
+      (RoomPage room_event) ->
          (
-            "(Game Event: "
-            ++ (Struct.Page.Game.event_to_string game_event)
+            "(Room Event: "
+            ++ (Struct.Page.Room.event_to_string room_event)
             ++ ")"
          )
 

@@ -1,12 +1,16 @@
-module Struct.Page.GameList exposing
+module Struct.Page.Room.Chat exposing
    (
       Type,
-      Entry,
-      Event(..),
+      Message,
       new,
-      get_list,
-      set_list,
-      event_to_string
+      toggle_is_opened,
+      get_messages,
+      set_messages,
+      new_message,
+      get_author_username,
+      set_author_username,
+      get_content,
+      set_content
    )
 
 --------------------------------------------------------------------------------
@@ -21,19 +25,17 @@ module Struct.Page.GameList exposing
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
-type alias Entry =
+type alias Message =
    {
-      id : String
+      author_username : String,
+      content : String
    }
 
 type alias Type =
    {
-      list : (Array Entry)
+      is_opened : Bool,
+      messages : (Array Message)
    }
-
-type Event =
-   EnterGame String
-   | LeaveGame String
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
@@ -42,17 +44,38 @@ type Event =
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-event_to_string : Event -> String
-event_to_string event =
-   when event is
-      (EnterGame _) -> "EnterGame"
-      (LeaveGame _) -> "LeaveGame"
-
 new : Type
-new = { list = [] }
+new =
+   {
+      is_opened = False,
+      messages = []
+   }
 
-get_list : Type -> (Array Entry)
-get_list game_list = game_list.list
+toggle_is_opened : Type -> Type
+toggle_is_opened chat = {chat | is_opened = (not chat.is_opened) }
 
-set_list : (Array Entry) -> Type -> Type
-set_list list game_list = {game_list | list = list}
+get_messages : Type -> (Array Message)
+get_messages chat = chat.messages
+
+set_messages : (Array Message) -> Type -> Type
+set_messages messages chat = {chat | messages = messages}
+
+new_message : String -> String -> Message
+new_message author_username content =
+   {
+      author_username = author_username,
+      content = content
+   }
+
+get_author_username : Message -> String
+get_author_username message = message.author_username
+
+set_author_username : String -> Message -> Message
+set_author_username author_username message =
+   {message | author_username = author_username}
+
+get_content : Message -> String
+get_content message = message.content
+
+set_content : String -> Message -> Message
+set_content content message = {message | content = content}

@@ -1,4 +1,4 @@
-module Struct.Page.Game exposing
+module Struct.Page.Room exposing
    (
       Type,
       Event(..),
@@ -21,12 +21,12 @@ import Dict
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Struct.Page.Game.Card
-import Struct.Page.Game.Deck
-import Struct.Page.Game.Player
-import Struct.Page.Game.Chat
-import Struct.Page.Game.Selection
-import Struct.Page.Game.DeckBrowser
+import Struct.Page.Room.Card
+import Struct.Page.Room.Deck
+import Struct.Page.Room.Player
+import Struct.Page.Room.Chat
+import Struct.Page.Room.Selection
+import Struct.Page.Room.DeckBrowser
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -35,12 +35,12 @@ type alias Type =
    {
       id : String,
       name : String,
-      players : (Dict.Dict String Struct.Page.Game.Player.Type),
-      decks : (Dict.Dict String Struct.Page.Game.Deck.Type),
-      cards : (Dict.Dict String Struct.Page.Game.Card.Type),
-      chat : Struct.Page.Game.Chat.Type,
-      selection : Struct.Page.Game.Selection.Type,
-      deck_browser : Struct.Page.Game.DeckBrowser.Type
+      players : (Dict.Dict String Struct.Page.Room.Player.Type),
+      decks : (Dict.Dict String Struct.Page.Room.Deck.Type),
+      cards : (Dict.Dict String Struct.Page.Room.Card.Type),
+      chat : Struct.Page.Room.Chat.Type,
+      selection : Struct.Page.Room.Selection.Type,
+      deck_browser : Struct.Page.Room.DeckBrowser.Type
    }
 
 -- Events here are how the user interact with the client. Not the puppeteer's
@@ -98,49 +98,49 @@ new =
       players = (Dict.empty),
       decks = (Dict.empty),
       cards = (Dict.empty),
-      chat = (Struct.Page.Game.Chat.new),
-      selection = (Struct.Page.Game.Selection.new),
-      deck_browser = (Struct.Page.Game.DeckBrowser.new)
+      chat = (Struct.Page.Room.Chat.new),
+      selection = (Struct.Page.Room.Selection.new),
+      deck_browser = (Struct.Page.Room.DeckBrowser.new)
    }
 
-get_decks : Type -> (Dict.Dict String Struct.Page.Game.Deck.Type)
-get_decks game = game.decks
+get_decks : Type -> (Dict.Dict String Struct.Page.Room.Deck.Type)
+get_decks room = room.decks
 
-set_decks : (Dict.Dict String Struct.Page.Game.Deck.Type) -> Type -> Type
-set_decks decks game = {game | decks = decks}
+set_decks : (Dict.Dict String Struct.Page.Room.Deck.Type) -> Type -> Type
+set_decks decks room = {room | decks = decks}
 
-get_players : Type -> (Dict.Dict String Struct.Page.Game.Player.Type)
-get_players game = game.players
+get_players : Type -> (Dict.Dict String Struct.Page.Room.Player.Type)
+get_players room = room.players
 
-set_players : (Dict.Dict String Struct.Page.Game.Player.Type) -> Type -> Type
-set_players players game = {game | players = players}
+set_players : (Dict.Dict String Struct.Page.Room.Player.Type) -> Type -> Type
+set_players players room = {room | players = players}
 
-get_cards : Type -> (Dict.Dict String Struct.Page.Game.Card.Type)
-get_cards game = game.cards
+get_cards : Type -> (Dict.Dict String Struct.Page.Room.Card.Type)
+get_cards room = room.cards
 
-set_cards : (Dict.Dict String Struct.Page.Game.Card.Type) -> Type -> Type
-set_cards cards game = {game | cards = cards}
+set_cards : (Dict.Dict String Struct.Page.Room.Card.Type) -> Type -> Type
+set_cards cards room = {room | cards = cards}
 
 get_name : Type -> String
-get_name game = game.name
+get_name room = room.name
 
-get_chat : Type -> Struct.Page.Game.Chat.Type
-get_chat game = game.chat
+get_chat : Type -> Struct.Page.Room.Chat.Type
+get_chat room = room.chat
 
-get_selection : Type -> Struct.Page.Game.Selection.Type
-get_selection game = game.selection
+get_selection : Type -> Struct.Page.Room.Selection.Type
+get_selection room = room.selection
 
-get_deck_browser : Type -> Struct.Page.Game.DeckBrowser.Type
-get_deck_browser game = game.deck_browser
+get_deck_browser : Type -> Struct.Page.Room.DeckBrowser.Type
+get_deck_browser room = room.deck_browser
 
 set_name : String -> Type -> Type
-set_name name game = {game | name = name}
+set_name name room = {room | name = name}
 
-set_chat : Struct.Page.Game.Chat.Type -> Type -> Type
-set_chat chat game = {game | chat = chat}
+set_chat : Struct.Page.Room.Chat.Type -> Type -> Type
+set_chat chat room = {room | chat = chat}
 
-set_selection : Struct.Page.Game.Selection.Type -> Type -> Type
-set_selection selection game = {game | selection = selection}
+set_selection : Struct.Page.Room.Selection.Type -> Type -> Type
+set_selection selection room = {room | selection = selection}
 
-set_deck_browser : Struct.Page.Game.DeckBrowser.Type -> Type -> Type
-set_deck_browser deck_browser game = {game | deck_browser = deck_browser}
+set_deck_browser : Struct.Page.Room.DeckBrowser.Type -> Type -> Type
+set_deck_browser deck_browser room = {room | deck_browser = deck_browser}
