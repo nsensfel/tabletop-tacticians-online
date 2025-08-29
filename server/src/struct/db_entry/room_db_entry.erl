@@ -10,10 +10,11 @@
 	user,
 	{
 		color :: binary(),
-		id :: user_db_entry:id(),
-		name :: binary(),
+		username :: user_db_entry:id(),
+		displayed_name :: binary(),
+		avatar :: binary(),
 		current_history_ix :: non_neg_integer(),
-		is_active :: boolean()
+		is_pinged :: boolean()
 	}
 ).
 
@@ -23,12 +24,13 @@
 (
 	room,
 	{
-		allowed_users :: ordsets:ordset(user_db_entry:id()),
-		objects :: orddict:orddict(non_neg_integer(), room_object:type()),
-		history :: list(room_action:type()), % It would be better for the list to be recent to old
+		decks :: #{ ataxia_id:type() => room_object:type() },
+		cards :: #{ ataxia_id:type() => room_object:type() },
+		dice :: #{ ataxia_id:type() => room_object:type() },
+		% It would be better for the list to be recent to old
+		history :: list(room_action:type()),
 		history_last_ix :: non_neg_integer(),
-		user_id_to_user_ix :: orddict:orddict(user_db_entry:id(), non_neg_integer()),
-		user_data :: orddict:orddict(non_neg_integer(), user_data())
+		user_data :: #{ataxia_id:type() => user_data()}
 	}
 ).
 

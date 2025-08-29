@@ -16,8 +16,7 @@
 		displayed_name :: binary(),
 		avatar :: binary(),
 		email :: binary(),
-		ataxia_client :: ataxia_client:type(),
-		lock_janitor :: ataxia_lock_client:janitor()
+		ataxia_client :: ataxia_client:type()
 	}
 ).
 
@@ -43,8 +42,7 @@ decode_request (Query) ->
 			displayed_name = maps:get(?DISPLAYED_NAME_FIELD, Map),
 			avatar = maps:get(?AVATAR_FIELD, Map),
 			email = maps:get(?EMAIL_FIELD, Map),
-			ataxia_client = ataxia_client:new(),
-			lock_janitor = ataxia_lock_client:new_janitor()
+			ataxia_client = ataxia_client:new()
 		}
 	}.
 
@@ -71,8 +69,9 @@ get_request_avatar (#request{ avatar = Result }) -> Result.
 -spec get_request_displayed_name (request()) -> binary().
 get_request_displayed_name (#request{ displayed_name = Result }) -> Result.
 
--spec get_request_lock_janitor (request()) -> ataxia_lock_client:janitor().
-get_request_lock_janitor (#request{ lock_janitor = Result }) -> Result.
+-spec set_request_displayed_name (binary(), request()) -> binary().
+set_request_displayed_name (Name, Request) ->
+	Request#request{ displayed_name = Name}.
 
 %%%% SECURITY CHECK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -spec validate
@@ -81,7 +80,7 @@ get_request_lock_janitor (#request{ lock_janitor = Result }) -> Result.
 		({'ok', request()} | {'error', binary()})
 	)
 	->
-	({'ok', request()} | {'error', binary()})).
+	({'ok', request()} | {'error', binary()}).
 validate (username, {ok, Request}) ->
 	Username = get_request_username(Request),
 	Length = string:length(Username),
@@ -108,7 +107,7 @@ validate (username, {ok, Request}) ->
 			)
 		}
 	of
-		{true, true, true} -> {ok, Request}
+		{true, true, true} -> {ok, Request};
 		{false, _, _} -> {error, <<"Username missing.">>};
 		{_, false, _} -> {error, <<"Username is too long (32 char max).">>};
 		{_, _, false} ->
@@ -143,7 +142,7 @@ validate (email, {ok, Request}) ->
 	case { Length > 0, Length < 129, AtCharCount == 1} of
 		{true, true, true} -> {ok, Request};
 		{false, _, _} -> {error, <<"Email missing.">>};
-		{_, false, _} -> {error, <<"Email too long (128 char max).">>}
+		{_, false, _} -> {error, <<"Email too long (128 char max).">>};
 		{_, _, false} -> {error, <<"Email syntax invalid.">>}
 	end;
 validate (displayed_name, {ok, Request}) ->
@@ -166,7 +165,7 @@ validate (avatar, {ok, Request}) ->
 	end;
 validate (_, Error) -> Error.
 
--spec validate_request (request()) -> {'ok', request()} | {'error', binary()}).
+-spec validate_request (request()) -> ({'ok', request()} | {'error', binary()}).
 validate_request (Request) ->
 	S0Status = validate(username, {ok, Request}),
 	S1Status = validate(password, S0Status),
@@ -229,7 +228,6 @@ create_new_user (Request) ->
 			user_db,
 			Username,
 			{temp, write},
-			AtaxicUpdate,
 			S1User
 		),
 
@@ -273,8 +271,7 @@ handle (Query) ->
 	ValidateRequestResult = validate_request(Request),
 	FetchResult = fetch_data(ValidateRequestResult),
 	CreateNewUserResult = create_new_user(FetchResult),
-	release_resources(UpdateResult),
-	generate_reply(UpdateResult).
+	generate_reply(CreateNewUserResult).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% EXPORTED FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
