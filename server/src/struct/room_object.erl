@@ -3,19 +3,14 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% TYPES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--type permissions() ::
-	'none'
-	| 'all'
-	| ordsets:ordset(non_neg_integer())
-.
-
 -record
 (
-	image,
+	card,
 	{
 		front_url :: binary(),
 		back_url :: binary(),
-		is_on_front :: boolean()
+		is_flipped :: boolean(),
+		is_displayed :: boolean()
 	}
 ).
 
@@ -30,61 +25,15 @@
 
 -record
 (
-	finite_bag,
+	deck,
 	{
 		url :: binary(),
+		shows_card :: boolean(),
 		contains :: list(non_neg_integer())
 	}
 ).
 
--record
-(
-	open_bag,
-	{
-		url :: binary(),
-		contains :: ordsets:ordset(non_neg_integer())
-	}
-).
-
--record
-(
-	magic_bag,
-	{
-		url :: binary(),
-		spawns :: non_neg_integer()
-	}
-).
-
--record
-(
-	hidden_area_tab,
-	{
-		contains :: ordsets:ordset(non_neg_integer()),
-		name :: binary()
-	}
-).
-
--record
-(
-	hidden_area,
-	{
-		color :: binary(),
-		name :: binary(),
-		contains :: list(non_neg_integer()),
-		active_tab :: non_neg_integer(),
-		can_see_inside_ix :: ordsets:ordset(non_neg_integer())
-	}
-).
-
--type properties() ::
-	#image{}
-	| #dice{}
-	| #finite_bag{}
-	| #open_bag{}
-	| #magic_bag{}
-	| #hidden_area_tab{}
-	| #hidden_area{}
-.
+-type properties() :: #card{} | #dice{} | #deck{} .
 
 -record
 (
@@ -93,7 +42,7 @@
 		x :: non_neg_integer(),
 		y :: non_neg_integer(),
 		z :: non_neg_integer(),
-		angle :: integer(),
+		angle :: integer()
 	}
 ).
 
@@ -103,8 +52,9 @@
 (
 	object,
 	{
-		visible_to_ix :: permissions(),
-		can_interact_ix :: permissions(),
+		id :: ataxia_id:type(),
+		is_locked :: boolean(),
+		tags :: ordset:ordset(binary()),
 		width :: non_neg_integer(),
 		height :: non_neg_integer(),
 		attitude :: attitude(),
@@ -122,75 +72,49 @@
 -export
 (
 	[
-		new/6,
+		new/5,
 
-		get_visible_to_ix/1,
-		get_can_interact_ix/1,
+		get_id/1,
 		get_width/1,
 		get_height/1,
-		get_x/1,
-		get_y/1,
-		get_z/1,
-		get_angle/1,
+		get_attitude/1,
 		get_properties/1,
+		get_is_locked/1,
+		get_tags/1,
 
-		set_visible_to_ix/2,
-		set_can_interact_ix/2,
-		add_visible_to_ix/2,
-		add_can_interact_ix/2,
-		remove_visible_to_ix/2,
-		remove_can_interact_ix/2,
+		set_id/2,
 		set_width/2,
 		set_height/2,
-		set_x/2,
-		set_y/2,
-		set_z/2,
-		set_angle/2,
+		set_attitude/2,
 		set_properties/2,
+		set_is_locked/2,
+		set_tags/2,
 
-		ataxia_set_visible_to_ix/2,
-		ataxia_set_can_interact_ix/2,
-		ataxia_add_visible_to_ix/2,
-		ataxia_add_can_interact_ix/2,
-		ataxia_remove_visible_to_ix/2,
-		ataxia_remove_can_interact_ix/2,
 		ataxia_set_width/2,
 		ataxia_set_height/2,
-		ataxia_set_x/2,
-		ataxia_set_y/2,
-		ataxia_set_z/2,
-		ataxia_set_angle/2,
+		ataxia_update_attitude/3,
 		ataxia_update_properties/3,
+		ataxia_update_tags/3,
+		ataxia_set_is_locked/2,
 
-		get_visible_to_ix_field/0,
-		get_can_interact_ix_field/0,
+		get_id_field/0,
+		get_tags_field/0,
 		get_width_field/0,
 		get_height_field/0,
-		get_x_field/0,
-		get_y_field/0,
-		get_z_field/0,
-		get_angle_field/0,
-		get_properties_field/0
+		get_attitude_field/0,
+		get_properties_field/0,
+		get_is_locked_field/0
 	]
 ).
-
-% Properties functions
 -export
 (
 	[
-		maybe_ataxia_flip/1
+		attitude_get_x_field/0,
+		attitude_get_y_field/0,
+		attitude_get_z_field/0,
+		attitude_get_angle_field/0
 	]
 ).
-
-% Web export functions
--export
-(
-	[
-		encode_limited_view/2,
-		encode_full_view/1
-	]
-).
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% LOCAL FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -201,108 +125,49 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -spec new
 	(
+		ataxia_id:type(),
 		non_neg_integer(),
 		non_neg_integer(),
-		non_neg_integer(),
-		non_neg_integer(),
-		non_neg_integer(),
+		attitude(),
 		properties()
 	) -> type().
-new (Width, Height, X, Y, Z, Properties) ->
+new (ID, Width, Height, Attitude, Properties) ->
 	#object
 	{
-		visible_to_ix = none,
-		can_interact_ix = none,
+		id = ID,
+		is_locked = false,
+		tags = ordset:empty(),
 		width = Width,
 		height = Height,
-		x = X,
-		y = Y,
-		z = Z,
-		angle = 0,
+		attitude = Attitude,
 		properties = Properties
 	}.
 
 %%%% GET %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec get_visible_to_ix (type()) -> permissions().
-get_visible_to_ix (Object) -> Object#object.visible_to_ix.
-
--spec get_can_interact_ix (type()) -> permissions().
-get_can_interact_ix (Object) -> Object#object.can_interact_ix.
+-spec get_id (type()) -> ataxia_id:type().
+get_id (#object{ id = Result }) -> Result.
 
 -spec get_width (type()) -> non_neg_integer().
-get_width (Object) -> Object#object.width.
+get_width (#object{ width = Result }) -> Result.
 
 -spec get_height (type()) -> non_neg_integer().
-get_height (Object) -> Object#object.height.
+get_height (#object{ height = Result }) -> Result.
 
--spec get_x (type()) -> non_neg_integer().
-get_x (Object) -> Object#object.attitude#attitude.x.
-
--spec get_y (type()) -> non_neg_integer().
-get_y (Object) -> Object#object.attitude#attitude.y.
-
--spec get_z (type()) -> non_neg_integer().
-get_z (Object) -> Object#object.attitude#attitude.z.
-
--spec get_angle (type()) -> integer().
-get_angle (Object) -> Object#object.attitude#attitude.angle.
+-spec get_attitude (type()) -> attitude().
+get_attitude (#object{ attitude = Result }) -> Result.
 
 -spec get_properties (type()) -> properties().
-get_properties (Object) -> Object#object.properties.
+get_properties (#object{ properties = Result }) -> Result.
+
+-spec get_is_locked (type()) -> boolean().
+get_is_locked (#object{ is_locked = Result }) -> Result.
+
+-spec get_tags (type()) -> ordset:ordset(binary()).
+get_tags (#object{ tags = Result }) -> Result.
 
 %%%% SET %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec set_visible_to_ix (permissions(), type()) -> type().
-set_visible_to_ix (Value, Object) -> Object#object{ visible_to_ix = Value }.
-
--spec set_can_interact_ix (permissions(), type()) -> type().
-set_can_interact_ix (Value, Object) -> Object#object{ can_interact_ix = Value }.
-
--spec add_visible_to_ix (non_neg_integer(), type()) -> type().
-add_visible_to_ix (Value, Object) ->
-	case Object#object.visible_to_ix of
-		all -> Object;
-		none ->
-			Object#object
-			{
-				visible_to_ix = ordsets:add_element(Value, ordsets:new())
-			};
-
-		Ordset -> Object#object{ visible_to_ix = ordsets:add_element(Value, Ordset) }
-	end.
-
--spec add_can_interact_ix (non_neg_integer(), type()) -> type().
-add_can_interact_ix (Value, Object) ->
-	case Object#object.can_interact_ix of
-		all -> Object;
-		none ->
-			Object#object
-			{
-				can_interact_ix = ordsets:add_element(Value, ordsets:new())
-			};
-
-		Ordset ->
-			Object#object
-			{
-				can_interact_ix = ordsets:add_element(Value, Ordset)
-			}
-	end.
-
--spec remove_visible_to_ix (non_neg_integer(), type()) -> type().
-remove_visible_to_ix (Value, Object) ->
-	case Object#object.visible_to_ix of
-		all -> Object;
-		none -> Object;
-		Ordset -> Object#object{ visible_to_ix = ordsets:del_element(Value, Ordset) }
-	end.
-
--spec remove_can_interact_ix (non_neg_integer(), type()) -> type().
-remove_can_interact_ix (Value, Object) ->
-	case Object#object.can_interact_ix of
-		all -> Object;
-		none -> Object;
-		Ordset ->
-			Object#object{ can_interact_ix = ordsets:del_element(Value, Ordset) }
-	end.
+-spec set_id (ataxia_id:type(), type()) -> type().
+set_id (Value, Object) -> Object#object{ id = Value }.
 
 -spec set_width (non_neg_integer(), type()) -> type().
 set_width (Value, Object) -> Object#object{ width = Value }.
@@ -310,189 +175,30 @@ set_width (Value, Object) -> Object#object{ width = Value }.
 -spec set_height (non_neg_integer(), type()) -> type().
 set_height (Value, Object) -> Object#object{ height = Value }.
 
--spec set_x (non_neg_integer(), type()) -> type().
-set_x (Value, Object) ->
-	Object#object
-	{
-		attitude = Object#object.attitude#attitude{ x = Value }
-	}.
-
--spec set_y (non_neg_integer(), type()) -> type().
-set_y (Value, Object) ->
-	Object#object
-	{
-		attitude = Object#object.attitude#attitude{ y = Value }
-	}.
-
--spec set_z (non_neg_integer(), type()) -> type().
-set_z (Value, Object) ->
-	Object#object
-	{
-		attitude = Object#object.attitude#attitude{ z = Value }
-	}.
-
--spec set_angle (integer(), type()) -> type().
-set_angle (Value, Object) ->
-	Object#object
-	{
-		attitude = Object#object.attitude#attitude{ angle = Value }
-	}.
+-spec set_attitude (attitude(), type()) -> type().
+set_attitude (Attitude, Object) -> Object#object{ attitude = Attitude }.
 
 -spec set_properties (properties(), type()) -> type().
 set_properties (Value, Object) -> Object#object{ properties = Value }.
 
+-spec set_is_locked (boolean(), type()) -> type().
+set_is_locked (Value, Object) -> Object#object{ is_locked = Value }.
+
+-spec set_tags (ordset:ordset(binary()), type()) -> type().
+set_tags (Value, Object) -> Object#object{ tags = Value }.
+
 %%%% ATAXIA SET %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec ataxia_set_visible_to_ix (permissions(), type()) -> {ataxic:type(), type()}.
-ataxia_set_visible_to_ix (Value, Object) ->
+-spec ataxia_set_is_locked (boolean(), type()) -> {ataxic:type(), type()}.
+ataxia_set_is_locked (Value, S0Object) ->
+	S1Object = set_is_locked(Value, S0Object),
 	{
-		ataxic:update_field(get_visible_to_ix_field(), ataxic:constant(Value)),
-		Object#object{ visible_to_ix = Value }
+		ataxic:update_field
+		(
+			get_is_locked_field(),
+			ataxic:constant(S1Object#object.is_locked)
+		),
+		S1Object
 	}.
-
--spec ataxia_set_can_interact_ix
-	(
-		permissions(),
-		type()
-	) -> {ataxic:type(), type()}.
-ataxia_set_can_interact_ix (Value, Object) ->
-	{
-		ataxic:update_field(get_can_interact_ix_field(), ataxic:constant(Value)),
-		Object#object{ can_interact_ix = Value }
-	}.
-
--spec ataxia_add_visible_to_ix
-	(
-		non_neg_integer(),
-		type()
-	) -> {ataxic:type(), type()}.
-ataxia_add_visible_to_ix (Value, Object) ->
-	case Object#object.visible_to_ix of
-		all -> {ataxic:current_value(), Object};
-		Other ->
-			{AtaxicInitialSet, InitialSet} =
-				case Other of
-					none -> {ataxic:constant(ordsets:new()), ordsets:new()};
-					Ordset -> {ataxic:field(get_visible_to_ix_field()), Ordset}
-				end,
-			{
-				ataxic:update_field
-				(
-					get_visible_to_ix_field(),
-					ataxic:apply_function
-					(
-						ordsets,
-						add_element,
-						[ataxic:constant(Value), AtaxicInitialSet]
-					)
-				),
-				Object#object
-				{
-					visible_to_ix = ordsets:add_element(Value, InitialSet)
-				}
-			}
-	end.
-
--spec ataxia_add_can_interact_ix
-	(
-		non_neg_integer(),
-		type()
-	) -> {ataxic:type(), type()}.
-ataxia_add_can_interact_ix (Value, Object) ->
-	case Object#object.can_interact_ix of
-		all -> {ataxic:current_value(), Object};
-		Other ->
-			{AtaxicInitialSet, InitialSet} =
-				case Other of
-					none -> {ataxic:constant(ordsets:new()), ordsets:new()};
-					Ordset -> {ataxic:field(get_can_interact_ix_field()), Ordset}
-				end,
-			{
-				ataxic:update_field
-				(
-					get_can_interact_ix_field(),
-					ataxic:apply_function
-					(
-						ordsets,
-						add_element,
-						[ataxic:constant(Value), AtaxicInitialSet]
-					)
-				),
-				Object#object
-				{
-					can_interact_ix = ordsets:add_element(Value, InitialSet)
-				}
-			}
-	end.
-
--spec ataxia_remove_visible_to_ix
-	(
-		non_neg_integer(),
-		type()
-	) -> {ataxic:type(), type()}.
-ataxia_remove_visible_to_ix (Value, Object) ->
-	case Object#object.visible_to_ix of
-		all -> {ataxic:current_value(), Object};
-		none -> {ataxic:current_value(), Object};
-		Ordset ->
-			{
-				ataxic:update_field
-				(
-					get_visible_to_ix_field(),
-					ataxic:apply_function
-					(
-						ordsets,
-						del_element,
-						[
-							ataxic:constant(Value),
-							ataxic:field
-							(
-								get_visible_to_ix_field(),
-								ataxic:current_value()
-							)
-						]
-					)
-				),
-				Object#object
-				{
-					visible_to_ix = ordsets:del_element(Value, Ordset)
-				}
-			}
-	end.
-
--spec ataxia_remove_can_interact_ix
-	(
-		non_neg_integer(),
-		type()
-	) -> {ataxic:type(), type()}.
-ataxia_remove_can_interact_ix (Value, Object) ->
-	case Object#object.can_interact_ix of
-		all -> {ataxic:current_value(), Object};
-		none -> {ataxic:current_value(), Object};
-		Ordset ->
-			{
-				ataxic:update_field
-				(
-					get_can_interact_ix_field(),
-					ataxic:apply_function
-					(
-						ordsets,
-						del_element,
-						[
-							ataxic:constant(Value),
-							ataxic:field
-							(
-								get_can_interact_ix_field(),
-								ataxic:current_value()
-							)
-						]
-					)
-				),
-				Object#object
-				{
-					can_interact_ix = ordsets:del_element(Value, Ordset)
-				}
-			}
-	end.
 
 -spec ataxia_set_width (non_neg_integer(), type()) -> {ataxic:type(), type()}.
 ataxia_set_width (Value, S0Object) ->
@@ -518,68 +224,30 @@ ataxia_set_height (Value, S0Object) ->
 		S1Object
 	}.
 
--spec ataxia_set_x (non_neg_integer(), type()) -> {ataxic:type(), type()}.
-ataxia_set_x (Value, S0Object) ->
-	S1Object = set_x(Value, S0Object),
+-spec ataxia_update_attitude
+	(
+		ataxic:type(),
+		attitude(),
+		type()
+	)
+	-> {ataxic:type(), type()}.
+ataxia_update_attitude (AtaxicUpdate, Attitude, Object) ->
 	{
-		ataxic:update_field
-		(
-			get_attitude_field(),
-			ataxic:update_field
-			(
-				get_x_field(),
-				ataxic:constant(Value)
-			)
-		)
-		S1Object
+		ataxic:update_field(get_attitude_field(), AtaxicUpdate),
+		set_attitude(Attitude, Object)
 	}.
 
--spec ataxia_set_y (non_neg_integer(), type()) -> {ataxic:type(), type()}.
-ataxia_set_y (Value, S0Object) ->
-	S1Object = set_y(Value, S0Object),
+-spec ataxia_update_tags
+	(
+		ataxic:type(),
+		ordset:ordset(binary()),
+		type()
+	)
+	-> {ataxic:type(), type()}.
+ataxia_update_tags (AtaxicUpdate, Tags, Object) ->
 	{
-		ataxic:update_field
-		(
-			get_attitude_field(),
-			ataxic:update_field
-			(
-				get_y_field(),
-				ataxic:constant(Value)
-			)
-		),
-		S1Object
-	}.
-
--spec ataxia_set_z (non_neg_integer(), type()) -> {ataxic:type(), type()}.
-ataxia_set_z (Value, S0Object) ->
-	S1Object = set_z(Value, S0Object),
-	{
-		ataxic:update_field
-		(
-			get_attitude_field(),
-			ataxic:update_field
-			(
-				get_z_field(),
-				ataxic:constant(Value)
-			)
-		),
-		S1Object
-	}.
-
--spec ataxia_set_angle (integer(), type()) -> {ataxic:type(), type()}.
-ataxia_set_angle (Value, S0Object) ->
-	S1Object = set_angle(Value, S0Object),
-	{
-		ataxic:update_field
-		(
-			get_attitude_field(),
-			ataxic:update_field
-			(
-				get_angle_field(),
-				ataxic:constant(Value)
-			)
-		),
-		S1Object
+		ataxic:update_field(get_tags_field(), AtaxicUpdate),
+		set_tags(Tags, Object)
 	}.
 
 -spec ataxia_update_properties
@@ -595,63 +263,35 @@ ataxia_update_properties (Update, Value, Object) ->
 	}.
 
 %%%% Field Accessors %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec get_visible_to_ix_field () -> non_neg_integer().
-get_visible_to_ix_field () -> #object.visible_to_ix.
-
--spec get_can_interact_ix_field () -> non_neg_integer().
-get_can_interact_ix_field () -> #object.can_interact_ix.
-
 -spec get_width_field () -> non_neg_integer().
 get_width_field () -> #object.width.
 
 -spec get_height_field () -> non_neg_integer().
 get_height_field () -> #object.height.
 
+-spec get_tags_field () -> non_neg_integer().
+get_tags_field () -> #object.tags.
+
+-spec get_is_locked_field () -> non_neg_integer().
+get_is_locked_field () -> #object.is_locked.
+
+-spec get_id_field () -> non_neg_integer().
+get_id_field () -> #object.id.
+
 -spec get_attitude_field () -> non_neg_integer().
 get_attitude_field () -> #object.attitude.
 
--spec get_x_field () -> non_neg_integer().
-get_x_field () -> #attitude.x.
+-spec attitude_get_x_field () -> non_neg_integer().
+attitude_get_x_field () -> #attitude.x.
 
--spec get_y_field () -> non_neg_integer().
-get_y_field () -> #attitude.y.
+-spec attitude_get_y_field () -> non_neg_integer().
+attitude_get_y_field () -> #attitude.y.
 
--spec get_z_field () -> non_neg_integer().
-get_z_field () -> #attitude.z.
+-spec attitude_get_z_field () -> non_neg_integer().
+attitude_get_z_field () -> #attitude.z.
 
--spec get_angle_field () -> non_neg_integer().
-get_angle_field () -> #attitude.angle.
+-spec attitude_get_angle_field () -> non_neg_integer().
+attitude_get_angle_field () -> #attitude.angle.
 
 -spec get_properties_field () -> non_neg_integer().
 get_properties_field () -> #object.properties.
-
-%%%% Property Modifiers %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec maybe_ataxia_flip (type()) -> ('error' | {ataxic:type(), type()}).
-maybe_ataxia_flip (Object) ->
-	case Object#object.properties of
-		Image = #image{ is_on_front = IsOnFront } ->
-			NewIsOnFront = not(IsOnFront),
-			ataxia_update_properties
-			(
-				ataxic:update_field
-				(
-					#image.is_on_front,
-					ataxic:constant(NewIsOnFront)
-				),
-				Image#image{ is_on_front = NewIsOnFront },
-				Object
-			);
-
-		_ -> error
-	end.
-
-%%%% Encoders %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec encode_limited_view (non_neg_integer(), type()) -> {list(any())}.
-encode_limited_view (_UserIX, _Object) ->
-	% TODO: implement.
-	{[ ]}.
-
--spec encode_full_view (type()) -> {list(any())}.
-encode_full_view (_Object) ->
-	% TODO: implement.
-	{[ ]}.
