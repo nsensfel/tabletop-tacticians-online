@@ -13,6 +13,7 @@
 	{
 		user_id :: ataxia_id:type(),
 		session_token :: binary(),
+		user_version :: non_neg_integer(),
 		lock_janitor :: ataxia_lock_client:janitor(),
 		room_id :: ataxia_id:type(),
 		act :: room_action:act()

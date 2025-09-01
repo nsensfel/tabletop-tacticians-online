@@ -68,7 +68,7 @@ authenticate_user (Request) ->
 		db_query_security:credentials_match(LockJanitor, SessionToken, UserID)
 	of
 		true -> ok;
-		_ -> reply_disconnect:generate_encoded().
+		_ -> reply_disconnect:generate_encoded()
 	end.
 
 -spec fetch_data
@@ -113,11 +113,9 @@ apply_action (Request, S0Data) ->
 	case room_action:ataxia_apply_to(Action, S0Objects) of
 			% TODO: update user history index.
 			% TODO: trim history.
-
+		{ok, S1Data, CurrentUserHistoryIX} ->
 			S1Data =
-				ataxia_client_data:add_update(RoomAtaxicUpdate, S1Room, S0Data),
-
-			{ok, S1Data, CurrentUserHistoryIX};
+				ataxia_client_data:add_update(RoomAtaxicUpdate, S1Room, S0Data);
 
 		error -> error
 	end.

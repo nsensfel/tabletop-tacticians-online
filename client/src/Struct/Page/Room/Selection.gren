@@ -2,11 +2,13 @@ module Struct.Page.Room.Selection exposing
    (
       Type,
       new,
-      add_deck,
-      add_card,
+      toggle_deck,
+      toggle_card,
+      toggle_die,
       clear,
-      get_id_list,
-      get_is_selecting_deck,
+      get_decks,
+      get_cards,
+      get_dice,
       get_is_active
    )
 
@@ -25,8 +27,9 @@ import Set
 --------------------------------------------------------------------------------
 type alias Type =
    {
-      is_selecting_deck : Bool,
-      id_list : (Set.Set String)
+      decks : (Set.Set String),
+      cards : (Set.Set String),
+      dice : (Set.Set String)
    }
 
 --------------------------------------------------------------------------------
@@ -39,35 +42,41 @@ type alias Type =
 new : Type
 new =
    {
-      is_selecting_deck = False,
-      id_list = (Set.empty)
+      decks = (Set.empty),
+      cards = (Set.empty),
+      dice = (Set.empty)
    }
 
-add_deck : String -> Type -> Type
-add_deck deck_id selection =
-   {selection |
-      is_selecting_deck = True,
-      id_list = (Set.singleton deck_id)
-   }
+toggle_deck : String -> Type -> Type
+toggle_deck deck_id selection =
+   {selection | decks = (Set.toggle deck_id selection.decks)}
 
-add_card : String -> Type -> Type
-add_card card_id selection =
-   {selection |
-      is_selecting_deck = False,
-      id_list =
-         if selection.is_selecting_deck
-         then (Set.singleton card_id)
-         else (Set.toggle card_id selection.id_list)
-   }
+toggle_card : String -> Type -> Type
+toggle_card card_id selection =
+   {selection | cards = (Set.toggle card_id selection.cards)}
+
+toggle_die : String -> Type -> Type
+toggle_die die_id selection =
+   {selection | dice = (Set.toggle die_id selection.dice)}
 
 clear : Type -> Type
 clear _selection = (new)
 
-get_id_list : Type -> (Set.Set String)
-get_id_list selection = selection.id_list
+get_decks: Type -> (Set.Set String)
+get_decks selection = selection.decks
 
-get_is_selecting_deck : Type -> Bool
-get_is_selecting_deck selection = selection.is_selecting_deck
+get_cards: Type -> (Set.Set String)
+get_cards selection = selection.cards
+
+get_dice: Type -> (Set.Set String)
+get_dice selection = selection.dice
 
 get_is_active : Type -> Bool
-get_is_active selection = (not (Set.isEmpty selection.id_list))
+get_is_active selection =
+   (not
+      (
+         (Set.isEmpty selection.decks)
+         && (Set.isEmpty selection.cards)
+         &&(Set.isEmpty selection.dice)
+      )
+   )
