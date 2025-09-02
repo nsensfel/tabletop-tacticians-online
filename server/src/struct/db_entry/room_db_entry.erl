@@ -36,6 +36,8 @@
 (
 	room,
 	{
+		name :: binary(),
+		game_id :: ataxia_id:type(),
 		objects :: #{ ataxia_id:type() => room_object:type() },
 		% It would be better for the list to be recent to old
 		history :: list(room_action:type()),
@@ -227,7 +229,7 @@ get_user_data (UserID, Room) -> maps:get(UserID, Room#room.user_data).
 -spec get_objects (type()) -> #{ ataxia_id:type() => room_object:type() }.
 get_objects (Room) -> Room#room.objects.
 
--spec get_history_for (non_neg_integer(), type()) -> list(room_action:type()).
+-spec get_history_for (ataxia_id:type(), type()) -> list(room_action:type()).
 get_history_for (UserID, Room) ->
 	UserData = get_user_data(UserID, Room),
 	CurrentHistoryIX = UserData#user.current_history_ix,

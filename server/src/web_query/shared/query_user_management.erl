@@ -66,11 +66,11 @@ validate_session_token (_SessionToken, Other) -> Other.
 		({ok, ataxia_client_data:type()} | {error, binary()})
 	)
 	-> (ok | {ok, list(any())} | {error, binary()}).
-generate_pending_room_list_update (ClientVersion, {ok, DBEntry}) ->
+generate_pending_room_list_update (UserVersion, {ok, DBEntry}) ->
 	Version = ataxia_client_data:get_version(DBEntry),
 	User = ataxia_client_data:get_value(DBEntry),
-	case ClientVersion == Version of
-		true -> ok;
+	case UserVersion == Version of
+		true -> {ok, []};
 		_ ->
 			{
 				ok,
@@ -111,7 +111,7 @@ generate_pending_room_list_update (ClientVersion, {ok, DBEntry}) ->
 				]
 			}
 	end;
-generate_pending_room_list_update (_ClientVersion, Other) -> Other.
+generate_pending_room_list_update (_UserVersion, Other) -> Other.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% EXPORTED FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -126,12 +126,12 @@ generate_pending_room_list_update (_ClientVersion, Other) -> Other.
 	->
 	{
 		ataxia_client:type(),
-		(ok | {ok, list(any())} | {error, binary()})
+		({ok, list(any())} | {error, binary()})
 	}.
-handle_session (S0AtaxiaClient, ClientVersion, Username, SessionToken) ->
+handle_session (S0AtaxiaClient, UserVersion, Username, SessionToken) ->
 	{S1AtaxiaClient, FetchResult} = fetch_data(S0AtaxiaClient, Username),
 	ValidateResult = validate_session_token(SessionToken, FetchResult),
 	RoomUpdateResult =
-		generate_pending_room_list_update(ClientVersion, ValidateResult),
+		generate_pending_room_list_update(UserVersion, ValidateResult),
 
 	{S1AtaxiaClient, RoomUpdateResult}.

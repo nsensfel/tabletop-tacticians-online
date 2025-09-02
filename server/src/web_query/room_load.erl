@@ -5,7 +5,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% TYPES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--include("yaws_api.hrl").
 
 -record
 (
@@ -13,7 +12,8 @@
 	{
 		user_id :: ataxia_id:type(),
 		session_token :: binary(),
-		lock_janitor :: ataxia_lock_client:janitor(),
+		user_version :: non_neg_integer(),
+		ataxia_client :: ataxia_client:type(),
 		room_id :: ataxia_id:type()
 	}
 ).
@@ -35,8 +35,9 @@ decode_request (Query) ->
 	{
 		user_id = maps:get(?USER_ID_FIELD, Map),
 		session_token = maps:get(?SESSION_TOKEN_FIELD, Map),
+		user_version = maps:get(?USER_VERSION_FIELD, Map),
+		ataxia_client = ataxia_client:new(),
 		room_id = maps:get(?ROOM_ID_FIELD, Map),
-		lock_janitor = ataxia_lock_client:new_janitor()
 	}.
 
 %%%% Request Accessors %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -46,68 +47,162 @@ get_request_user_id (#request{ user_id = Result }) -> Result.
 -spec get_request_session_token (request()) -> binary().
 get_request_session_token (#request{ session_token = Result }) -> Result.
 
--spec get_request_lock_janitor (request()) -> ataxia_lock_client:janitor().
-get_request_lock_janitor (#request{ lock_janitor = Result }) -> Result.
+-spec get_request_user_version (request()) -> non_neg_integer().
+get_request_user_version (#request{ user_version = Result }) -> Result.
 
 -spec get_request_room_id (request()) -> ataxia_id:type().
 get_request_room_id (#request{ room_id = Result }) -> Result.
 
-%%%% SECURITY CHECK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec authenticate_user (room_action_request:type()) -> ('ok' | 'error').
-authenticate_user (Request) ->
-	UserID = get_request_user_id(Request),
-	SessionToken = get_request_session_token(Request),
-	LockJanitor = get_request_lock_janitor(Request),
-	case shr_security:credentials_match(LockJanitor, SessionToken, UserID) of
-		true -> ok;
-		_ -> jiffy:encode([shr_disconnected:generate()])
-	end.
+-spec get_request_ataxia_client (request()) -> ataxia_client:type().
+get_request_ataxia_client (#request{ ataxia_client = Result }) -> Result.
+
+-spec set_request_ataxia_client
+	(
+		ataxia_client:type(),
+		request()
+	)
+	-> ataxia_client:type().
+set_request_ataxia_client (AtaxiaClient, Request) ->
+	Request#request{ ataxia_client = AtaxiaClient }.
+
+-spec user_management (request()) ->
+	{
+		request(),
+		({ok, list(any())} | {error, binary()})
+	}.
+user_management (Request) ->
+	{AtaxiaClient, QueryResult} =
+		query_user_management
+		(
+			get_request_ataxia_client(Request),
+			get_request_user_version(Request),
+			get_request_user_id(Request),
+			get_request_session_token(Request)
+		),
+	{set_request_ataxia_client(AtaxiaClient, Request, QueryResult}.
 
 -spec fetch_data
 	(
-		room_action_request:type()
-	) -> ({'ok', room_db_entry:type()} | ataxic_error:type()).
-fetch_data (Request) ->
+		{
+			request(),
+			({ok, list(any())} | {error, binary()})
+		}
+	)
+	->
+	{
+		request(),
+		({ok, list(any()), ataxia_client_data:type()} | {error, binary()})
+	}.
+fetch_data ({Request, {ok, ServerCmdList}}) ->
 	RoomID = get_request_room_id(Request),
 	UserID = get_request_user_id(Request),
 	LockJanitor = get_request_lock_janitor(Request),
 	% We need a write lock, to update the user's history index (and potentially
 	% the history itself).
-	case ataxia_lock_client:request_write_lock(LockJanitor, room_db, RoomID) of
-		{ok, Lock} ->
-			case
-				ataxia_client:fetch_if
-				(
-					room_db,
-					RoomID,
-					Lock,
-					room_db_entry:ataxic_is_user_in_room(UserID)
-				)
-			of
-				{ok, RoomVersion, RoomData} ->
-					{
-						ok,
-						ataxia_client_data:new
-						(
-							room_db,
-							RoomID,
-							Lock,
-							RoomVersion,
-							RoomData
-						)
-					};
+	% Nevermind: just load here. They can trigger an action to update their
+	% history index (let's add a special action for this).
+	{AtaxiaClient, FetchResult} =
+		ataxia_client:fetch_if
+		(
+			get_request_ataxia_client(Request),
+			room_db,
+			RoomID,
+			{temp, read},
+			room_db_entry:ataxic_is_user_in_room(UserID)
+		),
 
-				Error -> {error, Error}
-			end;
+	{
+		set_request_ataxia_client(AtaxiaClient, Request),
+		case FetchResult of
+			{ok, RoomVersion, RoomData} ->
+				{
+					ok,
+					ServerCmdList,
+					ataxia_client_data:new
+					(
+						room_db,
+						RoomID,
+						none,
+						RoomVersion,
+						RoomData
+					)
+				};
 
-		Error -> {error, Error}
-	end.
+			Error -> {error, Error}
+		end
+	};
+fetch_data (Error) -> Error.
 
-release_resources (Request) ->
-	ataxia_lock_client:release_all
+-spec process
 	(
-		get_request_lock_janitor(Request)
-	).
+		{
+			request(),
+			({ok, list(any()), ataxia_client_data:type()} | {error, binary()}),
+		}
+	)
+	->
+	{
+		request(),
+		({ok, list(any())} | {error, binary()})
+	}.
+process ({Request, {ok, CmdList, ClientData}}) ->
+	Room = ataxia_client_data:get_value(ClientData),
+	HistoryList =
+		room_db_entry:get_history_for
+		(
+			get_request_username(Request),
+			Room
+		),
+
+	{
+		[
+			{?MESSAGE_FIELD, ?ROOM_DATA_REPLY_ID},
+			{?ROOM_NAME_FIELD, room_db_entry:get_name(Room)},
+			{?ROOM_GAME_ID_FIELD, room_db_entry:get_game_id(Room)},
+			{
+				?OBJECTS_FIELD,
+				lists:map
+				(
+					fun encode_object/1,
+					maps:to_list(room_db_entry:get_objects(Room))
+				),
+			},
+			{
+				?HISTORY_FIELD,
+				lists:map
+				(
+					fun encode_room_action/1,
+					room_db_entry:get_history(Room)
+				)
+			},
+			{
+				% We need a way to easily update this. Is that an action?
+				?LOBBY_FIELD,
+				lists:map
+				(
+					fun encode_room_action/1,
+					room_db_entry:get_history(Room)
+				)
+			},
+			{
+				?CHAT_FIELD,
+				lists:map
+				(
+					fun encode_room_action/1,
+					room_db_entry:get_history(Room)
+				)
+			},
+			{
+				?USERS_FIELD,
+				lists:map
+				(
+					fun encode_room_action/1,
+					room_db_entry:get_history(Room)
+				)
+			}
+		]
+	};
+process (Error) -> Error.
 
 generate_reply (UserID, ClientData) ->
 	Room = ataxia_client_data:get_value(ClientData),
@@ -122,17 +217,10 @@ generate_error_reply (_Error) ->
 -spec handle (web_query:type()) -> binary().
 handle (Query) ->
 	{ok, Request} = decode_request(Query), % Add lockJanitor in this decode function.
-	ok = authenticate_user(Request),
-	MaybeData = fetch_data(Request),
-	case fetch_data(Request) of
-		{ok, Data} ->
-			update_data(Data, Request),
-			release_resources(Request),
-			generate_reply(get_request_user_id(Request), Data);
-		{error, Error} ->
-			release_resources(Request),
-			generate_error_reply(Error)
-	end.
+	PostUserManagement =	user_management(Request),
+	PostFetchData = fetch_data(PostUserManagement),
+	PostProcessing = process(PostFetchData),
+	generate_reply(PostProcessing).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% EXPORTED FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
