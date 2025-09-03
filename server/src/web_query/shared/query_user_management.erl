@@ -75,43 +75,21 @@ generate_pending_room_list_update (UserVersion, {ok, DBEntry}) ->
 			{
 				ok,
 				[
-					[
-						{ ?MESSAGE_FIELD, ?PENDING_ROOM_LIST_UPDATE_ID },
-						{ ?USER_VERSION_FIELD, Version },
-						{
-							?PENDING_ROOMS_FIELD,
-							lists:foldl
-							(
-								fun (PendingRoom) ->
-									[
-										{
-											?ROOM_ID_FIELD,
-											user_db_entry:room_get_id(PendingRoom)
-										},
-										{
-											?ROOM_GAME_ID_FIELD,
-											user_db_entry:room_get_game_id(PendingRoom)
-										},
-										{
-											?ROOM_NAME_FIELD,
-											user_db_entry:room_get_name(PendingRoom)
-										}
-									]
-								end,
-								lists:filter
-								(
-									fun (Room) ->
-										user_db_entry:room_get_is_pending(Room)
-									end,
-									user_db_entry:get_rooms(User)
-								)
-							)
-						}
-					]
+					pending_rooms_update_reply:new
+					(
+						user_db_entry:get_pending_rooms(User)
+					)
 				]
 			}
 	end;
-generate_pending_room_list_update (_UserVersion, Other) -> Other.
+generate_pending_room_list_update (_UserVersion, {error, Message}) ->
+	{
+		error,
+		[
+			disconnect_reply:new(),
+			error_reply:new(Message)
+		]
+	}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% EXPORTED FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -126,7 +104,7 @@ generate_pending_room_list_update (_UserVersion, Other) -> Other.
 	->
 	{
 		ataxia_client:type(),
-		({ok, list(any())} | {error, binary()})
+		({ok, list(any())} | {error, list(any)})
 	}.
 handle_session (S0AtaxiaClient, UserVersion, Username, SessionToken) ->
 	{S1AtaxiaClient, FetchResult} = fetch_data(S0AtaxiaClient, Username),

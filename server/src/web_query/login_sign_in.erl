@@ -191,30 +191,23 @@ release_resources (_Other) -> ok.
 
 -spec generate_reply
 	(
-		{'ok', request(), binary()}
+		{'ok', ataxia_client_data:type(), binary()}
 		| {'error', binary()}
 	)
 	-> list(any()).
-generate_reply ({ok, Request, SessionToken}) ->
+generate_reply ({ok, DBEntry, SessionToken}) ->
+	User = ataxia_client_data:get_value(DBEntry),
 	[
-		{
-			[
-				{?MESSAGE_FIELD, ?SET_SESSION_ID},
-				{?USER_ID_FIELD, get_request_username(Request)},
-				{?SESSION_TOKEN_FIELD, SessionToken}
-			]
-		}
+		set_session_reply:new
+		(
+			ataxia_client_data:get_version(DBEntry),
+			user_db_entry:get_username(User),
+			SessionToken,
+			user_db_entry:get_pending_rooms(User)
+		)
 	];
 generate_reply ({error, ErrorMessage}) ->
-	[
-		{
-			[
-				{?MESSAGE_FIELD, ?ERROR_ID},
-				{?CATEGORY_FIELD, ?ERROR_ERROR_ID},
-				{?CONTENT_FIELD, ErrorMessage}
-			]
-		}
-	].
+	[ error_reply:new(ErrorMessage) ].
 
 %%%% MAIN LOGIC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -spec handle (web_query:type()) -> binary().

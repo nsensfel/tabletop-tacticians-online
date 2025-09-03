@@ -37,7 +37,7 @@
 
 -opaque type() :: #user{}.
 
--export_type([type/0, id/0]).
+-export_type([type/0, id/0, room/0]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% EXPORTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -59,6 +59,7 @@
 		get_displayed_name/1,
 		get_avatar/1,
 		get_room_list/1,
+		get_pending_room_list/1,
 
 		add_token/1,
 
@@ -166,6 +167,14 @@ get_avatar (User) -> User#user.avatar.
 
 -spec get_room_list (type()) -> #{ ataxia_id:type() => room() }.
 get_room_list (User) -> User#user.room_list.
+
+-spec get_pending_room_list (type()) -> list(room()).
+get_pending_room_list (User) ->
+	lists:filter
+	(
+		fun (Room) -> Room#room.is_pending end,
+		maps:values(User#user.room_list)
+	).
 
 -spec set_password (binary(), type()) -> type().
 set_password (Val, User) ->

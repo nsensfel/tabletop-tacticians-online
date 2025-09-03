@@ -8,7 +8,7 @@
 -define(ACTION_ID_FIELD, <<"aid">>).
 -define(AVATAR_FIELD, <<"avt">>).
 -define(CATEGORY_FIELD, <<"cat">>).
--define(CONTENT_FIELD, <<"txt">>).
+-define(CONTENT_FIELD, <<"ctn">>).
 -define(DISPLAYED_NAME_FIELD, <<"dnm">>).
 -define(EMAIL_FIELD, <<"eml">>).
 -define(HISTORY_FIELD, <<"hst">>).
@@ -18,7 +18,6 @@
 -define(OBJECTS_FIELD, <<"obj">>).
 -define(PASSWORD_FIELD, <<"pwd">>).
 -define(PENDING_ROOMS_FIELD, <<"prs">>).
--define(REPLY_ID_FIELD, <<"rep">>).
 -define(ROOM_GAME_ID_FIELD, <<"rgi">>).
 -define(ROOM_ID_FIELD, <<"rid">>).
 -define(ROOM_NAME_FIELD, <<"rnm">>).
@@ -32,12 +31,11 @@
 
 %%%% REPLY TYPES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -define(DISCONNECT_REPLY_ID, <<"dis">>).
--define(ERROR_ID, <<"err">>).
--define(FAILED_REPLY_ID, <<"fai">>).
+-define(ERROR_REPLY_ID, <<"err">>).
 -define(HISTORY_UPDATE_REPLY_ID, <<"hup">>).
--define(PENDING_ROOM_LIST_UPDATE_ID, <<"pru">>).
+-define(PENDING_ROOMS_UPDATE_REPLY_ID, <<"pru">>).
 -define(ROOM_DATA_REPLY_ID, <<"rda">>).
--define(SET_SESSION_ID, <<"sst">>).
+-define(SET_SESSION_REPLY_ID, <<"sst">>).
 
 %%%% ERROR CATEGORIES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -define(WARNING_ERROR_ID, <<"wrn">>).
