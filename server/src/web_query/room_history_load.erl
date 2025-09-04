@@ -32,11 +32,11 @@
 -spec decode_request (web_query:type()) -> ('error' | {'ok', request()}).
 decode_request (Query) ->
 	Map = web_query:get_params(Query),
-	{ok, DecodedAct} = decode_action(maps:get(?ACTION_FIELD, Map)),
 	#request
 	{
 		user_id = maps:get(?USER_ID_FIELD, Map),
 		session_token = maps:get(?SESSION_TOKEN_FIELD, Map),
+		user_version = maps:get(?USER_VERSION_FIELD, Map),
 		room_id = maps:get(?ROOM_ID_FIELD, Map),
 		history_ix = maps:get(?HISTORY_INDEX_FIELD, Map),
 		lock_janitor = ataxia_lock_client:new_janitor()
@@ -61,15 +61,13 @@ get_request_history_index (#request{ history_ix = Result }) -> Result.
 %%%% SECURITY CHECK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -spec authenticate_user (room_action_request:type()) -> ('ok' | 'error').
 authenticate_user (Request) ->
-	UserID = get_request_user_id(Request),
-	SessionToken = get_request_session_token(Request),
-	LockJanitor = get_request_lock_janitor(Request),
-	case
-		db_query_security:credentials_match(LockJanitor, SessionToken, UserID)
-	of
-		true -> ok;
-		_ -> reply_disconnect:generate_encoded()
-	end.
+	query_user_management:handle_session
+	(
+		get_request_ataxia_client(Request),
+		get_request_user_version(Request),
+		get_request_username(Request),
+		get_request_session_token(Request)
+	);
 
 -spec fetch_data
 	(
@@ -79,27 +77,35 @@ fetch_data (Request) ->
 	RoomID = get_request_room_id(Request),
 	UserID = get_request_user_id(Request),
 	LockJanitor = get_request_lock_janitor(Request),
-	% We need a write lock, to update the user's history index (and potentially
-	% the history itself).
-	case ataxia_lock_client:request_write_lock(LockJanitor, room_db, RoomID) of
-		{ok, Lock} ->
-			case
-				ataxia_client:fetch_if
-				(
-					room_db,
-					RoomID,
-					Lock,
-					room_db_entry:ataxic_is_user_in_room(UserID)
-				)
-			of
-				{ok, RoomVersion, RoomData} ->
-					{ok, ataxia_client_data:new(Lock, RoomVersion, RoomData)};
+	{S1AtaxiaClient, FetchResult} =
+		ataxia_client:fetch_if
+		(
+			S0AtaxiaClient,
+			room_db,
+			RoomID,
+			{temp, read},
+			room_db_entry:ataxic_is_user_in_room(UserID)
+		),
 
-				Error -> {error, Error}
-			end;
+	{
+		S1AtaxiaClient,
+		case FetchResult of
+			{ok, RoomVersion, RoomData} ->
+				{
+					ok,
+					ataxia_client_data:new
+					(
+						room_db,
+						RoomID,
+						none,
+						RoomVersion,
+						RoomData
+					)
+				};
 
-		Error -> {error, Error}
-	end.
+			Error -> {error, Error}
+		end
+	}.
 
 apply_action (Request, S0Data) ->
 	UserID = get_request_user_id(Request),
@@ -175,5 +181,5 @@ out(A) ->
 	{
 		content,
 		"application/json; charset=UTF-8",
-		handle(web_query:new(A))
+		jiffy:encode(handle(web_query:new(A)))
 	}.

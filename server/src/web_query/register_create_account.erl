@@ -244,24 +244,17 @@ create_new_user (Request) ->
 	-> list(any()).
 generate_reply ({ok, Version, Username, SessionToken}) ->
 	[
-		{
-			[
-				{?MESSAGE_FIELD, ?SET_SESSION_ID},
-				{?USER_VERSION_FIELD, Version},
-				{?USER_ID_FIELD, Username},
-				{?SESSION_TOKEN_FIELD, SessionToken}
-			]
-		}
+		set_session_reply:new
+		(
+			Version,
+			Username,
+			SessionToken,
+			[] % No rooms yet.
+		)
 	];
 generate_reply ({error, ErrorMessage}) ->
 	[
-		{
-			[
-				{?MESSAGE_FIELD, ?ERROR_ID},
-				{?CATEGORY_FIELD, ?ERROR_ERROR_ID},
-				{?CONTENT_FIELD, ErrorMessage}
-			]
-		}
+		error_reply:new(ErrorMessage)
 	].
 
 %%%% MAIN LOGIC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
