@@ -8,11 +8,13 @@
 -define(ACTION_ID_FIELD, <<"aid">>).
 -define(AVATAR_FIELD, <<"avt">>).
 -define(CATEGORY_FIELD, <<"cat">>).
+-define(CHAT_FIELD, <<"cha">>).
 -define(CONTENT_FIELD, <<"ctn">>).
 -define(DISPLAYED_NAME_FIELD, <<"dnm">>).
 -define(EMAIL_FIELD, <<"eml">>).
 -define(HISTORY_FIELD, <<"hst">>).
 -define(HISTORY_INDEX_FIELD, <<"hix">>).
+-define(USER_HISTORY_INDEX_FIELD, <<"uhx">>).
 -define(LOBBY_FIELD, <<"lby">>).
 -define(MESSAGE_FIELD, <<"msg">>).
 -define(OBJECTS_FIELD, <<"obj">>).
@@ -34,7 +36,7 @@
 -define(ERROR_REPLY_ID, <<"err">>).
 -define(HISTORY_UPDATE_REPLY_ID, <<"hup">>).
 -define(PENDING_ROOMS_UPDATE_REPLY_ID, <<"pru">>).
--define(ROOM_DATA_REPLY_ID, <<"rda">>).
+-define(SET_ROOM_REPLY_ID, <<"sro">>).
 -define(SET_SESSION_REPLY_ID, <<"sst">>).
 
 %%%% ERROR CATEGORIES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
