@@ -14,7 +14,8 @@
 		user_version :: non_neg_integer(),
 		lock_janitor :: ataxia_lock_client:janitor(),
 		room_id :: ataxia_id:type(),
-		act :: room_action:act()
+		act :: room_action:act(),
+		client_history_ix :: non_neg_integer()
 	}
 ).
 
@@ -137,7 +138,6 @@ fetch_data ({Request, {ok, CurrentReplies}}) ->
 	};
 fetch_data (Other) -> Other.
 
-
 -spec apply_action
 	(
 		{
@@ -156,6 +156,30 @@ fetch_data (Other) -> Other.
 			| {error, list(any())}
 		)
 	}.
+apply_action ({error, List}) -> {error, List};
+apply_action
+(
+	{
+		ok,
+		CurrentReplies,
+		Request,
+		S0Data,
+		?PING_ACTION_ID
+	}
+) ->
+	{error, List};
+apply_action
+(
+	{
+		ok,
+		CurrentReplies,
+		Request,
+		S0Data,
+		?PING_ACTION_ID
+	}
+) ->
+	{error, List};
+
 apply_action ({Request, {ok, ServerReplies, S0Data}}) ->
 	UserID = get_request_user_id(Request),
 	Act = get_request_act(Request),
