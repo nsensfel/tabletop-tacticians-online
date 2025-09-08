@@ -68,6 +68,7 @@ get_request_ataxia_client (#request{ ataxia_client = Result }) -> Result.
 set_request_ataxia_client (AtaxiaClient, Request) ->
 	Request#request{ ataxia_client = AtaxiaClient }.
 
+%%%% Request Processing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -spec user_management (request()) ->
 	{
 		request(),
@@ -82,7 +83,7 @@ user_management (Request) ->
 			get_request_user_id(Request),
 			get_request_session_token(Request)
 		),
-	{set_request_ataxia_client(AtaxiaClient, Request), {ok, QueryResult}}.
+	{set_request_ataxia_client(AtaxiaClient, Request), QueryResult}.
 
 -spec fetch_data
 	(
@@ -94,7 +95,10 @@ user_management (Request) ->
 	->
 	{
 		request(),
-		({ok, list(any()), ataxia_client_data:type(room_db_entry:type())} | {error, list(any())})
+		(
+			{ok, list(any()), ataxia_client_data:type(room_db_entry:type())}
+			| {error, list(any())}
+		)
 	}.
 fetch_data ({Request, {ok, ServerCmdList}}) ->
 	RoomID = get_request_room_id(Request),

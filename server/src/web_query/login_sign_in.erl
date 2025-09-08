@@ -5,7 +5,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% TYPES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--include("yaws_api.hrl").
 
 -record
 (
@@ -59,7 +58,7 @@ get_request_password (#request{ password = Result }) -> Result.
 -spec get_request_lock_janitor (request()) -> ataxia_lock_client:janitor().
 get_request_lock_janitor (#request{ lock_janitor = Result }) -> Result.
 
-%%%% SECURITY CHECK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% Request Processing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -spec fetch_data (request()) ->
 	(
 		{'ok', request(), ataxia_client_data:type()}

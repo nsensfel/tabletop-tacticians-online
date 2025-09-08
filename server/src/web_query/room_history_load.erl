@@ -69,7 +69,7 @@ get_request_ataxia_client (#request{ ataxia_client = Result }) -> Result.
 set_request_ataxia_client (AtaxiaClient, Request) ->
 	Request#request{ ataxia_client = AtaxiaClient}.
 
-%%%% SECURITY CHECK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% Request Processing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -spec authenticate_user (room_action_request:type()) ->
 	{
 		request(),
