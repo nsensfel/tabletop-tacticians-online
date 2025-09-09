@@ -29,9 +29,31 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% LOCAL FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec decode_action (map()) -> ('error' | {'ok', room_action:act()}).
+-spec decode_action (map()) -> ('error' | {'ok', act()}).
 decode_action (Map) ->
 	case maps:get(?ACTION_ID_FIELD, Map) of
+		?MOVE_ACTION_ID ->
+			{
+				ok,
+				#move
+				{
+					objects_id = maps:get(?TARGETS_FIELD),
+					x = maps:get(?X_FIELD),
+					y = maps:get(?Y_FIELD),
+					z = maps:get(?Z_FIELD),
+					angle = maps:get(?ANGLE_FIELD)
+				}
+			};
+
+		?PING_ACTION_ID ->
+			{
+				ok,
+				#ping
+				{
+					x = maps:get(?X_FIELD),
+					y = maps:get(?Y_FIELD)
+				}
+			};
 		?FLIP_ACTION_ID -> {ok, room_action:new_flip(maps:get(?TARGETS_FIELD))};
 		_ -> error
 	end.
@@ -164,10 +186,117 @@ apply_action
 		CurrentReplies,
 		Request,
 		S0Data,
-		?PING_ACTION_ID
+		Move#move
+		{
+			objects_id = Targets,
+			x = X,
+			y = Y,
+			y = Z,
+			angle = Angle
+		}
 	}
 ) ->
-	{error, List};
+	% TODO: check that list is not empty.
+	% TODO: check that offset is not nil.
+	% TODO: check that objects are still in valid locations.
+	S0Room = ataxia_client_data:get_value(S0Data),
+	S0Objects = room_db_entry:get_objects(S0Room),
+	{ActionStatus, ObjectUpdates, S1Objects} =
+		lists:foldl
+		(
+			fun (ObjectID, {Status, Updates, Objects}) ->
+				case maps:find(ObjectID, Objects) of
+					{ok, S0Object} ->
+						S0Attitude = room_object:get_attitude(S0Object),
+						{S0UpdatesList, S1Attitude} =
+							case X of
+								0 -> {[], S0Attitude};
+								_ ->
+									NewX = X + room_object:attitude_get_x(S0Attitude),
+									{U, V} = ataxia_attitude_set_x(NewX, S0Attitude),
+									{[U], V}
+							end,
+						{S1UpdatesList, S2Attitude} =
+							case Y of
+								0 -> {S0UpdatesList, S1Attitude};
+								_ ->
+									NewY = Y + room_object:attitude_get_y(S1Attitude),
+									{U, V} = ataxia_attitude_set_y(NewY, S1Attitude),
+									{[U|S0UpdatesList], V}
+							end,
+						{S2UpdatesList, S3Attitude} =
+							case Z of
+								0 -> {S1UpdatesList, S2Attitude};
+								_ ->
+									NewZ = Z + room_object:attitude_get_z(S2Attitude),
+									{U, V} = ataxia_attitude_set_z(NewZ, S2Attitude),
+									{[U|S1UpdatesList], V}
+							end,
+						{S3UpdatesList, S4Attitude} =
+							case Angle of
+								0 -> {S2UpdatesList, S3Attitude};
+								_ ->
+									NewAngle = Angle + room_object:attitude_get_angle(S3Attitude),
+									% That one needs to sanitize things...
+									{U, V} = ataxia_attitude_set_angle(NewAngle, S3Attitude),
+									{[U|S2UpdatesList], V}
+							end,
+
+						NewX = X + room_object:attitude_get_x(S0Attitude),
+						NewY = Y + room_object:attitude_get_y(S0Attitude),
+						NewZ = Z + room_object:attitude_get_z(S0Attitude),
+						NewAngle = Angle + room_object:attitude_get_angle(S0Attitude),
+					_ -> {error, Updates, Objects}
+				end
+			end,
+			{ok, [], S0Objects},
+			Targets
+		),
+
+	case ActionStatus of
+		ok
+	{AtaxicUpdate, UpdatedRoom} =
+		room_db_entry:ataxia_add_to_history
+		(
+			room_action:new(get_request_user_id(Request), Ping),
+			ataxia_client_data:get_value(S0Data)
+		),
+
+	S1Data =
+		ataxia_client_data:add_update
+		(
+			AtaxicUpdate,
+			UpdatedRoom,
+			S0Data
+		),
+
+	{ok, List, S1Data};
+apply_action
+(
+	{
+		ok,
+		CurrentReplies,
+		Request,
+		S0Data,
+		Ping#ping{}
+	}
+) ->
+	{AtaxicUpdate, UpdatedRoom} =
+		room_db_entry:ataxia_add_to_history
+		(
+			room_action:new(get_request_user_id(Request), Ping),
+			ataxia_client_data:get_value(S0Data)
+		),
+
+	S1Data =
+		ataxia_client_data:add_update
+		(
+			AtaxicUpdate,
+			UpdatedRoom,
+			S0Data
+		),
+
+	{ok, List, S1Data};
 apply_action
 (
 	{
@@ -216,6 +345,8 @@ apply_action ({Request, {ok, ServerReplies, S0Data}}) ->
 				{error, [error_reply:new(ErrorMsg) | ServerReplies]}
 			}
 	end.
+
+update_history_index (PostActionRoom) -> ...
 
 update_database (ClientData) ->
 	case
