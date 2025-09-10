@@ -216,6 +216,7 @@ apply_action
 									{U, V} = ataxia_attitude_set_x(NewX, S0Attitude),
 									{[U], V}
 							end,
+
 						{S1UpdatesList, S2Attitude} =
 							case Y of
 								0 -> {S0UpdatesList, S1Attitude};
@@ -224,6 +225,7 @@ apply_action
 									{U, V} = ataxia_attitude_set_y(NewY, S1Attitude),
 									{[U|S0UpdatesList], V}
 							end,
+
 						{S2UpdatesList, S3Attitude} =
 							case Z of
 								0 -> {S1UpdatesList, S2Attitude};
@@ -232,6 +234,7 @@ apply_action
 									{U, V} = ataxia_attitude_set_z(NewZ, S2Attitude),
 									{[U|S1UpdatesList], V}
 							end,
+
 						{S3UpdatesList, S4Attitude} =
 							case Angle of
 								0 -> {S2UpdatesList, S3Attitude};
@@ -242,10 +245,22 @@ apply_action
 									{[U|S2UpdatesList], V}
 							end,
 
-						NewX = X + room_object:attitude_get_x(S0Attitude),
-						NewY = Y + room_object:attitude_get_y(S0Attitude),
-						NewZ = Z + room_object:attitude_get_z(S0Attitude),
-						NewAngle = Angle + room_object:attitude_get_angle(S0Attitude),
+						{ObjectUpdate, S1Object} =
+							room_object:update_attitude
+							(
+								ataxic:sequence(S3UpdateList),
+								S4Attitude,
+								S0Object
+							),
+						{
+							Status,
+							[
+								ataxic_sugar:update_map_element(ObjectID, ObjectUpdate)
+								| Updates
+							],
+							maps:put(ObjectID, S1Object, Objects)
+						};
+
 					_ -> {error, Updates, Objects}
 				end
 			end,
@@ -254,22 +269,27 @@ apply_action
 		),
 
 	case ActionStatus of
-		ok
-	{AtaxicUpdate, UpdatedRoom} =
-		room_db_entry:ataxia_add_to_history
-		(
-			room_action:new(get_request_user_id(Request), Ping),
-			ataxia_client_data:get_value(S0Data)
-		),
+		ok ->
+			{AtaxicUpdate0, S1Room} =
+				room_db_entry:ataxia_add_to_history
+				(
+					room_action:new(get_request_user_id(Request), Ping),
+					ataxia_client_data:get_value(S0Data)
+				),
 
-	S1Data =
-		ataxia_client_data:add_update
-		(
-			AtaxicUpdate,
-			UpdatedRoom,
-			S0Data
-		),
+			{AtaxicUpdate1, S2Room} =
+				room_db_entry:ataxia_update_objects
+				(
+					ataxic:sequence(ObjectUpdates),
+					S1Objects,
+					S1Room
+				),
 
+			S1Data =
+				ataxia_client_data:add_update(AtaxicUpdate, UpdatedRoom, S0Data),
+
+		error -> ...
+	end,
 	{ok, List, S1Data};
 apply_action
 (
