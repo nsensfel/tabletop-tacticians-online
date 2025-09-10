@@ -160,6 +160,20 @@ fetch_data ({Request, {ok, CurrentReplies}}) ->
 	};
 fetch_data (Other) -> Other.
 
+-spec update_room_db
+	(
+		request(),
+		ataxia_client_data:type(room_db_entry:type())
+	)
+	-> ???
+update_room_db(Request, S1Data),
+
+% Apply the action... but we don't want to return from this with the Room lock
+% still held. Indeed, the action may involve some other DB entry being modified
+% (e.g. user ping, lobby modification, end of game), which would mean a second
+% write lock (needless risk of interlock).
+% So instead, this function handles everything up to the reply (calling other
+% functions as needed).
 -spec apply_action
 	(
 		{
@@ -213,7 +227,7 @@ apply_action
 								0 -> {[], S0Attitude};
 								_ ->
 									NewX = X + room_object:attitude_get_x(S0Attitude),
-									{U, V} = ataxia_attitude_set_x(NewX, S0Attitude),
+									{U, V} = room_object:ataxia_attitude_set_x(NewX, S0Attitude),
 									{[U], V}
 							end,
 
@@ -222,7 +236,7 @@ apply_action
 								0 -> {S0UpdatesList, S1Attitude};
 								_ ->
 									NewY = Y + room_object:attitude_get_y(S1Attitude),
-									{U, V} = ataxia_attitude_set_y(NewY, S1Attitude),
+									{U, V} = room_object:ataxia_attitude_set_y(NewY, S1Attitude),
 									{[U|S0UpdatesList], V}
 							end,
 
@@ -231,7 +245,7 @@ apply_action
 								0 -> {S1UpdatesList, S2Attitude};
 								_ ->
 									NewZ = Z + room_object:attitude_get_z(S2Attitude),
-									{U, V} = ataxia_attitude_set_z(NewZ, S2Attitude),
+									{U, V} = room_object:ataxia_attitude_set_z(NewZ, S2Attitude),
 									{[U|S1UpdatesList], V}
 							end,
 
@@ -241,12 +255,12 @@ apply_action
 								_ ->
 									NewAngle = Angle + room_object:attitude_get_angle(S3Attitude),
 									% That one needs to sanitize things...
-									{U, V} = ataxia_attitude_set_angle(NewAngle, S3Attitude),
+									{U, V} = room_object:ataxia_attitude_set_angle(NewAngle, S3Attitude),
 									{[U|S2UpdatesList], V}
 							end,
 
 						{ObjectUpdate, S1Object} =
-							room_object:update_attitude
+							room_object:ataxia_update_attitude
 							(
 								ataxic:sequence(S3UpdateList),
 								S4Attitude,
@@ -270,10 +284,12 @@ apply_action
 
 	case ActionStatus of
 		ok ->
+			UserID = get_request_user_id(Request),
+
 			{AtaxicUpdate0, S1Room} =
 				room_db_entry:ataxia_add_to_history
 				(
-					room_action:new(get_request_user_id(Request), Ping),
+					room_history:move(UserID, Move),
 					ataxia_client_data:get_value(S0Data)
 				),
 
@@ -285,10 +301,28 @@ apply_action
 					S1Room
 				),
 
-			S1Data =
-				ataxia_client_data:add_update(AtaxicUpdate, UpdatedRoom, S0Data),
+			{AtaxicUpdate2, S3Room} =
+				room_db_entry:update_user_history_index(UserID, S2Room),
 
-		error -> ...
+			S1Data =
+				ataxia_client_data:add_update
+				(
+					ataxic:sequence([AtaxicUpdate0, AtaxicUpdate1, AtaxicUpdate2]),
+					S3Room,
+					S0Data
+				),
+
+			% Maybe support having an error here?
+			update_room_db(Request, S1Data),
+
+			ataxia_lock_janitor:release_lock
+			(
+				ataxia_client_data:get_lock(S1Data),
+				get_request_lock_janitor(Request)
+			),
+			[generate_reply(Request, S1Data) | CurrentReplies];
+
+		error -> [error_reply:new(<<"Action failed.">>) | CurrentReplies]
 	end,
 	{ok, List, S1Data};
 apply_action
