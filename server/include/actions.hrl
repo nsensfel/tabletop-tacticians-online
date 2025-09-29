@@ -1,3 +1,5 @@
+-type deck_source() :: 'top' | 'bottom' | 'random'.
+
 -record
 (
 	move,
@@ -138,13 +140,3 @@
 	| #create_deck{}
 	| #explode_deck{}
 .
-
--record
-(
-	action,
-	{
-		actor_ix :: non_neg_integer(),
-		act :: act()
-	}
-).
-

@@ -1,6 +1,7 @@
 -module(room_play_action).
 
 -include("protocol.hrl").
+-include("actions.hrl").
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% TYPES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -15,7 +16,8 @@
 		lock_janitor :: ataxia_lock_client:janitor(),
 		room_id :: ataxia_id:type(),
 		act :: room_action:act(),
-		client_history_ix :: non_neg_integer()
+		client_history_ix :: non_neg_integer(),
+		ataxia_client :: ataxia_client:type()
 	}
 ).
 
@@ -38,10 +40,10 @@ decode_action (Map) ->
 				#move
 				{
 					objects_id = maps:get(?TARGETS_FIELD),
-					x = maps:get(?X_FIELD),
-					y = maps:get(?Y_FIELD),
-					z = maps:get(?Z_FIELD),
-					angle = maps:get(?ANGLE_FIELD)
+					offset_x = maps:get(?X_FIELD),
+					offset_y = maps:get(?Y_FIELD),
+					offset_z = maps:get(?Z_FIELD),
+					offset_angle = maps:get(?ANGLE_FIELD)
 				}
 			};
 
@@ -66,7 +68,7 @@ decode_request (Query) ->
 	{
 		user_id = maps:get(?USER_ID_FIELD, Map),
 		session_token = maps:get(?SESSION_TOKEN_FIELD, Map),
-		user_version = maps:get(?USER_VERION_FIELD, Map),
+		user_version = maps:get(?USER_VERSION_FIELD, Map),
 		room_id = maps:get(?ROOM_ID_FIELD, Map),
 		act = DecodedAct,
 		lock_janitor = ataxia_lock_client:new_janitor()
@@ -90,6 +92,13 @@ get_request_room_id (#request{ room_id = Result }) -> Result.
 
 -spec get_request_act (request()) -> room_action:act().
 get_request_act (#request{ act = Result }) -> Result.
+
+-spec get_request_ataxia_client (request()) -> ataxia_client:type().
+get_request_ataxia_client (#request{ ataxia_client = Result }) -> Result.
+
+-spec set_request_ataxia_client (ataxia_client:type(), request()) -> request().
+set_request_ataxia_client (Client, Request) ->
+	Request#request{ ataxia_client = Client}.
 
 %%%% Request Processing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -spec user_management (request()) ->
@@ -165,8 +174,53 @@ fetch_data (Other) -> Other.
 		request(),
 		ataxia_client_data:type(room_db_entry:type())
 	)
-	-> ???
-update_room_db(Request, S1Data),
+	->
+		{
+			request(),
+			(
+				{ok, ataxia_client_data:type(room_db_entry:type())}
+				| {error, list(any())}
+			)
+		}.
+update_room_db (Request, Data) ->
+	{ AtaxiaClient, RequestResult } =
+		ataxia_client:safe_update(get_request_ataxia_client(Request), Data),
+
+	{
+		set_request_ataxia_client(AtaxiaClient, Request),
+		case RequestResult of
+			{ok, NewVersion} ->
+				{
+					ok,
+					ataxia_client_data:clear_updates
+					(
+						ataxia_client_data:set_version
+						(
+							NewVersion,
+							Data
+						)
+					)
+				};
+
+			{ok, _NewLock, _NewVersion} ->
+				% That should _not_ happen.
+				{
+					error,
+					[
+						error_reply:new
+						(
+							?PROGRAMMING_ERROR_ID,
+							<<"Unexpected new lock while playing room action.">>
+						)
+					]
+				};
+
+			{error, Error} ->
+				{
+					error,
+					[ error_reply:new(ataxia_error:to_string(Error)) ]
+				}
+		end.
 
 % Apply the action... but we don't want to return from this with the Room lock
 % still held. Indeed, the action may involve some other DB entry being modified
@@ -200,14 +254,15 @@ apply_action
 		CurrentReplies,
 		Request,
 		S0Data,
-		Move#move
-		{
-			objects_id = Targets,
-			x = X,
-			y = Y,
-			y = Z,
-			angle = Angle
-		}
+		Move =
+			#move
+			{
+				objects_id = Targets,
+				offset_x = X,
+				offset_y = Y,
+				offset_z = Z,
+				offset_angle = Angle
+			}
 	}
 ) ->
 	% TODO: check that list is not empty.
@@ -227,8 +282,8 @@ apply_action
 								0 -> {[], S0Attitude};
 								_ ->
 									NewX = X + room_object:attitude_get_x(S0Attitude),
-									{U, V} = room_object:ataxia_attitude_set_x(NewX, S0Attitude),
-									{[U], V}
+									{U0, V0} = room_object:ataxia_attitude_set_x(NewX, S0Attitude),
+									{[U0], V0}
 							end,
 
 						{S1UpdatesList, S2Attitude} =
@@ -236,8 +291,8 @@ apply_action
 								0 -> {S0UpdatesList, S1Attitude};
 								_ ->
 									NewY = Y + room_object:attitude_get_y(S1Attitude),
-									{U, V} = room_object:ataxia_attitude_set_y(NewY, S1Attitude),
-									{[U|S0UpdatesList], V}
+									{U1, V1} = room_object:ataxia_attitude_set_y(NewY, S1Attitude),
+									{[U1|S0UpdatesList], V1}
 							end,
 
 						{S2UpdatesList, S3Attitude} =
@@ -245,8 +300,8 @@ apply_action
 								0 -> {S1UpdatesList, S2Attitude};
 								_ ->
 									NewZ = Z + room_object:attitude_get_z(S2Attitude),
-									{U, V} = room_object:ataxia_attitude_set_z(NewZ, S2Attitude),
-									{[U|S1UpdatesList], V}
+									{U2, V2} = room_object:ataxia_attitude_set_z(NewZ, S2Attitude),
+									{[U2|S1UpdatesList], V2}
 							end,
 
 						{S3UpdatesList, S4Attitude} =
@@ -255,14 +310,14 @@ apply_action
 								_ ->
 									NewAngle = Angle + room_object:attitude_get_angle(S3Attitude),
 									% That one needs to sanitize things...
-									{U, V} = room_object:ataxia_attitude_set_angle(NewAngle, S3Attitude),
-									{[U|S2UpdatesList], V}
+									{U3, V3} = room_object:ataxia_attitude_set_angle(NewAngle, S3Attitude),
+									{[U3|S2UpdatesList], V3}
 							end,
 
 						{ObjectUpdate, S1Object} =
 							room_object:ataxia_update_attitude
 							(
-								ataxic:sequence(S3UpdateList),
+								ataxic:sequence(S3UpdatesList),
 								S4Attitude,
 								S0Object
 							),
@@ -391,7 +446,7 @@ apply_action ({Request, {ok, ServerReplies, S0Data}}) ->
 					S0Data
 				),
 
-			{Request, {ok, S1Data};
+			{Request, {ok, S1Data}};
 
 		{error, ErrorMsg} ->
 			{
@@ -400,7 +455,7 @@ apply_action ({Request, {ok, ServerReplies, S0Data}}) ->
 			}
 	end.
 
-update_history_index (PostActionRoom) -> ...
+%update_history_index (PostActionRoom) -> ...
 
 update_database (ClientData) ->
 	case
