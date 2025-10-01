@@ -15,7 +15,7 @@
 		user_version :: non_neg_integer(),
 		lock_janitor :: ataxia_lock_client:janitor(),
 		room_id :: ataxia_id:type(),
-		act :: room_action:act(),
+		act :: act(),
 		client_history_ix :: non_neg_integer(),
 		ataxia_client :: ataxia_client:type()
 	}
@@ -220,7 +220,8 @@ update_room_db (Request, Data) ->
 					error,
 					[ error_reply:new(ataxia_error:to_string(Error)) ]
 				}
-		end.
+		end
+	}.
 
 % Apply the action... but we don't want to return from this with the Room lock
 % still held. Indeed, the action may involve some other DB entry being modified
@@ -230,13 +231,12 @@ update_room_db (Request, Data) ->
 % functions as needed).
 -spec apply_action
 	(
-		{
-			request(),
-			(
-				{ok, list(any()), ataxia_client_data:type(room_db_entry:type())}
-				| {error, list(any())}
-			)
-		}
+		request(),
+		(
+			{ok, list(any()), ataxia_client_data:type(room_db_entry:type())}
+			| {error, list(any())}
+		),
+		act()
 	)
 	->
 	{
@@ -246,24 +246,26 @@ update_room_db (Request, Data) ->
 			| {error, list(any())}
 		)
 	}.
-apply_action ({error, List}) -> {error, List};
 apply_action
 (
-	{
-		ok,
-		CurrentReplies,
-		Request,
-		S0Data,
-		Move =
-			#move
-			{
-				objects_id = Targets,
-				offset_x = X,
-				offset_y = Y,
-				offset_z = Z,
-				offset_angle = Angle
-			}
-	}
+	Request,
+	{error, List},
+	_Act
+) ->
+	{Request, {error, List}};
+apply_action
+(
+	S0Request,
+	{ ok, CurrentReplies, S0Data },
+	Move =
+		#move
+		{
+			objects_id = Targets,
+			offset_x = X,
+			offset_y = Y,
+			offset_z = Z,
+			offset_angle = Angle
+		}
 ) ->
 	% TODO: check that list is not empty.
 	% TODO: check that offset is not nil.
@@ -336,10 +338,9 @@ apply_action
 			{ok, [], S0Objects},
 			Targets
 		),
-
 	case ActionStatus of
 		ok ->
-			UserID = get_request_user_id(Request),
+			UserID = get_request_user_id(S0Request),
 
 			{AtaxicUpdate0, S1Room} =
 				room_db_entry:ataxia_add_to_history
@@ -367,33 +368,44 @@ apply_action
 					S0Data
 				),
 
-			% Maybe support having an error here?
-			update_room_db(Request, S1Data),
+			{S1Request, DBUpdateResult} = update_room_db(S0Request, S1Data),
 
 			ataxia_lock_janitor:release_lock
 			(
 				ataxia_client_data:get_lock(S1Data),
-				get_request_lock_janitor(Request)
+				get_request_lock_janitor(S1Request)
 			),
-			[generate_reply(Request, S1Data) | CurrentReplies];
 
-		error -> [error_reply:new(<<"Action failed.">>) | CurrentReplies]
-	end,
-	{ok, List, S1Data};
+			{
+				S1Request,
+				case DBUpdateResult of
+					{ok, S2Data} ->
+						{
+							ok,
+							[generate_reply(S1Request, S1Data) | CurrentReplies],
+							S2Data
+						};
+
+					{error, Errors} -> {error, Errors ++ CurrentReplies}
+				end
+			};
+
+		error ->
+			{
+				S0Request,
+				{error, [error_reply:new(<<"Action failed.">>) | CurrentReplies]}
+			}
+	end;
 apply_action
 (
-	{
-		ok,
-		CurrentReplies,
-		Request,
-		S0Data,
-		Ping#ping{}
-	}
+	S0Request,
+	{ ok, CurrentReplies, S0Data },
+	Ping = #ping{}
 ) ->
 	{AtaxicUpdate, UpdatedRoom} =
 		room_db_entry:ataxia_add_to_history
 		(
-			room_action:new(get_request_user_id(Request), Ping),
+			room_action:new(get_request_user_id(S0Request), Ping),
 			ataxia_client_data:get_value(S0Data)
 		),
 
@@ -405,73 +417,27 @@ apply_action
 			S0Data
 		),
 
-	{ok, List, S1Data};
-apply_action
-(
+	{S1Request, DBUpdateResult} = update_room_db(S0Request, S1Data),
+
+	ataxia_lock_janitor:release_lock
+	(
+		ataxia_client_data:get_lock(S1Data),
+		get_request_lock_janitor(S1Request)
+	),
+
 	{
-		ok,
-		CurrentReplies,
-		Request,
-		S0Data,
-		?PING_ACTION_ID
-	}
-) ->
-	{error, List};
+		S1Request,
+		case DBUpdateResult of
+			{ok, S2Data} ->
+				{
+					ok,
+					[generate_reply(S1Request, S1Data) | CurrentReplies],
+					S2Data
+				};
 
-apply_action ({Request, {ok, ServerReplies, S0Data}}) ->
-	UserID = get_request_user_id(Request),
-	Act = get_request_act(Request),
-	S0Room = ataxia_client_data:get_value(S0Data),
-	UserIX = room_db_entry:get_user_index(S0Room, UserID),
-	UserData = room_db_entry:get_user_data(S0Room, UserIX),
-	Action = room_action:new(UserIX, Act),
-
-	% Actions can affect Lobby, Users, Chat, and room objects.
-	% How do you handle a ping? It affects more than just the room...
-	% Where are we handling all the cases? This module? Another?
-	case room_action:ataxia_apply_to(Action, S0Room) of
-		{ok, RoomAtaxicUpdate, S1Room} ->
-			HistoryView = room_db_entry:get_history_for(UserIX, S2Room),
-			{RoomAtaxicUpdate1, S2Room} =
-				room_db_entry:ataxia_update_user_history_index(UserIX, S2Room),
-
-			S1Data =
-				ataxia_client_data:add_update
-				(
-					ataxic:sequence
-					(
-						[RoomAtaxicUpdate0, RoomAtaxicUpdate1, RoomAtaxicUpdate2]
-					),
-					S3Room,
-					S0Data
-				),
-
-			{Request, {ok, S1Data}};
-
-		{error, ErrorMsg} ->
-			{
-				Request,
-				{error, [error_reply:new(ErrorMsg) | ServerReplies]}
-			}
-	end.
-
-%update_history_index (PostActionRoom) -> ...
-
-update_database (ClientData) ->
-	case
-		ataxia_client:safe_update
-		(
-			ataxia_client_data:get_database(ClientData),
-			ataxia_client_data:get_id(ClientData),
-			ataxia_client_data:get_lock(ClientData),
-			ataxia_client_data:get_ataxic(ClientData),
-			ataxia_client_data:get_version(ClientData),
-			ataxia_client_data:get_value(ClientData)
-		)
-	of
-		{ok, _NewVersion} -> ok;
-		{error, Error} -> {error, Error}
-	end.
+			{error, Errors} -> {error, Errors ++ CurrentReplies}
+		end
+	}.
 
 release_resources (Request) ->
 	ataxia_lock_client:release_all
@@ -491,19 +457,8 @@ generate_error_reply (_Error) -> <<"Error.">>.
 %%%% MAIN LOGIC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -spec handle (web_query:type()) -> binary().
 handle (Query) ->
-	{ok, Request} = decode_request(Query), % Add lockJanitor in this decode function.
-	ok = authenticate_user(Request),
-	{ok, S0Data} = fetch_data(Request),
-	case apply_action(Request, S0Data) of
-		{ok, S1Data, PreviousUserHistoryIX} ->
-			ok = update_database(S1Data),
-			release_resources(Request),
-			generate_reply(S1Data, PreviousUserHistoryIX);
-
-		error ->
-			release_resources(Request),
-			generate_error_reply("Invalid action.")
-	end.
+	{ok, S0Request} = decode_request(Query), % Add lockJanitor in this decode function.
+	apply_action(fetch_data(user_management(S0Request))).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% EXPORTED FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
