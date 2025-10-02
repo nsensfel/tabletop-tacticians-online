@@ -25,6 +25,7 @@
 -define(ROOM_NAME_FIELD, <<"rnm">>).
 -define(SESSION_TOKEN_FIELD, <<"sto">>).
 -define(TARGETS_FIELD, <<"tar">>).
+-define(USERS_FIELD, <<"usr">>).
 -define(USER_HISTORY_INDEX_FIELD, <<"uhx">>).
 -define(USER_ID_FIELD, <<"uid">>).
 -define(USER_VERSION_FIELD, <<"uvr">>).

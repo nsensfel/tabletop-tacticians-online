@@ -9,7 +9,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% EXPORTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--export([new/1]).
+-export([new/2]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% LOCAL FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -37,7 +37,7 @@ new (Room, Username) ->
 				(
 					fun encode_object/1,
 					maps:to_list(room_db_entry:get_objects(Room))
-				),
+				)
 			},
 			{
 				?HISTORY_FIELD,
@@ -69,7 +69,7 @@ new (Room, Username) ->
 				lists:map
 				(
 					fun encode_room_action/1,
-					room_db_entry:get_history(Room)
+					room_db_entry:get_chat(Room)
 				)
 			},
 			{
@@ -77,7 +77,7 @@ new (Room, Username) ->
 				lists:map
 				(
 					fun encode_room_action/1,
-					room_db_entry:get_history(Room)
+					room_db_entry:get_users(Room)
 				)
 			}
 		]

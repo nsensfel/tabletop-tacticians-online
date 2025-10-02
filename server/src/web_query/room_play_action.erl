@@ -231,32 +231,35 @@ update_room_db (Request, Data) ->
 % functions as needed).
 -spec apply_action
 	(
-		request(),
-		(
-			{ok, list(any()), ataxia_client_data:type(room_db_entry:type())}
-			| {error, list(any())}
-		),
+		{
+			request(),
+			(
+				{ok, list(any()), ataxia_client_data:type(room_db_entry:type())}
+				| {error, list(any())}
+			)
+		},
 		act()
 	)
 	->
 	{
 		request(),
-		(
-			{ok, list(any()), ataxia_client_data:type(room_db_entry:type())}
-			| {error, list(any())}
-		)
+		list(any())
 	}.
 apply_action
 (
-	Request,
-	{error, List},
+	{
+		Request,
+		{error, List}
+	},
 	_Act
 ) ->
-	{Request, {error, List}};
+	{Request, List};
 apply_action
 (
-	S0Request,
-	{ ok, CurrentReplies, S0Data },
+	{
+		S0Request,
+		{ ok, CurrentReplies, S0Data }
+	},
 	Move =
 		#move
 		{
@@ -380,26 +383,24 @@ apply_action
 				S1Request,
 				case DBUpdateResult of
 					{ok, S2Data} ->
-						{
-							ok,
-							[generate_reply(S1Request, S1Data) | CurrentReplies],
-							S2Data
-						};
+						(generate_reply(S1Request, S2Data) ++ CurrentReplies);
 
-					{error, Errors} -> {error, Errors ++ CurrentReplies}
+					{error, Errors} -> (Errors ++ CurrentReplies)
 				end
 			};
 
 		error ->
 			{
 				S0Request,
-				{error, [error_reply:new(<<"Action failed.">>) | CurrentReplies]}
+				[error_reply:new(<<"Action failed.">>) | CurrentReplies]
 			}
 	end;
 apply_action
 (
-	S0Request,
-	{ ok, CurrentReplies, S0Data },
+	{
+		S0Request,
+		{ ok, CurrentReplies, S0Data }
+	},
 	Ping = #ping{}
 ) ->
 	{AtaxicUpdate, UpdatedRoom} =
@@ -428,37 +429,35 @@ apply_action
 	{
 		S1Request,
 		case DBUpdateResult of
-			{ok, S2Data} ->
-				{
-					ok,
-					[generate_reply(S1Request, S1Data) | CurrentReplies],
-					S2Data
-				};
-
-			{error, Errors} -> {error, Errors ++ CurrentReplies}
+			{ok, S2Data} -> (generate_reply(S1Request, S2Data) ++ CurrentReplies);
+			{error, Errors} -> (Errors ++ CurrentReplies)
 		end
 	}.
 
-release_resources (Request) ->
-	ataxia_lock_client:release_all
-	(
-		get_request_lock_janitor(Request)
-	).
+-spec release_resources ({ request(), list(any()) }) -> list(any()).
+release_resources ({ Request, Replies }) ->
+	ataxia_lock_client:release_all(get_request_lock_janitor(Request)),
+	Replies.
 
-generate_reply (_ClientData, PreviousUserHistoryIX) ->
-	lists:map
+-spec generate_reply
 	(
-		fun room_action:encode/1,
-		room_db_entry:get_history_from(PreviousUserHistoryIX)
-	).
-
-generate_error_reply (_Error) -> <<"Error.">>.
+		request(),
+		ataxia_client_data:type(room_db_entry:type())
+	) -> list(any()).
+generate_reply (_Request, _S0Data) -> [ ].
 
 %%%% MAIN LOGIC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -spec handle (web_query:type()) -> binary().
 handle (Query) ->
-	{ok, S0Request} = decode_request(Query), % Add lockJanitor in this decode function.
-	apply_action(fetch_data(user_management(S0Request))).
+	{ok, S0Request} = decode_request(Query),
+	release_resources
+	(
+		apply_action
+		(
+			fetch_data(user_management(S0Request)),
+			get_request_act(S0Request)
+		)
+	).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% EXPORTED FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -467,5 +466,5 @@ out(A) ->
 	{
 		content,
 		"application/json; charset=UTF-8",
-		handle(web_query:new(A))
+		jiffy:encode(handle(web_query:new(A)))
 	}.
