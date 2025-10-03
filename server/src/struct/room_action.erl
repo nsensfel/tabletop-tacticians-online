@@ -16,7 +16,9 @@
 
 -opaque type() :: #action{}.
 
--export_type([type/0, act/0]).
+-type id() :: ataxia_id:type().
+
+-export_type([type/0, id/0 act/0]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% EXPORTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -29,6 +31,8 @@
 		ataxia_apply_to/2
 	]
 ).
+
+-export([encode/1]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% LOCAL FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -98,3 +102,26 @@ ataxia_apply_to (_Action = #chat{}, Objects) ->
 	{ok, ataxic:current_value(), Objects};
 ataxia_apply_to (Action = #flip{}, Objects) ->
 	ataxia_handle_flips(Action#flip.objects_id, [], Objects).
+
+-spec encode (type()) -> {list({binary(), any()})}.
+encode
+(
+	#action
+	{
+		actor_ix = ActorIX,
+		act =
+			#move
+			{
+				objects_id = IDs,
+				offset_x = X,
+				offset_y = Y,
+				offset_z = Z,
+				offset_angle = Angle
+			}
+	}
+) ->
+	{
+		[
+			{?ACTOR_IX_FIELD, ActorIX},
+		]
+	}.

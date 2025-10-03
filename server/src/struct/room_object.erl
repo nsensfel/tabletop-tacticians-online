@@ -29,7 +29,7 @@
 	{
 		url :: binary(),
 		shows_card :: boolean(),
-		contains :: list(non_neg_integer())
+		contains :: list(ataxia_id:type())
 	}
 ).
 
@@ -106,6 +106,7 @@
 		get_is_locked_field/0
 	]
 ).
+
 -export
 (
 	[
@@ -115,6 +116,8 @@
 		attitude_get_angle_field/0
 	]
 ).
+
+-export([encode/2]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% LOCAL FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -295,3 +298,75 @@ attitude_get_angle_field () -> #attitude.angle.
 
 -spec get_properties_field () -> non_neg_integer().
 get_properties_field () -> #object.properties.
+
+%%%% Encoders %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+-spec encode_properties (type()) -> {list({binary(), any()})}.
+encode_properties
+(
+	#deck
+	{
+		url = Url,
+		shows_card = ShowsCard,
+		contains = Contains
+	}
+) ->
+	{
+		[
+			{?TYPE_FIELD, ?DECK_OBJECT_TYPE},
+			{?URL_FIELD, Url},
+			{?SHOWS_CARD_FIELD, ShowsCard},
+			{?CONTAINS_FIELD, Contains}
+		]
+	};
+encode_properties
+(
+	#dice
+	{
+		faces = Faces,
+		active_face = ActiveFace
+	}
+) ->
+	{
+		[
+			{?TYPE_FIELD, ?DICE_OBJECT_TYPE},
+			{?FACES_FIELD, Faces},
+			{?ACTIVE_FACE_FIELD, ActiveFace}
+		]
+	};
+encode_properties
+(
+	#card
+	{
+		front_url = FrontUrl,
+		back_url = BackUrl,
+		is_flipped = IsFlipped,
+		is_displayed = IsDisplayed
+	}
+) ->
+	{
+		[
+			{?TYPE_FIELD, ?CARD_OBJECT_TYPE},
+			{?FRONT_FIELD, FrontUrl},
+			{?BACK_FIELD, BackUrl},
+			{?IS_FLIPPED_FIELD, IsFlipped},
+			{?IS_DISPLAYED_FIELD, IsDisplayed}
+		]
+	}.
+
+-spec encode (type()) -> {list({binary(), any()})}.
+encode (Object) ->
+	Attitude = Object#object.attitude,
+	{
+		[
+			{?ID_FIELD, Object#object.id},
+			{?IS_LOCKED_FIELD, Object#object.is_locked},
+			{?TAGS_FIELD, Object#object.tags},
+			{?WIDTH_FIELD, Object#object.width},
+			{?HEIGHT_FIELD, Object#object.height},
+			{?X_FIELD, Attitude#attitude.x},
+			{?Y_FIELD, Attitude#attitude.y},
+			{?Z_FIELD, Attitude#attitude.z},
+			{?ANGLE_FIELD, Attitude#attitude.angle},
+			{?PROPERTIES_FIELD, encode_properties(Object#object.properties)}
+		]
+	}.
