@@ -124,5 +124,11 @@ encode
 	{
 		[
 			{?ACTOR_IX_FIELD, ActorIX},
+			{?ACTION_ID_FIELD, ?MOVE_ACTION_ID},
+			{?OBJECTS_FIELD, IDs},
+			{?X_FIELD, X},
+			{?Y_FIELD, Y},
+			{?Z_FIELD, Z},
+			{?ANGLE_FIELD, Angle}
 		]
 	}.

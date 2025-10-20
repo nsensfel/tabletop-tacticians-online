@@ -41,7 +41,7 @@ new (Room, Username) ->
 				?HISTORY_FIELD,
 				lists:map
 				(
-					fun encode_room_action/1,
+					fun room_action:encode/1,
 					room_db_entry:get_history(Room)
 				)
 			},
@@ -74,7 +74,7 @@ new (Room, Username) ->
 				?USERS_FIELD,
 				lists:map
 				(
-					fun encode_room_action/1,
+					fun room_user:encode/1,
 					room_db_entry:get_users(Room)
 				)
 			}

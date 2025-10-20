@@ -7,24 +7,9 @@
 
 -record
 (
-	user,
-	{
-		color :: binary(),
-		username :: user_db_entry:id(),
-		displayed_name :: binary(),
-		avatar :: binary(),
-		current_history_ix :: non_neg_integer(),
-		is_pinged :: boolean()
-	}
-).
-
--type user_data() :: #user{}.
-
--record
-(
 	lobby_user,
 	{
-		user :: user_data(),
+		user :: room_user:type(),
 		message :: binary(),
 		declined :: boolean()
 	}
@@ -44,13 +29,13 @@
 		history_last_ix :: non_neg_integer(),
 		lobby :: #{ ataxia_id:type() => lobby_user_data() },
 		chat :: list(chat_message:type()),
-		user_data :: #{ ataxia_id:type() => user_data() }
+		user_data :: #{ ataxia_id:type() => room_user:type() }
 	}
 ).
 
 -opaque type() :: #room{}.
 
--export_type([user_data/0, type/0, id/0]).
+-export_type([type/0, id/0]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% EXPORTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -154,19 +139,14 @@ ataxia_add_to_history (Action, Room) ->
 ataxia_update_user_history_index (UserID, S0Room) ->
 	S0UserData = get_user_data(UserID, S0Room),
 	LastHistoryIX = S0Room#room.history_last_ix,
+	{AtaxicUserUpdate, UpdatedUser} =
+		room_user:ataxia_set_current_history_index(UserID, S0UserData),
+
 	AtaxicUpdate0 =
 		ataxic:update_field
 		(
 			get_user_data_field(),
-			ataxic_sugar:update_map_element
-			(
-				UserID,
-				ataxic:update_field
-				(
-					#user.current_history_ix,
-					ataxic:constant(LastHistoryIX)
-				)
-			)
+			ataxic_sugar:update_map_element(UserID, AtaxicUserUpdate)
 		),
 	S1Room =
 		S0Room#room
@@ -175,14 +155,15 @@ ataxia_update_user_history_index (UserID, S0Room) ->
 				maps:put
 				(
 					UserID,
-					S0UserData#user{ current_history_ix = LastHistoryIX },
+					UpdatedUser,
 					S0Room#room.user_data
 				)
 		},
 	LowestHistoryIX =
 		maps:fold
 		(
-			fun (_Key, #user{ current_history_ix = IX }, MinIX) ->
+			fun (_Key, User, MinIX) ->
+				IX = room_user:get_history_index(User),
 				case MinIX =< IX of
 					true -> MinIX;
 					_ -> IX
@@ -223,7 +204,7 @@ ataxia_update_user_history_index (UserID, S0Room) ->
 			}
 	end.
 
--spec get_user_data (ataxia_id:type(), type()) -> user_data().
+-spec get_user_data (ataxia_id:type(), type()) -> room_user:type().
 get_user_data (UserID, Room) -> maps:get(UserID, Room#room.user_data).
 
 -spec get_objects (type()) -> #{ ataxia_id:type() => room_object:type() }.
@@ -232,7 +213,7 @@ get_objects (Room) -> Room#room.objects.
 -spec get_history_for (ataxia_id:type(), type()) -> list(room_action:type()).
 get_history_for (UserID, Room) ->
 	UserData = get_user_data(UserID, Room),
-	CurrentHistoryIX = UserData#user.current_history_ix,
+	CurrentHistoryIX = room_user:get_history_index(UserData),
 	LastHistoryIX = Room#room.history_last_ix,
 	History = Room#room.history,
 	lists:sublist(History, LastHistoryIX - CurrentHistoryIX).

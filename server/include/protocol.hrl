@@ -13,6 +13,7 @@
 -define(BACK_FIELD, <<"bac">>).
 -define(CATEGORY_FIELD, <<"cat">>).
 -define(CHAT_FIELD, <<"cha">>).
+-define(COLOR_FIELD, <<"col">>).
 -define(CONTAINS_FIELD, <<"con">>).
 -define(CONTENT_FIELD, <<"ctn">>).
 -define(DISPLAYED_NAME_FIELD, <<"dnm">>).
@@ -26,6 +27,7 @@
 -define(IS_DISPLAYED_FIELD, <<"dis">>).
 -define(IS_FLIPPED_FIELD, <<"fli">>).
 -define(IS_LOCKED_FIELD, <<"lok">>).
+-define(IS_PINGED_FIELD, <<"pin">>).
 -define(LOBBY_FIELD, <<"lby">>).
 -define(MESSAGE_FIELD, <<"msg">>).
 -define(OBJECTS_FIELD, <<"obj">>).
@@ -41,6 +43,7 @@
 -define(TARGETS_FIELD, <<"tar">>).
 -define(TYPE_FIELD, <<"typ">>).
 -define(URL_FIELD, <<"url">>).
+-define(USERNAME_FIELD, <<"urn">>).
 -define(USERS_FIELD, <<"usr">>).
 -define(USER_HISTORY_INDEX_FIELD, <<"uhx">>).
 -define(USER_ID_FIELD, <<"uid">>).
