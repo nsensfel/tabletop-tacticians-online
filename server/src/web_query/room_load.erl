@@ -72,11 +72,11 @@ set_request_ataxia_client (AtaxiaClient, Request) ->
 -spec user_management (request()) ->
 	{
 		request(),
-		({ok, list(any())} | {error, list(any())})
+		({ok, web_reply:type()} | {error, web_reply:type()})
 	}.
 user_management (Request) ->
 	{AtaxiaClient, QueryResult} =
-		query_user_management:handle
+		query_user_management:handle_session
 		(
 			get_request_ataxia_client(Request),
 			get_request_user_version(Request),
@@ -89,15 +89,15 @@ user_management (Request) ->
 	(
 		{
 			request(),
-			({ok, list(any())} | {error, binary()})
+			({ok, web_reply:type()} | {error, web_reply:type()})
 		}
 	)
 	->
 	{
 		request(),
 		(
-			{ok, list(any()), ataxia_client_data:type(room_db_entry:type())}
-			| {error, list(any())}
+			{ok, web_reply:type(), ataxia_client_data:type(room_db_entry:type())}
+			| {error, web_reply:type()}
 		)
 	}.
 fetch_data ({Request, {ok, ServerCmdList}}) ->
@@ -130,7 +130,15 @@ fetch_data ({Request, {ok, ServerCmdList}}) ->
 					)
 				};
 
-			Error -> {error, error_reply:new(ataxia_error:to_string(Error))}
+			Error ->
+				{
+					error,
+					web_reply:add_fragment
+					(
+						error_reply:new(ataxia_error:to_string(Error)),
+						ServerCmdList
+					)
+				}
 		end
 	};
 fetch_data (Error) -> Error.
@@ -142,28 +150,29 @@ fetch_data (Error) -> Error.
 			(
 				{
 					ok,
-					list(any()),
+					web_reply:type(),
 					ataxia_client_data:type(room_db_entry:type())
 				}
-				| {error, list(any())}
+				| {error, web_reply:type()}
 			)
 		}
 	)
-	-> list(any()).
+	-> web_reply:type().
 generate_reply ({Request, {ok, CurrentReplies, DBEntry}}) ->
-	[
+	web_reply:add_fragment
+	(
 		set_room_reply:new
 		(
 			ataxia_client_data:get_value(DBEntry),
 			get_request_user_id(Request)
-		)
-		|CurrentReplies
-	];
+		),
+		CurrentReplies
+	);
 generate_reply ({_Request, {error, CurrentReplies}}) -> CurrentReplies.
 
 
 %%%% MAIN LOGIC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec handle (web_query:type()) -> binary().
+-spec handle (web_query:type()) -> web_reply:type().
 handle (Query) ->
 	{ok, Request} = decode_request(Query), % Add lockJanitor in this decode function.
 	PostUserManagement =	user_management(Request),
@@ -177,5 +186,5 @@ out(A) ->
 	{
 		content,
 		"application/json; charset=UTF-8",
-		jiffy:encode(handle(web_query:new(A)))
+		web_reply:encode(handle(web_query:new(A)))
 	}.

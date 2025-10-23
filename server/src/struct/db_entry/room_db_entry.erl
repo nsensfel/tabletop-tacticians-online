@@ -1,5 +1,7 @@
 -module(room_db_entry).
 
+-include("protocol.hrl").
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% TYPES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -23,13 +25,13 @@
 	{
 		name :: binary(),
 		game_id :: ataxia_id:type(),
-		objects :: #{ ataxia_id:type() => room_object:type() },
+		objects :: #{ room_object:id() => room_object:type() },
 		% It would be better for the list to be recent to old
 		history :: list(room_action:type()),
 		history_last_ix :: non_neg_integer(),
-		lobby :: #{ ataxia_id:type() => lobby_user_data() },
-		chat :: list(chat_message:type()),
-		user_data :: #{ ataxia_id:type() => room_user:type() }
+		lobby :: #{ user_db_entry:id() => lobby_user_data() },
+		chat :: list(room_chat_message:type()),
+		user_data :: #{ user_db_entry:id() => room_user:type() }
 	}
 ).
 
@@ -60,6 +62,7 @@
 	]
 ).
 
+-export([encode/1]).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% LOCAL FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -68,7 +71,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% EXPORTED FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec ataxic_is_user_in_room (user_db_entry:id()) -> ataxic:basic().
+-spec ataxic_is_user_in_room (user_db_entry:id()) -> ataxic:type().
 ataxic_is_user_in_room (PlayerID) ->
 	ataxic:field
 	(
@@ -132,7 +135,7 @@ ataxia_add_to_history (Action, Room) ->
 
 -spec ataxia_update_user_history_index
 	(
-		ataxia_id:type(),
+		user_db_entry:id(),
 		type()
 	)
 	-> {ataxic:type(), type()}.
@@ -163,7 +166,7 @@ ataxia_update_user_history_index (UserID, S0Room) ->
 		maps:fold
 		(
 			fun (_Key, User, MinIX) ->
-				IX = room_user:get_history_index(User),
+				IX = room_user:get_current_history_index(User),
 				case MinIX =< IX of
 					true -> MinIX;
 					_ -> IX
@@ -204,16 +207,16 @@ ataxia_update_user_history_index (UserID, S0Room) ->
 			}
 	end.
 
--spec get_user_data (ataxia_id:type(), type()) -> room_user:type().
+-spec get_user_data (user_db_entry:id(), type()) -> room_user:type().
 get_user_data (UserID, Room) -> maps:get(UserID, Room#room.user_data).
 
 -spec get_objects (type()) -> #{ ataxia_id:type() => room_object:type() }.
 get_objects (Room) -> Room#room.objects.
 
--spec get_history_for (ataxia_id:type(), type()) -> list(room_action:type()).
+-spec get_history_for (user_db_entry:id(), type()) -> list(room_action:type()).
 get_history_for (UserID, Room) ->
 	UserData = get_user_data(UserID, Room),
-	CurrentHistoryIX = room_user:get_history_index(UserData),
+	CurrentHistoryIX = room_user:get_current_history_index(UserData),
 	LastHistoryIX = Room#room.history_last_ix,
 	History = Room#room.history,
 	lists:sublist(History, LastHistoryIX - CurrentHistoryIX).
@@ -230,3 +233,68 @@ get_history_last_ix_field () -> #room.history_last_ix.
 
 -spec get_user_data_field () -> non_neg_integer().
 get_user_data_field () -> #room.user_data.
+
+%%%% ENCODING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+-spec encode (type()) -> {list({binary(), any()})}.
+encode (Room) ->
+	{
+		[
+			{?ROOM_NAME_FIELD, Room#room.name},
+			{?ROOM_GAME_ID_FIELD, Room#room.game_id},
+			{
+				?OBJECTS_FIELD,
+				lists:map
+				(
+					fun room_object:encode/1,
+					maps:to_list(Room#room.objects)
+				)
+			},
+			{
+				?HISTORY_FIELD,
+				lists:map
+				(
+					fun room_action:encode/1,
+					Room#room.history
+				)
+			},
+			{
+				?HISTORY_INDEX_FIELD,
+				Room#room.history_last_ix
+			},
+			{
+				?LOBBY_FIELD,
+				lists:map
+				(
+					fun (LobbyEntry) ->
+						{
+							[
+								{?MESSAGE_FIELD, LobbyEntry#lobby_user.message},
+								{
+									?USER_FIELD,
+									room_user:encode(LobbyEntry#lobby_user.user)
+								},
+								{?DECLINED_FIELD, LobbyEntry#lobby_user.declined}
+							]
+						}
+					end,
+					maps:to_list(Room#room.lobby)
+				)
+			},
+			{
+				?CHAT_FIELD,
+				lists:map
+				(
+					fun room_chat_message:encode/1,
+					Room#room.chat
+				)
+			},
+			{
+				?USERS_FIELD,
+				lists:map
+				(
+					fun room_user:encode/1,
+					maps:to_list(Room#room.user_data)
+				)
+			}
+		]
+	}.

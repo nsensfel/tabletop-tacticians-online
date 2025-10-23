@@ -4,7 +4,7 @@
 (
 	move,
 	{
-		objects_id :: list(room_object:id()),
+		object_ids :: list(room_object:id()),
 		offset_x :: integer(),
 		offset_y :: integer(),
 		offset_z :: integer(),
@@ -33,7 +33,7 @@
 (
 	flip,
 	{
-		objects_id :: list(room_object:id())
+		object_ids :: list(room_object:id())
 	}
 ).
 
@@ -41,7 +41,7 @@
 (
 	rotate,
 	{
-		objects_id :: list(room_object:id()),
+		object_ids :: list(room_object:id()),
 		angle_offset :: integer()
 	}
 ).
@@ -50,7 +50,7 @@
 (
 	set_face,
 	{
-		objects_id :: list(room_object:id()),
+		object_ids :: list(room_object:id()),
 		previous_faces :: list(non_neg_integer()),
 		new_face :: non_neg_integer()
 	}
@@ -70,7 +70,7 @@
 (
 	roll,
 	{
-		objects_id :: list(room_object:id()),
+		object_ids :: list(room_object:id()),
 		previous_faces :: list(non_neg_integer()),
 		new_faces :: list(non_neg_integer())
 	}

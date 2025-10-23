@@ -7,7 +7,7 @@
 -define(ACTION_FIELD, <<"act">>).
 -define(ACTION_ID_FIELD, <<"aid">>).
 -define(ACTIVE_FACE_FIELD, <<"afa">>).
--define(ACTOR_IX_FIELD, <<"aix">>).
+-define(ACTOR_ID_FIELD, <<"aci">>).
 -define(ANGLE_FIELD, <<"a">>).
 -define(AVATAR_FIELD, <<"avt">>).
 -define(BACK_FIELD, <<"bac">>).
@@ -17,6 +17,7 @@
 -define(CONTAINS_FIELD, <<"con">>).
 -define(CONTENT_FIELD, <<"ctn">>).
 -define(DISPLAYED_NAME_FIELD, <<"dnm">>).
+-define(DECLINED_FIELD, <<"dcl">>).
 -define(EMAIL_FIELD, <<"eml">>).
 -define(FACES_FIELD, <<"fac">>).
 -define(FRONT_FIELD, <<"fro">>).
@@ -36,6 +37,7 @@
 -define(PROPERTIES_FIELD, <<"pro">>).
 -define(ROOM_GAME_ID_FIELD, <<"rgi">>).
 -define(ROOM_ID_FIELD, <<"rid">>).
+-define(ROOM_FIELD, <<"rom">>).
 -define(ROOM_NAME_FIELD, <<"rnm">>).
 -define(SESSION_TOKEN_FIELD, <<"sto">>).
 -define(SHOWS_CARD_FIELD, <<"shc">>).
@@ -45,6 +47,7 @@
 -define(URL_FIELD, <<"url">>).
 -define(USERNAME_FIELD, <<"urn">>).
 -define(USERS_FIELD, <<"usr">>).
+-define(USER_FIELD, <<"u">>).
 -define(USER_HISTORY_INDEX_FIELD, <<"uhx">>).
 -define(USER_ID_FIELD, <<"uid">>).
 -define(USER_VERSION_FIELD, <<"uvr">>).

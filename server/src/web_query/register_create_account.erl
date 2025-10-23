@@ -67,7 +67,7 @@ get_request_avatar (#request{ avatar = Result }) -> Result.
 -spec get_request_displayed_name (request()) -> binary().
 get_request_displayed_name (#request{ displayed_name = Result }) -> Result.
 
--spec set_request_displayed_name (binary(), request()) -> binary().
+-spec set_request_displayed_name (binary(), request()) -> request().
 set_request_displayed_name (Name, Request) ->
 	Request#request{ displayed_name = Name}.
 
@@ -174,7 +174,7 @@ validate_request (Request) ->
 
 -spec fetch_data ({'ok', request()} | {'error', binary()}) ->
 	(
-		{'ok', request(), ataxia_client_data:type()}
+		{'ok', request()}
 		| {'error', binary()}
 	).
 fetch_data ({ok, Request}) ->
@@ -197,14 +197,15 @@ fetch_data (Error) -> Error.
 
 -spec create_new_user
 	(
-			request()
+		{'ok', request()}
+		| {'error', binary()}
 	)
 	->
 	(
 		{'ok', non_neg_integer(), binary(), binary()}
 		| {'error', binary()}
 	).
-create_new_user (Request) ->
+create_new_user ({ok, Request}) ->
 	S0AtaxiaClient = get_request_ataxia_client(Request),
 	Username = get_request_username(Request),
 	S0User =
@@ -232,16 +233,18 @@ create_new_user (Request) ->
 	case AddAtResult of
 		{ok, Version} -> {ok, Version, Username, SessionToken};
 		{error, _} -> {error, ataxia_error:to_string(AddAtResult)}
-	end.
+	end;
+create_new_user (Other) -> Other.
 
 -spec generate_reply
 	(
 		{'ok', non_neg_integer(), binary(), binary()}
 		| {'error', binary()}
 	)
-	-> list(any()).
+	-> web_reply:type().
 generate_reply ({ok, Version, Username, SessionToken}) ->
-	[
+	web_reply:new
+	(
 		set_session_reply:new
 		(
 			Version,
@@ -249,14 +252,12 @@ generate_reply ({ok, Version, Username, SessionToken}) ->
 			SessionToken,
 			[] % No rooms yet.
 		)
-	];
+	);
 generate_reply ({error, ErrorMessage}) ->
-	[
-		error_reply:new(ErrorMessage)
-	].
+	web_reply:new(error_reply:new(ErrorMessage)).
 
 %%%% MAIN LOGIC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec handle (web_query:type()) -> binary().
+-spec handle (web_query:type()) -> web_reply:type().
 handle (Query) ->
 	{ok, Request} = decode_request(Query),
 	ValidateRequestResult = validate_request(Request),
@@ -271,5 +272,5 @@ out(A) ->
 	{
 		content,
 		"application/json; charset=UTF-8",
-		jiffy:encode(handle(web_query:new(A)))
+		web_reply:encode(handle(web_query:new(A)))
 	}.

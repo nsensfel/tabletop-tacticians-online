@@ -87,38 +87,36 @@ fetch_data (Request) ->
 
 -spec generate_session_token
 	(
-		ataxia_lock_janitor:type(),
-		ataxia_client:type(),
+		request(),
 		ataxia_client_data:type()
 	)
 	->
 	(
-		{'ok', binary()}
+		{'ok', request(), binary()}
 		| {'error', binary()}
 	).
-generate_session_token(LockJanitor, S0AtaxiaClient, S0DBData) ->
-	Username = ataxia_client_data:get_id(S0DBData),
-	Lock = ataxia_client_data:get_lock(S0DBData),
-	Version = ataxia_client_data:get_version(S0DBData),
+generate_session_token(S0Request, S0DBData) ->
+	LockJanitor = get_request_lock_janitor(S0Request),
+	S0AtaxiaClient = get_request_ataxia_client(S0Request),
 	S0User = ataxia_client_data:get_value(S0DBData),
 	{AtaxicUpdate, S1User, SessionToken} =
 		user_db_entry:ataxia_add_token(S0User),
-	{_S1AtaxiaClient, UpdateResult} =
-		ataxia_client:safe_update
-		(
-			S0AtaxiaClient,
-			user_db,
-			Username,
-			Lock,
-			AtaxicUpdate,
-			Version,
-			S1User
-		),
 
-	ataxia_lock_janitor:release_lock(Lock, LockJanitor),
+	S1DBData = ataxia_client_data:add_update(AtaxicUpdate, S1User, S0DBData),
+
+	{S1AtaxiaClient, UpdateResult} =
+		ataxia_client:safe_update(S0AtaxiaClient, S1DBData),
+
+	S1Request = set_request_ataxia_client(S1AtaxiaClient, S0Request),
+
+	ataxia_lock_janitor:release_lock
+	(
+		ataxia_client_data:get_lock(S1DBData),
+		LockJanitor
+	),
 
 	case UpdateResult of
-		{ok, _NewVersion} -> {ok, SessionToken};
+		{ok, _NewVersion} -> {ok, S1Request, SessionToken};
 		{error, _} -> {error, ataxia_error:to_string(UpdateResult)}
 	end.
 
@@ -132,13 +130,13 @@ generate_session_token(LockJanitor, S0AtaxiaClient, S0DBData) ->
 		{'ok', request(), binary()}
 		| {'error', binary()}
 	).
-update_data ({ok, Request, S0DBData}) ->
-	Username = get_request_username(Request),
-	LockJanitor = get_request_lock_janitor(Request),
-	S0AtaxiaClient = get_request_ataxia_client(Request),
+update_data ({ok, S0Request, S0DBData}) ->
+	Username = get_request_username(S0Request),
+	LockJanitor = get_request_lock_janitor(S0Request),
+	S0AtaxiaClient = get_request_ataxia_client(S0Request),
 	S0User = ataxia_client_data:get_value(S0DBData),
 	S0Version = ataxia_client_data:get_version(S0DBData),
-	case user_db_entry:password_is(get_request_password(Request), S0User) of
+	case user_db_entry:password_is(get_request_password(S0Request), S0User) of
 		false -> {error, "Invalid password."};
 		true ->
 			{S1AtaxiaClient, FetchResult} =
@@ -151,12 +149,13 @@ update_data ({ok, Request, S0DBData}) ->
 					S0Version,
 					S0User
 				),
+			S1Request = set_request_ataxia_client(S1AtaxiaClient, S0Request),
 
 			case FetchResult of
 				{ok, Lock} ->
 					ataxia_lock_janitor:store_lock(Lock, LockJanitor),
 					S1DBData = ataxia_client_data:set_lock(Lock, S0DBData),
-					generate_session_token(LockJanitor, S1AtaxiaClient, S1DBData);
+					generate_session_token(S1Request, S1DBData);
 
 				{ok, Lock, S1Version, S1User} ->
 					ataxia_lock_janitor:store_lock(Lock, LockJanitor),
@@ -168,7 +167,7 @@ update_data ({ok, Request, S0DBData}) ->
 							S1User,
 							S0DBData
 						),
-					generate_session_token(LockJanitor, S1AtaxiaClient, S1DBData);
+					generate_session_token(S1Request, S1DBData);
 
 				{error, _} ->
 					ataxia_lock_janitor:release_all(LockJanitor),
@@ -186,30 +185,31 @@ update_data (Error) -> Error.
 release_resources ({ok, Request, _}) ->
 	ataxia_lock_janitor:release_all(get_request_lock_janitor(Request)),
 	ok;
-release_resources (_Other) -> ok.
+release_resources ({error, _Other}) -> ok.
 
 -spec generate_reply
 	(
 		{'ok', ataxia_client_data:type(), binary()}
 		| {'error', binary()}
 	)
-	-> list(any()).
+	-> web_reply:type().
 generate_reply ({ok, DBEntry, SessionToken}) ->
 	User = ataxia_client_data:get_value(DBEntry),
-	[
+	web_reply:new
+	(
 		set_session_reply:new
 		(
 			ataxia_client_data:get_version(DBEntry),
 			user_db_entry:get_username(User),
 			SessionToken,
-			user_db_entry:get_pending_rooms(User)
+			user_db_entry:get_pending_room_list(User)
 		)
-	];
+	);
 generate_reply ({error, ErrorMessage}) ->
-	[ error_reply:new(ErrorMessage) ].
+	web_reply:new(error_reply:new(ErrorMessage)).
 
 %%%% MAIN LOGIC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec handle (web_query:type()) -> binary().
+-spec handle (web_query:type()) -> web_reply:type().
 handle (Query) ->
 	{ok, Request} = decode_request(Query),
 	FetchResult = fetch_data(Request),

@@ -70,10 +70,10 @@ set_request_ataxia_client (AtaxiaClient, Request) ->
 	Request#request{ ataxia_client = AtaxiaClient}.
 
 %%%% Request Processing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec authenticate_user (room_action_request:type()) ->
+-spec authenticate_user (request()) ->
 	{
 		request(),
-		({ok, list(any())} | {error, list(any())})
+		({ok, web_reply:type()} | {error, web_reply:type()})
 	}.
 authenticate_user (Request) ->
 	{AtaxiaClient, Result} =
@@ -87,12 +87,15 @@ authenticate_user (Request) ->
 
 	{set_request_ataxia_client(AtaxiaClient, Request), Result}.
 
--spec fetch_data ({request(), ({ok, list(any())} | {error, list(any())})}) ->
+-spec fetch_data
+(
+	{request(), ({ok, web_reply:type()} | {error, web_reply:type()})}
+) ->
 	{
 		request(),
 		(
-			{ok, ataxia_client_data:type(room_db_entry:type()), list(any())}
-			| {error, list(any())}
+			{ok, ataxia_client_data:type(room_db_entry:type()), web_reply:type()}
+			| {error, web_reply:type()}
 		)
 	}.
 fetch_data ({Request, {ok, CurrentReplies}}) ->
@@ -109,7 +112,7 @@ fetch_data ({Request, {ok, CurrentReplies}}) ->
 		),
 
 	{
-		room_db_entry:set_ataxia_client(AtaxiaClient, Request),
+		set_request_ataxia_client(AtaxiaClient, Request),
 		case FetchResult of
 			{ok, RoomVersion, RoomData} ->
 				{
@@ -128,39 +131,46 @@ fetch_data ({Request, {ok, CurrentReplies}}) ->
 			{error, Error} ->
 				{
 					error,
-					[error_reply:new(ataxia_error:to_string(Error)) | CurrentReplies]
+					web_reply:add_fragment
+					(
+						error_reply:new(ataxia_error:to_string(Error)),
+						CurrentReplies
+					)
 				}
 		end
 	};
 fetch_data (Other) -> Other.
 
 -spec generate_reply
-	(
-		{
-			request(),
-			(
-				{ok, ataxia_client_data:type(room_db_entry:type()), list(any())}
-				| {error, list(any())}
-			)
-		}
-	)
-	-> list(any()).
-generate_reply ({Request, {ok, DBData, CurrentReplies}}) ->
-	NewReplies =
-		lists:map
+(
+	{
+		request(),
 		(
-			fun add_history_item_reply:new/1,
-			room_db_entry:get_history_since
-			(
-				get_request_history_index(Request),
-				ataxia_client_data:get_value(DBData)
-			)
+			{
+				ok,
+				ataxia_client_data:type(room_db_entry:type()),
+				web_reply:type()
+			}
+			| {error, web_reply:type()}
+		)
+	}
+)
+-> web_reply:type().
+generate_reply ({Request, {ok, DBData, CurrentReplies}}) ->
+	web_reply:add_fragment
+	(
+		history_update_reply:new
+		(
+			get_request_user_id(Request),
+			get_request_history_index(Request),
+			ataxia_client_data:get_value(DBData)
 		),
-	NewReplies ++ CurrentReplies;
+		CurrentReplies
+	);
 generate_reply ({_Request, {error, CurrentReplies}}) -> CurrentReplies.
 
 %%%% MAIN LOGIC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec handle (web_query:type()) -> list(any()).
+-spec handle (web_query:type()) -> web_reply:type().
 handle (Query) ->
 	{ok, Request} = decode_request(Query),
 	PostAuthentication = authenticate_user(Request),
@@ -174,5 +184,5 @@ out(A) ->
 	{
 		content,
 		"application/json; charset=UTF-8",
-		jiffy:encode(handle(web_query:new(A)))
+		web_reply:encode(handle(web_query:new(A)))
 	}.

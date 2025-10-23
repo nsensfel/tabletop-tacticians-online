@@ -5,6 +5,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% TYPES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+-type id() :: ataxia_id:type().
+
 -record
 (
 	card,
@@ -31,7 +33,7 @@
 	{
 		url :: binary(),
 		shows_card :: boolean(),
-		contains :: list(ataxia_id:type())
+		contains :: list(id())
 	}
 ).
 
@@ -54,9 +56,9 @@
 (
 	object,
 	{
-		id :: ataxia_id:type(),
+		id :: id(),
 		is_locked :: boolean(),
-		tags :: ordset:ordset(binary()),
+		tags :: ordsets:ordset(binary()),
 		width :: non_neg_integer(),
 		height :: non_neg_integer(),
 		attitude :: attitude(),
@@ -69,7 +71,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% EXPORTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--export_type([type/0, attitude/0]).
+-export_type([type/0, attitude/0, id/0]).
 %%%% Accessors
 -export
 (
@@ -83,6 +85,21 @@
 		get_properties/1,
 		get_is_locked/1,
 		get_tags/1,
+
+		attitude_get_x/1,
+		attitude_get_y/1,
+		attitude_get_z/1,
+		attitude_get_angle/1,
+
+		attitude_set_x/2,
+		attitude_set_y/2,
+		attitude_set_z/2,
+		attitude_set_angle/2,
+
+		ataxia_attitude_set_x/2,
+		ataxia_attitude_set_y/2,
+		ataxia_attitude_set_z/2,
+		ataxia_attitude_set_angle/2,
 
 		set_id/2,
 		set_width/2,
@@ -130,7 +147,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -spec new
 	(
-		ataxia_id:type(),
+		id(),
 		non_neg_integer(),
 		non_neg_integer(),
 		attitude(),
@@ -141,7 +158,7 @@ new (ID, Width, Height, Attitude, Properties) ->
 	{
 		id = ID,
 		is_locked = false,
-		tags = ordset:empty(),
+		tags = ordsets:new(),
 		width = Width,
 		height = Height,
 		attitude = Attitude,
@@ -149,7 +166,7 @@ new (ID, Width, Height, Attitude, Properties) ->
 	}.
 
 %%%% GET %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec get_id (type()) -> ataxia_id:type().
+-spec get_id (type()) -> id().
 get_id (#object{ id = Result }) -> Result.
 
 -spec get_width (type()) -> non_neg_integer().
@@ -167,11 +184,23 @@ get_properties (#object{ properties = Result }) -> Result.
 -spec get_is_locked (type()) -> boolean().
 get_is_locked (#object{ is_locked = Result }) -> Result.
 
--spec get_tags (type()) -> ordset:ordset(binary()).
+-spec get_tags (type()) -> ordsets:ordset(binary()).
 get_tags (#object{ tags = Result }) -> Result.
 
+-spec attitude_get_x (attitude()) -> non_neg_integer().
+attitude_get_x (#attitude{ x = Result }) -> Result.
+
+-spec attitude_get_y (attitude()) -> non_neg_integer().
+attitude_get_y (#attitude{ y = Result }) -> Result.
+
+-spec attitude_get_z (attitude()) -> non_neg_integer().
+attitude_get_z (#attitude{ z = Result }) -> Result.
+
+-spec attitude_get_angle (attitude()) -> non_neg_integer().
+attitude_get_angle (#attitude{ angle = Result }) -> Result.
+
 %%%% SET %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec set_id (ataxia_id:type(), type()) -> type().
+-spec set_id (id(), type()) -> type().
 set_id (Value, Object) -> Object#object{ id = Value }.
 
 -spec set_width (non_neg_integer(), type()) -> type().
@@ -189,8 +218,20 @@ set_properties (Value, Object) -> Object#object{ properties = Value }.
 -spec set_is_locked (boolean(), type()) -> type().
 set_is_locked (Value, Object) -> Object#object{ is_locked = Value }.
 
--spec set_tags (ordset:ordset(binary()), type()) -> type().
+-spec set_tags (ordsets:ordset(binary()), type()) -> type().
 set_tags (Value, Object) -> Object#object{ tags = Value }.
+
+-spec attitude_set_x (non_neg_integer(), attitude()) -> attitude().
+attitude_set_x (X, Result) -> Result#attitude{ x = X }.
+
+-spec attitude_set_y (non_neg_integer(), attitude()) -> attitude().
+attitude_set_y (Y, Result) -> Result#attitude{ y = Y }.
+
+-spec attitude_set_z (non_neg_integer(), attitude()) -> attitude().
+attitude_set_z (Z, Result) -> Result#attitude{ z = Z }.
+
+-spec attitude_set_angle (non_neg_integer(), attitude()) -> attitude().
+attitude_set_angle (Angle, Result) -> Result#attitude{ angle = Angle }.
 
 %%%% ATAXIA SET %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -spec ataxia_set_is_locked (boolean(), type()) -> {ataxic:type(), type()}.
@@ -245,7 +286,7 @@ ataxia_update_attitude (AtaxicUpdate, Attitude, Object) ->
 -spec ataxia_update_tags
 	(
 		ataxic:type(),
-		ordset:ordset(binary()),
+		ordsets:ordset(binary()),
 		type()
 	)
 	-> {ataxic:type(), type()}.
@@ -265,6 +306,50 @@ ataxia_update_properties (Update, Value, Object) ->
 	{
 		ataxic:update_field(get_properties_field(), Update),
 		set_properties(Value, Object)
+	}.
+
+-spec ataxia_attitude_set_x (non_neg_integer(), attitude()) ->
+	{
+		ataxic:type(),
+		attitude()
+	}.
+ataxia_attitude_set_x (X, Result) ->
+	{
+		ataxic:update_field(attitude_get_x_field(), ataxic:constant(X)),
+		Result#attitude{ x = X }
+	}.
+
+-spec ataxia_attitude_set_y (non_neg_integer(), attitude()) ->
+	{
+		ataxic:type(),
+		attitude()
+	}.
+ataxia_attitude_set_y (Y, Result) ->
+	{
+		ataxic:update_field(attitude_get_y_field(), ataxic:constant(Y)),
+		Result#attitude{ y = Y }
+	}.
+
+-spec ataxia_attitude_set_z (non_neg_integer(), attitude()) ->
+	{
+		ataxic:type(),
+		attitude()
+	}.
+ataxia_attitude_set_z (Z, Result) ->
+	{
+		ataxic:update_field(attitude_get_z_field(), ataxic:constant(Z)),
+		Result#attitude{ z = Z }
+	}.
+
+-spec ataxia_attitude_set_angle (non_neg_integer(), attitude()) ->
+	{
+		ataxic:type(),
+		attitude()
+	}.
+ataxia_attitude_set_angle (Angle, Result) ->
+	{
+		ataxic:update_field(attitude_get_angle_field(), ataxic:constant(Angle)),
+		Result#attitude{ angle = Angle }
 	}.
 
 %%%% Field Accessors %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -302,7 +387,7 @@ attitude_get_angle_field () -> #attitude.angle.
 get_properties_field () -> #object.properties.
 
 %%%% Encoders %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec encode_properties (type()) -> {list({binary(), any()})}.
+-spec encode_properties (properties()) -> {list({binary(), any()})}.
 encode_properties
 (
 	#deck

@@ -11,7 +11,7 @@
 (
 	room,
 	{
-		id :: ataxia_id:type(),
+		id :: room_db_entry:id(),
 		game_id :: ataxia_id:type(),
 		name :: binary(),
 		is_pending :: boolean()
@@ -31,7 +31,7 @@
 		email :: binary(),
 		displayed_name :: binary(),
 		avatar :: binary(),
-		room_list :: #{ataxia_id:type() => room()}
+		room_list :: #{room_db_entry:id() => room()}
 	}
 ).
 
@@ -144,7 +144,8 @@ new (Username, Password, Email, DisplayedName, Avatar) ->
 			tokens = ordsets:new(),
 			email = Email,
 			displayed_name = DisplayedName,
-			avatar = Avatar
+			avatar = Avatar,
+			room_list = #{ }
 		},
 
 	set_password(Password, Result).
@@ -230,7 +231,7 @@ ataxia_add_token (S0User) ->
 -spec ataxia_remove_token (binary(), type()) -> {ataxic:type(), type()}.
 ataxia_remove_token (Token, S0User) ->
 	S1User =
-		S0User#user{ tokens = ordset:del_element(Token, S0User#user.tokens) },
+		S0User#user{ tokens = ordsets:del_element(Token, S0User#user.tokens) },
 	{
 		ataxic:update_field
 		(
@@ -337,4 +338,4 @@ password_is (Val, User) ->
 	(HashedSaltedCandidate == HashedSaltedVal).
 
 -spec has_session_token (binary(), type()) -> boolean().
-has_session_token (Val, User) -> ordset:is_element(Val, User#user.tokens).
+has_session_token (Val, User) -> ordsets:is_element(Val, User#user.tokens).

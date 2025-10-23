@@ -1,4 +1,4 @@
--module(pending_rooms_update_reply).
+-module(history_update_reply).
 
 -include("protocol.hrl").
 
@@ -9,40 +9,34 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% EXPORTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--export([new/1, embedded/1]).
+-export([new/3]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% LOCAL FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%% Request Accessors %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%% SECURITY CHECK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%% MAIN LOGIC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% EXPORTED FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec new (list(user_db_entry:room())) -> web_reply:fragment().
-new (PendingRooms) ->
+-spec new
+(
+	user_db_entry:id(),
+	non_neg_integer(),
+	room_db_entry:type()
+)
+-> web_reply:fragment().
+new (Username, HistoryIX, Room) ->
 	{
 		[
-			{?MESSAGE_FIELD, ?PENDING_ROOMS_UPDATE_REPLY_ID},
-			{?CONTENT_FIELD, embedded(PendingRooms)}
+			% TODO...
 		]
 	}.
-
--spec embedded (list(user_db_entry:room())) -> list(list({binary(), any()})).
-embedded (PendingRooms) ->
-	lists:map
-	(
-		fun (Room) ->
-			[
-				{?ROOM_ID_FIELD, user_db_entry:room_get_id(Room)},
-				{?ROOM_NAME_FIELD, user_db_entry:room_get_name(Room)},
-				{?ROOM_GAME_ID_FIELD, user_db_entry:room_get_game_id(Room)}
-			]
-		end,
-		PendingRooms
-	).
+%			lists:map
+%			(
+%				fun add_history_item_reply:new/1,
+%				room_db_entry:get_history_since
+%				(
+%					get_request_history_index(Request),
+%					ataxia_client_data:get_value(DBData)
+%				)
+%			)

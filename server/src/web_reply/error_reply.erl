@@ -24,7 +24,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% EXPORTED FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec new (binary()) -> {list({binary(), any()})}.
+-spec new (binary()) -> web_reply:fragment().
 new (Message) ->
 	{
 		[
@@ -38,7 +38,7 @@ new (Message) ->
 new (CategoryID, Message) ->
 	{
 		[
-			{?MESSAGE_FIELD, ?ERROR_ID},
+			{?MESSAGE_FIELD, ?ERROR_REPLY_ID},
 			{?CATEGORY_FIELD, CategoryID},
 			{?CONTENT_FIELD, Message}
 		]

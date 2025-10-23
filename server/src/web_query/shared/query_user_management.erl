@@ -65,7 +65,7 @@ validate_session_token (_SessionToken, Other) -> Other.
 		non_neg_integer(),
 		({ok, ataxia_client_data:type()} | {error, binary()})
 	)
-	-> (ok | {ok, list(any())} | {error, binary()}).
+	-> ({ok, web_reply:type()} | {error, web_reply:type()}).
 generate_pending_room_list_update (UserVersion, {ok, DBEntry}) ->
 	Version = ataxia_client_data:get_version(DBEntry),
 	User = ataxia_client_data:get_value(DBEntry),
@@ -74,21 +74,25 @@ generate_pending_room_list_update (UserVersion, {ok, DBEntry}) ->
 		_ ->
 			{
 				ok,
-				[
+				web_reply:new
+				(
 					pending_rooms_update_reply:new
 					(
-						user_db_entry:get_pending_rooms(User)
+						user_db_entry:get_pending_room_list(User)
 					)
-				]
+				)
 			}
 	end;
 generate_pending_room_list_update (_UserVersion, {error, Message}) ->
 	{
 		error,
-		[
-			disconnect_reply:new(),
-			error_reply:new(Message)
-		]
+		web_reply:from_list
+		(
+			[
+				disconnect_reply:new(),
+				error_reply:new(Message)
+			]
+		)
 	}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -97,14 +101,14 @@ generate_pending_room_list_update (_UserVersion, {error, Message}) ->
 -spec handle_session
 	(
 		ataxia_client:type(),
-		binary(),
-		binary(),
+		non_neg_integer(),
+		user_db_entry:id(),
 		binary()
 	)
 	->
 	{
 		ataxia_client:type(),
-		({ok, list(any())} | {error, list(any)})
+		({ok, web_reply:type()} | {error, web_reply:type()})
 	}.
 handle_session (S0AtaxiaClient, UserVersion, Username, SessionToken) ->
 	{S1AtaxiaClient, FetchResult} = fetch_data(S0AtaxiaClient, Username),

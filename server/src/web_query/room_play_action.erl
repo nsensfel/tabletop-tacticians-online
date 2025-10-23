@@ -39,11 +39,11 @@ decode_action (Map) ->
 				ok,
 				#move
 				{
-					objects_id = maps:get(?TARGETS_FIELD),
-					offset_x = maps:get(?X_FIELD),
-					offset_y = maps:get(?Y_FIELD),
-					offset_z = maps:get(?Z_FIELD),
-					offset_angle = maps:get(?ANGLE_FIELD)
+					object_ids = maps:get(?TARGETS_FIELD, Map),
+					offset_x = maps:get(?X_FIELD, Map),
+					offset_y = maps:get(?Y_FIELD, Map),
+					offset_z = maps:get(?Z_FIELD, Map),
+					offset_angle = maps:get(?ANGLE_FIELD, Map)
 				}
 			};
 
@@ -52,11 +52,20 @@ decode_action (Map) ->
 				ok,
 				#ping
 				{
-					x = maps:get(?X_FIELD),
-					y = maps:get(?Y_FIELD)
+					x = maps:get(?X_FIELD, Map),
+					y = maps:get(?Y_FIELD, Map)
 				}
 			};
-		?FLIP_ACTION_ID -> {ok, room_action:new_flip(maps:get(?TARGETS_FIELD))};
+
+		?FLIP_ACTION_ID ->
+			{
+				ok,
+				#flip
+				{
+					object_ids = maps:get(?TARGETS_FIELD, Map)
+				}
+			};
+
 		_ -> error
 	end.
 
@@ -64,14 +73,19 @@ decode_action (Map) ->
 decode_request (Query) ->
 	Map = web_query:get_params(Query),
 	{ok, DecodedAct} = decode_action(maps:get(?ACTION_FIELD, Map)),
-	#request
 	{
-		user_id = maps:get(?USER_ID_FIELD, Map),
-		session_token = maps:get(?SESSION_TOKEN_FIELD, Map),
-		user_version = maps:get(?USER_VERSION_FIELD, Map),
-		room_id = maps:get(?ROOM_ID_FIELD, Map),
-		act = DecodedAct,
-		lock_janitor = ataxia_lock_client:new_janitor()
+		ok,
+		#request
+		{
+			user_id = maps:get(?USER_ID_FIELD, Map),
+			session_token = maps:get(?SESSION_TOKEN_FIELD, Map),
+			user_version = maps:get(?USER_VERSION_FIELD, Map),
+			room_id = maps:get(?ROOM_ID_FIELD, Map),
+			act = DecodedAct,
+			lock_janitor = ataxia_lock_client:new_janitor(),
+			client_history_ix = maps:get(?HISTORY_INDEX_FIELD, Map),
+			ataxia_client = ataxia_client:new()
+		}
 	}.
 
 %%%% Request Accessors %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -84,13 +98,17 @@ get_request_session_token (#request{ session_token = Result }) -> Result.
 -spec get_request_user_version (request()) -> non_neg_integer().
 get_request_user_version (#request{ user_version = Result }) -> Result.
 
+-spec get_request_client_history_ix (request()) -> non_neg_integer().
+get_request_client_history_ix (#request{ client_history_ix = Result }) ->
+	Result.
+
 -spec get_request_lock_janitor (request()) -> ataxia_lock_client:janitor().
 get_request_lock_janitor (#request{ lock_janitor = Result }) -> Result.
 
 -spec get_request_room_id (request()) -> ataxia_id:type().
 get_request_room_id (#request{ room_id = Result }) -> Result.
 
--spec get_request_act (request()) -> room_action:act().
+-spec get_request_act (request()) -> act().
 get_request_act (#request{ act = Result }) -> Result.
 
 -spec get_request_ataxia_client (request()) -> ataxia_client:type().
@@ -104,11 +122,11 @@ set_request_ataxia_client (Client, Request) ->
 -spec user_management (request()) ->
 	{
 		request(),
-		({ok, list(any())} | {error, list(any())})
+		({ok, web_reply:type()} | {error, web_reply:type()})
 	}.
 user_management (Request) ->
 	{AtaxiaClient, QueryResult} =
-		query_user_management:handle
+		query_user_management:handle_session
 		(
 			get_request_ataxia_client(Request),
 			get_request_user_version(Request),
@@ -121,15 +139,15 @@ user_management (Request) ->
 	(
 		{
 			request(),
-			({ok, list(any())} | {error, list(any())})
+			({ok, web_reply:type()} | {error, web_reply:type()})
 		}
 	)
 	->
 	{
 		request(),
 		(
-			{ok, list(any()), ataxia_client_data:type(room_db_entry:type())}
-			| {error, list(any())}
+			{ok, web_reply:type(), ataxia_client_data:type(room_db_entry:type())}
+			| {error, web_reply:type()}
 		)
 	}.
 fetch_data ({Request, {ok, CurrentReplies}}) ->
@@ -179,7 +197,7 @@ fetch_data (Other) -> Other.
 			request(),
 			(
 				{ok, ataxia_client_data:type(room_db_entry:type())}
-				| {error, list(any())}
+				| {error, web_reply:type()}
 			)
 		}.
 update_room_db (Request, Data) ->
@@ -234,8 +252,8 @@ update_room_db (Request, Data) ->
 		{
 			request(),
 			(
-				{ok, list(any()), ataxia_client_data:type(room_db_entry:type())}
-				| {error, list(any())}
+				{ok, web_reply:type(), ataxia_client_data:type(room_db_entry:type())}
+				| {error, web_reply:type()}
 			)
 		},
 		act()
@@ -243,7 +261,7 @@ update_room_db (Request, Data) ->
 	->
 	{
 		request(),
-		list(any())
+		web_reply:type()
 	}.
 apply_action
 (
@@ -263,7 +281,7 @@ apply_action
 	Move =
 		#move
 		{
-			objects_id = Targets,
+			object_ids = Targets,
 			offset_x = X,
 			offset_y = Y,
 			offset_z = Z,
@@ -348,7 +366,7 @@ apply_action
 			{AtaxicUpdate0, S1Room} =
 				room_db_entry:ataxia_add_to_history
 				(
-					room_history:move(UserID, Move),
+					room_action:new(UserID, Move),
 					ataxia_client_data:get_value(S0Data)
 				),
 
@@ -361,7 +379,7 @@ apply_action
 				),
 
 			{AtaxicUpdate2, S3Room} =
-				room_db_entry:update_user_history_index(UserID, S2Room),
+				room_db_entry:ataxia_update_user_history_index(UserID, S2Room),
 
 			S1Data =
 				ataxia_client_data:add_update
@@ -382,17 +400,30 @@ apply_action
 			{
 				S1Request,
 				case DBUpdateResult of
-					{ok, S2Data} ->
-						(generate_reply(S1Request, S2Data) ++ CurrentReplies);
+					{ok, _S2Data} ->
+						web_reply:add_fragment
+						(
+							history_update_reply:new
+							(
+								get_request_user_id(S1Request),
+								get_request_client_history_ix(S1Request),
+								S3Room
+							),
+							CurrentReplies
+						);
 
-					{error, Errors} -> (Errors ++ CurrentReplies)
+					{error, Errors} -> web_reply:merge(Errors, CurrentReplies)
 				end
 			};
 
 		error ->
 			{
 				S0Request,
-				[error_reply:new(<<"Action failed.">>) | CurrentReplies]
+				web_reply:add_fragment
+				(
+					error_reply:new(<<"Action failed.">>),
+					CurrentReplies
+				)
 			}
 	end;
 apply_action
@@ -429,25 +460,29 @@ apply_action
 	{
 		S1Request,
 		case DBUpdateResult of
-			{ok, S2Data} -> (generate_reply(S1Request, S2Data) ++ CurrentReplies);
+			{ok, _S2Data} ->
+				web_reply:add_fragment
+				(
+					history_update_reply:new
+					(
+						get_request_user_id(S1Request),
+						get_request_client_history_ix(S1Request),
+						UpdatedRoom
+					),
+					CurrentReplies
+				);
+
 			{error, Errors} -> (Errors ++ CurrentReplies)
 		end
 	}.
 
--spec release_resources ({ request(), list(any()) }) -> list(any()).
+-spec release_resources ({ request(), web_reply:type() }) -> web_reply:type().
 release_resources ({ Request, Replies }) ->
 	ataxia_lock_client:release_all(get_request_lock_janitor(Request)),
 	Replies.
 
--spec generate_reply
-	(
-		request(),
-		ataxia_client_data:type(room_db_entry:type())
-	) -> list(any()).
-generate_reply (_Request, _S0Data) -> [ ].
-
 %%%% MAIN LOGIC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec handle (web_query:type()) -> binary().
+-spec handle (web_query:type()) -> web_reply:type().
 handle (Query) ->
 	{ok, S0Request} = decode_request(Query),
 	release_resources
@@ -466,5 +501,5 @@ out(A) ->
 	{
 		content,
 		"application/json; charset=UTF-8",
-		jiffy:encode(handle(web_query:new(A)))
+		web_reply:encode(handle(web_query:new(A)))
 	}.

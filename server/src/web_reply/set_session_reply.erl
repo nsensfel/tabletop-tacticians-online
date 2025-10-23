@@ -25,13 +25,13 @@
 %% EXPORTED FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -spec new
-	(
-		non_neg_integer(),
-		binary(),
-		binary(),
-		list(user_db_entry:room())
-	)
-	-> {list({binary(), any()})}.
+(
+	non_neg_integer(),
+	binary(),
+	binary(),
+	list(user_db_entry:room())
+)
+-> web_reply:fragment().
 new (Version, Username, Token, PendingRooms) ->
 	{
 		[

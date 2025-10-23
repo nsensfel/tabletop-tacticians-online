@@ -1,48 +1,54 @@
--module(pending_rooms_update_reply).
+-module(web_reply).
 
--include("protocol.hrl").
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% TYPES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+-type fragment() :: {list({binary(), any()})}.
+-type type() :: list(fragment()).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% EXPORTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--export([new/1, embedded/1]).
+-export_type([type/0, fragment/0]).
+
+-export
+(
+	[
+		new/0,
+		new/1,
+		add_fragment/2,
+		merge/2,
+		encode/1,
+		from_list/1,
+		to_list/1
+	]
+).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% LOCAL FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%% Request Accessors %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%% SECURITY CHECK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%% MAIN LOGIC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% EXPORTED FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec new (list(user_db_entry:room())) -> web_reply:fragment().
-new (PendingRooms) ->
-	{
-		[
-			{?MESSAGE_FIELD, ?PENDING_ROOMS_UPDATE_REPLY_ID},
-			{?CONTENT_FIELD, embedded(PendingRooms)}
-		]
-	}.
+-spec new () -> type().
+new () -> [].
 
--spec embedded (list(user_db_entry:room())) -> list(list({binary(), any()})).
-embedded (PendingRooms) ->
-	lists:map
-	(
-		fun (Room) ->
-			[
-				{?ROOM_ID_FIELD, user_db_entry:room_get_id(Room)},
-				{?ROOM_NAME_FIELD, user_db_entry:room_get_name(Room)},
-				{?ROOM_GAME_ID_FIELD, user_db_entry:room_get_game_id(Room)}
-			]
-		end,
-		PendingRooms
-	).
+-spec new (fragment()) -> type().
+new (Fragment) -> [Fragment].
+
+-spec add_fragment (fragment(), type()) -> type().
+add_fragment (Fragment, Reply) -> [Fragment | Reply].
+
+-spec merge (type(), type()) -> type().
+merge (ReplyA, ReplyB) -> ReplyA ++ ReplyB.
+
+-spec encode (type()) -> binary().
+encode (Reply) -> jiffy:encode(Reply).
+	
+-spec to_list (type()) -> list(fragment()).
+to_list (Reply) -> Reply.
+
+-spec from_list (list(fragment())) -> type().
+from_list (List) -> List.
