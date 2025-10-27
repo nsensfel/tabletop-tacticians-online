@@ -1,4 +1,4 @@
-module Comm.Receive.SetSession exposing (decoder)
+module Comm.Receive.PendingRoomsUpdate exposing (decoder)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
@@ -9,6 +9,7 @@ import Json.Decode
 -- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Struct.Error
 import Struct.Event
 import Struct.KeyValue
 
@@ -27,19 +28,8 @@ import Comm.Protocol
 --------------------------------------------------------------------------------
 decoder : (Json.Decode.Decoder Struct.Event.Type)
 decoder =
-   (Json.Decode.map2
-      ( \tkn id ->
-         (Struct.Event.Sequence
-            [
-               (Struct.Event.SetLocalValue
-                  (Struct.KeyValue.new "session_id" id)
-               ),
-               (Struct.Event.SetLocalValue
-                  (Struct.KeyValue.new "session_token" tkn)
-               )
-            ]
-         )
+   (Json.Decode.succeed
+      (Struct.Event.ErrorOccurred
+         (Struct.Error.new Struct.Error.Programming "Not implemented")
       )
-      (Json.Decode.field Comm.Protocol.session_token_field Json.Decode.string)
-      (Json.Decode.field Comm.Protocol.user_id_field Json.Decode.string)
    )

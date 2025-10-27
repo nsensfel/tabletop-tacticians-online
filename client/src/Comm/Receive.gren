@@ -14,9 +14,14 @@ import Result
 import Struct.Event
 import Struct.Error
 
-import Comm.Receive.Error
-import Comm.Receive.SetSession
 import Comm.Receive.EraseSession
+import Comm.Receive.Error
+import Comm.Receive.HistoryUpdate
+import Comm.Receive.PendingRoomsUpdate
+import Comm.Receive.SetRoom
+import Comm.Receive.SetSession
+
+import Comm.Protocol
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -28,8 +33,11 @@ import Comm.Receive.EraseSession
 decoder_step1 : String -> (Json.Decode.Decoder Struct.Event.Type)
 decoder_step1 reply_type =
    when reply_type is
+      "dis" -> (Comm.Receive.EraseSession.decoder)
       "err" -> (Comm.Receive.Error.decoder)
-      "est" -> (Comm.Receive.EraseSession.decoder)
+      "hup" -> (Comm.Receive.HistoryUpdate.decoder)
+      "pru" -> (Comm.Receive.PendingRoomsUpdate.decoder)
+      "sro" -> (Comm.Receive.SetRoom.decoder)
       "sst" -> (Comm.Receive.SetSession.decoder)
       other ->
          (Json.Decode.succeed
@@ -38,7 +46,7 @@ decoder_step1 reply_type =
 
 decoder_step0 : (Json.Decode.Decoder Struct.Event.Type)
 decoder_step0 =
-   (Json.Decode.field "msg" Json.Decode.string)
+   (Json.Decode.field Comm.Protocol.message_field Json.Decode.string)
    |> (Json.Decode.andThen (decoder_step1))
 
 decoder : (Json.Decode.Decoder (Array Struct.Event.Type))

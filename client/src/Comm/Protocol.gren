@@ -1,0 +1,232 @@
+module Comm.Protocol exposing (..)
+
+--------------------------------------------------------------------------------
+-- IMPORTS ---------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Standard Library ------------------------------------------------------------
+
+-- Third Party------------------------------------------------------------------
+
+-- Project ---------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- TYPES -----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- LOCAL FUNCTIONS -------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- EXPORTED FUNCTIONS ----------------------------------------------------------
+--------------------------------------------------------------------------------
+
+---- MAIN FIELDS ---------------------------------------------------------------
+action_field : String
+action_field = "act"
+
+action_id_field : String
+action_id_field = "aid"
+
+active_face_field : String
+active_face_field = "afa"
+
+actor_id_field : String
+actor_id_field = "aci"
+
+angle_field : String
+angle_field = "a"
+
+avatar_field : String
+avatar_field = "avt"
+
+back_field : String
+back_field = "bac"
+
+category_field : String
+category_field = "cat"
+
+chat_field : String
+chat_field = "cha"
+
+color_field : String
+color_field = "col"
+
+contains_field : String
+contains_field = "con"
+
+content_field : String
+content_field = "ctn"
+
+displayed_name_field : String
+displayed_name_field = "dnm"
+
+declined_field : String
+declined_field = "dcl"
+
+email_field : String
+email_field = "eml"
+
+faces_field : String
+faces_field = "fac"
+
+front_field : String
+front_field = "fro"
+
+height_field : String
+height_field = "hei"
+
+history_field : String
+history_field = "hst"
+
+history_index_field : String
+history_index_field = "hix"
+
+id_field : String
+id_field = "id"
+
+is_displayed_field : String
+is_displayed_field = "dis"
+
+is_flipped_field : String
+is_flipped_field = "fli"
+
+is_locked_field : String
+is_locked_field = "lok"
+
+is_pinged_field : String
+is_pinged_field = "pin"
+
+lobby_field : String
+lobby_field = "lby"
+
+message_field : String
+message_field = "msg"
+
+objects_field : String
+objects_field = "obj"
+
+password_field : String
+password_field = "pwd"
+
+pending_rooms_field : String
+pending_rooms_field = "prs"
+
+properties_field : String
+properties_field = "pro"
+
+room_game_id_field : String
+room_game_id_field = "rgi"
+
+room_id_field : String
+room_id_field = "rid"
+
+room_field : String
+room_field = "rom"
+
+room_name_field : String
+room_name_field = "rnm"
+
+session_token_field : String
+session_token_field = "sto"
+
+shows_card_field : String
+shows_card_field = "shc"
+
+tags_field : String
+tags_field = "tag"
+
+targets_field : String
+targets_field = "tar"
+
+type_field : String
+type_field = "typ"
+
+url_field : String
+url_field = "url"
+
+username_field : String
+username_field = "urn"
+
+users_field : String
+users_field = "usr"
+
+user_field : String
+user_field = "u"
+
+user_history_index_field : String
+user_history_index_field = "uhx"
+
+user_id_field : String
+user_id_field = "uid"
+
+user_version_field : String
+user_version_field = "uvr"
+
+width_field : String
+width_field = "wit"
+
+x_field : String
+x_field = "x"
+
+y_field : String
+y_field = "y"
+
+z_field : String
+z_field = "z"
+
+---- ACTIONS -------------------------------------------------------------------
+flip_action_id : String
+flip_action_id = "fli"
+
+move_action_id : String
+move_action_id = "mov"
+
+ping_action_id : String
+ping_action_id = "pin"
+
+---- REPLY TYPES ---------------------------------------------------------------
+disconnect_reply_id : String
+disconnect_reply_id = "dis"
+
+error_reply_id : String
+error_reply_id = "err"
+
+history_update_reply_id : String
+history_update_reply_id = "hup"
+
+pending_rooms_update_reply_id : String
+pending_rooms_update_reply_id = "pru"
+
+set_room_reply_id : String
+set_room_reply_id = "sro"
+
+set_session_reply_id : String
+set_session_reply_id = "sst"
+
+---- ERROR CATEGORIES ----------------------------------------------------------
+error_error_id : String
+error_error_id = "err"
+
+missing_input_error_id : String
+missing_input_error_id = "msi"
+
+network_error_id : String
+network_error_id = "net"
+
+programming_error_id : String
+programming_error_id = "pog"
+
+warning_error_id : String
+warning_error_id = "wrn"
+
+---- OBJECT TYPES --------------------------------------------------------------
+card_object_type : String
+card_object_type = "car"
+
+deck_object_type : String
+deck_object_type = "dec"
+
+dice_object_type : String
+dice_object_type = "die"
+
