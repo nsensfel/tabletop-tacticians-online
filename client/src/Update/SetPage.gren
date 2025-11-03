@@ -9,8 +9,11 @@ module Update.SetPage exposing (update)
 
 -- Project ---------------------------------------------------------------------
 import Struct.Event
+import Struct.InvocationParameters
 import Struct.Model
 import Struct.Page
+
+import Struct.Page.Room
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -19,40 +22,7 @@ import Struct.Page
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
-generate_url_parameters_update : Struct.Page.Type -> (Cmd Struct.Event.Type)
-generate_url_parameters_update page =
-   -- Nope. Should update model's stored URL args then set invocation params
-   -- as dirty.
-   (Struct.Event.Sequence
-      (
-         (Struct.Event.ClearUrlParams)
-         ::
-         (
-            when page is
-               Home -> [(Struct.Event.SetUrlParam "page" "")]
-               | (RoomList _) -> [(Struct.Event.SetUrlParam "page" "room_list")]
-               | (Login _) -> [(Struct.Event.SetUrlParam "page" "login")]
 
-               | (EditProfile _) ->
-                  [(Struct.Event.SetUrlParam "page" "edit_profile")]
-
-               | (Room room) ->
-                  [
-                     (Struct.Event.SetUrlParam "page" "room"),
-                     (Struct.Event.SetUrlParam "id" (Struct.Room.get_id room))
-                  ]
-
-               | (CreateRoom _) ->
-                  [(Struct.Event.SetUrlParam "page" "create_room")]
-
-               | (Register _) ->
-                  [(Struct.Event.SetUrlParam "page" "register")]
-
-               | (Unknown name) ->
-                  [(Struct.Event.SetUrlParam "page" "name")]
-         )
-      )
-   )
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -63,7 +33,121 @@ update :
       { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
    )
 update page model =
-   {
-      model = (Struct.Model.set_page page model),
-      command = (generate_url_parameters_update page)
-   }
+   let
+      reset_invocation_parameters =
+         (Struct.InvocationParameters.erase_url_parameters
+            (Struct.Model.get_invocation_parameters model)
+         )
+   in
+      when page is
+         Struct.Page.Home ->
+            {
+               command = (Cmd.none),
+               model =
+                  (Struct.Model.set_invocation_parameters
+                     reset_invocation_parameters
+                     model
+                  )
+            }
+
+         (Struct.Page.RoomList _) ->
+            {
+               command = (Cmd.none),
+               model =
+                  (Struct.Model.set_invocation_parameters
+                     (Struct.InvocationParameters.set_url_parameter
+                        "page"
+                        "room_list"
+                        reset_invocation_parameters
+                     )
+                     model
+                  )
+            }
+
+         (Struct.Page.Login _) ->
+            {
+               command = (Cmd.none),
+               model =
+                  (Struct.Model.set_invocation_parameters
+                     (Struct.InvocationParameters.set_url_parameter
+                        "page"
+                        "login"
+                        reset_invocation_parameters
+                     )
+                     model
+                  )
+            }
+
+         (Struct.Page.EditProfile _) ->
+            {
+               command = (Cmd.none),
+               model =
+                  (Struct.Model.set_invocation_parameters
+                     (Struct.InvocationParameters.set_url_parameter
+                        "page"
+                        "edit_profile"
+                        reset_invocation_parameters
+                     )
+                     model
+                  )
+            }
+
+         (Struct.Page.Room room) ->
+            {
+               command = (Cmd.none), -- TODO: may start puppeteer
+               model =
+                  (Struct.Model.set_invocation_parameters
+                     (Struct.InvocationParameters.set_url_parameter
+                        "page"
+                        "room"
+                        (Struct.InvocationParameters.set_url_parameter
+                           "id"
+                           (Struct.Page.Room.get_id room)
+                           reset_invocation_parameters
+                        )
+                     )
+                     model
+                  )
+            }
+
+         (Struct.Page.CreateRoom _) ->
+            {
+               command = (Cmd.none),
+               model =
+                  (Struct.Model.set_invocation_parameters
+                     (Struct.InvocationParameters.set_url_parameter
+                        "page"
+                        "create_room"
+                        reset_invocation_parameters
+                     )
+                     model
+                  )
+            }
+
+         (Struct.Page.Register _) ->
+            {
+               command = (Cmd.none),
+               model =
+                  (Struct.Model.set_invocation_parameters
+                     (Struct.InvocationParameters.set_url_parameter
+                        "page"
+                        "register"
+                        reset_invocation_parameters
+                     )
+                     model
+                  )
+            }
+
+         (Struct.Page.Unknown name) ->
+            {
+               command = (Cmd.none),
+               model =
+                  (Struct.Model.set_invocation_parameters
+                     (Struct.InvocationParameters.set_url_parameter
+                        "page"
+                        name
+                        reset_invocation_parameters
+                     )
+                     model
+                  )
+            }

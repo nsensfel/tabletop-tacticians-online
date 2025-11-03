@@ -3,6 +3,7 @@ module Struct.Page.Room exposing
       Type,
       Event(..),
       new,
+      get_id,
       get_decks,
       set_decks,
       get_players,
@@ -18,6 +19,8 @@ module Struct.Page.Room exposing
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
 import Dict
+
+import Json.Decode
 
 -- Third Party -----------------------------------------------------------------
 
@@ -104,6 +107,9 @@ new =
       deck_browser = (Struct.Page.Room.DeckBrowser.new)
    }
 
+get_id : Type -> String
+get_id room = room.id
+
 get_decks : Type -> (Dict.Dict String Struct.Page.Room.Deck.Type)
 get_decks room = room.decks
 
@@ -146,16 +152,5 @@ set_selection selection room = {room | selection = selection}
 set_deck_browser : Struct.Page.Room.DeckBrowser.Type -> Type -> Type
 set_deck_browser deck_browser room = {room | deck_browser = deck_browser}
 
-decoder : (Json.Decode.Decoder Struct.Event.Type)
-decoder =
-   (Json.Decode.map
-      ( \room ->
-         (Struct.Event.SetRoom room)
-      )
-      (Json.Decode.field Comm.Protocol.session_token_field Json.Decode.string)
-      (Json.Decode.field Comm.Protocol.user_id_field Json.Decode.string)
-      (Json.Decode.field Comm.Protocol.room_field Struct.Json.Decode.int)
-      (Json.Decode.field Comm.Protocol.pending_rooms_field
-         (Json.Decode.array (Struct.Session.PendingRoom.decoder))
-      )
-   )
+decoder : (Json.Decode.Decoder Type)
+decoder = (Json.Decode.succeed (new)) -- TODO: implement

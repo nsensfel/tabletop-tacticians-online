@@ -13,6 +13,8 @@ import Struct.Error
 import Struct.Event
 import Struct.KeyValue
 
+import Struct.Page.Room
+
 import Comm.Protocol
 
 --------------------------------------------------------------------------------

@@ -13,6 +13,7 @@ import Url
 -- Project ---------------------------------------------------------------------
 import Struct.Error
 import Struct.KeyValue
+import Struct.Page
 import Struct.Session
 
 import Struct.Page.EditProfile

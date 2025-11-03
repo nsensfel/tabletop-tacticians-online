@@ -8,6 +8,7 @@ module Struct.InvocationParameters exposing
       get_url_parameters,
       get_url_parameter,
       erase_url_parameter,
+      erase_url_parameters,
       set_url_parameters,
       set_url_parameter,
       get_local_values_dirty_flag,
@@ -15,6 +16,7 @@ module Struct.InvocationParameters exposing
       get_local_values,
       get_local_value,
       erase_local_value,
+      erase_local_values,
       set_local_values,
       set_local_value
    )
@@ -107,6 +109,13 @@ erase_url_parameter name invocation_parameters =
       url_params_are_dirty = True
    }
 
+erase_url_parameters : Type -> Type
+erase_url_parameters invocation_parameters =
+   {invocation_parameters |
+      url_params = (Dict.empty),
+      url_params_are_dirty = True
+   }
+
 get_local_values : Type -> (Dict.Dict String String)
 get_local_values invocation_parameters = invocation_parameters.local_values
 
@@ -142,5 +151,12 @@ erase_local_value : String -> Type -> Type
 erase_local_value name invocation_parameters =
    {invocation_parameters |
       local_values = (Dict.remove name invocation_parameters.local_values),
+      local_values_are_dirty = True
+   }
+
+erase_local_values : Type -> Type
+erase_local_values invocation_parameters =
+   {invocation_parameters |
+      local_values = (Dict.empty),
       local_values_are_dirty = True
    }
