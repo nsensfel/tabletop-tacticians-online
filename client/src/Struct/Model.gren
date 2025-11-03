@@ -4,6 +4,9 @@ module Struct.Model exposing
       new,
       get_page,
       set_page,
+      get_session,
+      set_session,
+      clear_session,
       get_error_tracker,
       set_error_tracker,
       get_invocation_parameters,
@@ -25,11 +28,12 @@ import Url
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Struct.Page
-import Struct.Error
 import Struct.Confirmation
-import Struct.InvocationParameters
+import Struct.Error
 import Struct.ErrorTracker
+import Struct.InvocationParameters
+import Struct.Page
+import Struct.Session
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -38,6 +42,7 @@ type alias Type =
    {
       invocation_parameters : Struct.InvocationParameters.Type,
       confirmation : (Maybe Struct.Confirmation.Type),
+      session : Struct.Session.Type,
       page : Struct.Page.Type,
       error_tracker : Struct.ErrorTracker.Type
    }
@@ -79,6 +84,15 @@ get_page model = model.page
 
 set_page : Struct.Page.Type -> Type -> Type
 set_page page model = {model | page = page}
+
+get_session : Type -> Struct.Session.Type
+get_session model = model.session
+
+set_session : Struct.Session.Type -> Type -> Type
+set_session session model = {model | session = session}
+
+clear_session : Type -> Type
+clear_session model = {model | session = (Struct.Session.new)}
 
 get_error_tracker : Type -> Struct.ErrorTracker.Type
 get_error_tracker model = model.error_tracker
