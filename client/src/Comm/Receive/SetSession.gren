@@ -27,7 +27,7 @@ import Comm.Protocol
 --------------------------------------------------------------------------------
 decoder : (Json.Decode.Decoder Struct.Event.Type)
 decoder =
-   (Json.Decode.map2
+   (Json.Decode.map4
       ( \tkn id ->
          (Struct.Event.Sequence
             [
@@ -37,9 +37,17 @@ decoder =
                (Struct.Event.SetLocalValue
                   (Struct.KeyValue.new "session_token" tkn)
                )
+               (Struct.Event.SetSession
+                  (Struct.Session.new
+                  )
+               )
             ]
          )
       )
       (Json.Decode.field Comm.Protocol.session_token_field Json.Decode.string)
       (Json.Decode.field Comm.Protocol.user_id_field Json.Decode.string)
+      (Json.Decode.field Comm.Protocol.user_version_field Json.Decode.int)
+      (Json.Decode.field Comm.Protocol.pending_rooms_field
+         (Json.Decode.list (Struct.Session.PendingRoom.decoder))
+      )
    )

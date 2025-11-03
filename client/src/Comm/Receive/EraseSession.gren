@@ -10,6 +10,7 @@ import Json.Decode
 
 -- Project ---------------------------------------------------------------------
 import Struct.Event
+import Struct.Session
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -29,6 +30,7 @@ decoder =
          [
             (Struct.Event.EraseLocalValue "session_id"),
             (Struct.Event.EraseLocalValue "session_token")
+            (Struct.Event.SetSession (Struct.Session.new))
          ]
       )
    )
