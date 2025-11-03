@@ -59,6 +59,7 @@ new invocation_parameters =
    {
       invocation_parameters = invocation_parameters,
       confirmation = Nothing,
+      session = (Struct.Session.empty),
       page =
          (Struct.Page.new
             (Struct.InvocationParameters.get_url_parameter
@@ -92,7 +93,7 @@ set_session : Struct.Session.Type -> Type -> Type
 set_session session model = {model | session = session}
 
 clear_session : Type -> Type
-clear_session model = {model | session = (Struct.Session.new)}
+clear_session model = {model | session = (Struct.Session.empty)}
 
 get_error_tracker : Type -> Struct.ErrorTracker.Type
 get_error_tracker model = model.error_tracker

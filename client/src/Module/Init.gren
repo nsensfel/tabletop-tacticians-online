@@ -35,6 +35,11 @@ init :
    )
 init flags =
    {
-      model = (Struct.Model.new (Struct.InvocationParameters.new (Debug.log "flags:"  flags))),
+      model =
+         (Struct.Model.new
+            (Struct.InvocationParameters.new
+               (Debug.log "flags:" flags)
+            )
+         ),
       command = Cmd.none
    }

@@ -28,8 +28,9 @@ import Comm.Protocol
 --------------------------------------------------------------------------------
 decoder : (Json.Decode.Decoder Struct.Event.Type)
 decoder =
-   (Json.Decode.succeed
-      (Struct.Event.ErrorOccurred
-         (Struct.Error.new Struct.Error.Programming "Not implemented")
+   (Json.Decode.map
+      ( \room ->
+         (Struct.Event.SetRoom room)
       )
+      (Json.Decode.field Comm.Protocol.room_field Struct.Page.Room.decoder)
    )

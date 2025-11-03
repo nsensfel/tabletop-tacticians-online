@@ -9,7 +9,8 @@ module Struct.Page.Room exposing
       set_players,
       get_cards,
       set_cards,
-      event_to_string
+      event_to_string,
+      decoder
    )
 
 --------------------------------------------------------------------------------
@@ -144,3 +145,17 @@ set_selection selection room = {room | selection = selection}
 
 set_deck_browser : Struct.Page.Room.DeckBrowser.Type -> Type -> Type
 set_deck_browser deck_browser room = {room | deck_browser = deck_browser}
+
+decoder : (Json.Decode.Decoder Struct.Event.Type)
+decoder =
+   (Json.Decode.map
+      ( \room ->
+         (Struct.Event.SetRoom room)
+      )
+      (Json.Decode.field Comm.Protocol.session_token_field Json.Decode.string)
+      (Json.Decode.field Comm.Protocol.user_id_field Json.Decode.string)
+      (Json.Decode.field Comm.Protocol.room_field Struct.Json.Decode.int)
+      (Json.Decode.field Comm.Protocol.pending_rooms_field
+         (Json.Decode.array (Struct.Session.PendingRoom.decoder))
+      )
+   )

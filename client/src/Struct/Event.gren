@@ -13,6 +13,7 @@ import Url
 -- Project ---------------------------------------------------------------------
 import Struct.Error
 import Struct.KeyValue
+import Struct.Session
 
 import Struct.Page.EditProfile
 import Struct.Page.Room
@@ -25,19 +26,22 @@ import Struct.Page.Register
 --------------------------------------------------------------------------------
 type Type =
    None
-   | Sequence (Array Type)
+   | ClearUrlParams
+   | Confirm
+   | EditProfilePage Struct.Page.EditProfile.Event
+   | EraseLocalValue String
+   | EraseUrlParam String
+   | ErrorOccurred Struct.Error.Type
    | LoginPage Struct.Page.Login.Event
    | RegisterPage Struct.Page.Register.Event
-   | EditProfilePage Struct.Page.EditProfile.Event
    | RoomListPage Struct.Page.RoomList.Event
    | RoomPage Struct.Page.Room.Event
+   | Sequence (Array Type)
    | SetLocalValue Struct.KeyValue.Type
-   | EraseLocalValue String
+   | SetPage Struct.Page.Type
+   | SetSession Struct.Session.Type
    | SetUrlParam Struct.KeyValue.Type
-   | EraseUrlParam String
    | UnknownMessageTypeReceived String
-   | ErrorOccurred Struct.Error.Type
-   | Confirm
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
@@ -89,6 +93,9 @@ to_string event =
       (SetLocalValue _) -> "SetLocalValue"
       (EraseLocalValue _) -> "EraseLocalValue"
       (SetUrlParam _) -> "SetUrlParam"
+      (SetSession _) -> "SetSession"
+      (SetPage _) -> "SetPage"
+      ClearUrlParams -> "ClearUrlParams"
       (EraseUrlParam _) -> "EraseUrlParam"
 
       (UnknownMessageTypeReceived str) ->

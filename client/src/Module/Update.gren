@@ -13,15 +13,17 @@ import Struct.Model
 import Struct.Error
 
 import Update.Dirty
-import Update.LoginPage
 import Update.EditProfilePage
+import Update.EraseLocalValue
+import Update.EraseUrlParam
+import Update.LoginPage
+import Update.RegisterPage
 import Update.RoomListPage
 import Update.RoomPage
-import Update.RegisterPage
 import Update.SetLocalValue
-import Update.EraseLocalValue
+import Update.SetPage
+import Update.SetSession
 import Update.SetUrlParam
-import Update.EraseUrlParam
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -77,8 +79,13 @@ handle_event event model =
       (Struct.Event.SetLocalValue key_value) ->
          (Update.SetLocalValue.update key_value model)
 
+      (Struct.Event.SetSession session) ->
+         (Update.SetSession.update session model)
+
       (Struct.Event.EraseLocalValue key) ->
          (Update.EraseLocalValue.update key model)
+
+      (Struct.Event.SetPage page) -> (Update.SetPage.update page)
 
       (Struct.Event.SetUrlParam key_value) ->
          (Update.SetUrlParam.update key_value model)

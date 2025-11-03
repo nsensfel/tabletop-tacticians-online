@@ -29,8 +29,8 @@ decoder =
       (Struct.Event.Sequence
          [
             (Struct.Event.EraseLocalValue "session_id"),
-            (Struct.Event.EraseLocalValue "session_token")
-            (Struct.Event.SetSession (Struct.Session.new))
+            (Struct.Event.EraseLocalValue "session_token"),
+            (Struct.Event.SetSession (Struct.Session.empty))
          ]
       )
    )

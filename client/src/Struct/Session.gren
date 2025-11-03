@@ -20,10 +20,10 @@ import Struct.Session.PendingRoom
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
-type Type =
+type alias Type =
    {
       version: Int,
-      pending_rooms: (List Struct.Session.PendingRoom.Type)
+      pending_rooms: (Array Struct.Session.PendingRoom.Type)
    }
 
 --------------------------------------------------------------------------------
@@ -33,18 +33,18 @@ type Type =
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-new : Int -> (List Struct.Session.PendingRoom.Type) -> Type
+new : Int -> (Array Struct.Session.PendingRoom.Type) -> Type
 new version pending_rooms =
    {
       version = version,
       pending_rooms = pending_rooms
    }
 
-clear : Type
-clear = (new -1 [])
+empty : Type
+empty = (new -1 [])
 
 get_version : Type -> Int
 get_version session = session.version
 
-get_pending_rooms : Type -> (List Struct.Session.PendingRoom.Type)
+get_pending_rooms : Type -> (Array Struct.Session.PendingRoom.Type)
 get_pending_rooms session = session.pending_rooms

@@ -9,11 +9,13 @@ import Json.Decode
 -- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Comm.Protocol
+
 import Struct.Error
 import Struct.Event
-import Struct.KeyValue
+import Struct.Session
 
-import Comm.Protocol
+import Struct.Session.PendingRoom
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -28,8 +30,17 @@ import Comm.Protocol
 --------------------------------------------------------------------------------
 decoder : (Json.Decode.Decoder Struct.Event.Type)
 decoder =
-   (Json.Decode.succeed
-      (Struct.Event.ErrorOccurred
-         (Struct.Error.new Struct.Error.Programming "Not implemented")
+   (Json.Decode.map2
+      ( \user_version pending_rooms ->
+         (Struct.Event.SetSession
+            (Struct.Session.new
+               user_version
+               pending_rooms
+            )
+         )
+      )
+      (Json.Decode.field Comm.Protocol.user_version_field Json.Decode.int)
+      (Json.Decode.field Comm.Protocol.pending_rooms_field
+         (Json.Decode.array (Struct.Session.PendingRoom.decoder))
       )
    )

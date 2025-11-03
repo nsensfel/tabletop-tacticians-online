@@ -11,22 +11,23 @@ module Struct.Session.PendingRoom exposing
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
+import Json.Decode
 
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Comm.Protocol
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
-type alias type Type =
+type alias Type =
    {
       id : String,
       game_id : String,
       name : String
    }
 
-alias type
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -34,4 +35,26 @@ alias type
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
+get_id : Type -> String
+get_id pending_room = pending_room.id
 
+get_game_id : Type -> String
+get_game_id pending_room = pending_room.game_id
+
+get_name : Type -> String
+get_name pending_room = pending_room.name
+
+decoder : (Json.Decode.Decoder Type)
+decoder =
+   (Json.Decode.map3
+      ( \id game_id name ->
+         {
+            id = id,
+            game_id = game_id,
+            name = name
+         }
+      )
+      (Json.Decode.field Comm.Protocol.room_id_field Json.Decode.string)
+      (Json.Decode.field Comm.Protocol.room_game_id_field Json.Decode.string)
+      (Json.Decode.field Comm.Protocol.room_name_field Json.Decode.string)
+   )
