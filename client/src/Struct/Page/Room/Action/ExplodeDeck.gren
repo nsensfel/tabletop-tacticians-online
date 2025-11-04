@@ -1,25 +1,32 @@
-module Comm.Receive.SetRoom exposing (decoder)
+module Struct.Page.Room.Action.ExplodeDeck exposing
+   (
+      Type,
+      get_deck_id,
+      get_card_ids,
+      get_new_attitudes
+   )
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
-import Json.Decode
 
--- Third Party------------------------------------------------------------------
+-- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Struct.Error
-import Struct.Event
-import Struct.Page
-
-import Struct.Page.Room
-
-import Comm.Protocol
+import Struct.Page.Room.Attitude
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
+type alias Type =
+   {
+      deck_id : String,
+		card_ids : (Array String),
+      new_attitudes : (Array Struct.Page.Room.Attitude.Type)
+		previous_top :: room_object:id(),
+		new_top :: room_object:id()
+   }
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
@@ -28,11 +35,11 @@ import Comm.Protocol
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-decoder : (Json.Decode.Decoder Struct.Event.Type)
-decoder =
-   (Json.Decode.map
-      ( \room ->
-         (Struct.Event.SetPage (Struct.Page.Room room))
-      )
-      (Json.Decode.field Comm.Protocol.room_field Struct.Page.Room.decoder)
-   )
+get_deck_id : String
+get_deck_id create_deck = create_deck.deck_id
+
+get_card_ids : (Array String)
+get_card_ids create_deck = create_deck.card_ids
+
+get_new_attitudes : (Array Struct.Page.Room.Attitude.Type)
+get_new_attitudes create_deck = create_deck.new_attitudes

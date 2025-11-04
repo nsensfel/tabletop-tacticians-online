@@ -85,7 +85,7 @@ handle_event event model =
       (Struct.Event.EraseLocalValue key) ->
          (Update.EraseLocalValue.update key model)
 
-      (Struct.Event.SetPage page) -> (Update.SetPage.update page)
+      (Struct.Event.SetPage page) -> (Update.SetPage.update page model)
 
       (Struct.Event.SetUrlParam key_value) ->
          (Update.SetUrlParam.update key_value model)

@@ -50,10 +50,10 @@ encode
 			#move
 			{
 				object_ids = IDs,
-				offset_x = X,
-				offset_y = Y,
-				offset_z = Z,
-				offset_angle = Angle
+				x_offset = X,
+				y_offset = Y,
+				z_offset = Z,
+				angle_offset = Angle
 			}
 	}
 ) ->

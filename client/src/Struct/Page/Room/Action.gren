@@ -1,0 +1,56 @@
+module Struct.Page.Room.Action exposing
+   (
+      Type,
+      Category
+   )
+
+--------------------------------------------------------------------------------
+-- IMPORTS ---------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Standard Library ------------------------------------------------------------
+
+-- Third Party -----------------------------------------------------------------
+
+-- Project ---------------------------------------------------------------------
+import Struct.Page.Room.Action.CreateDeck
+import Struct.Page.Room.Action.DrawFrom
+import Struct.Page.Room.Action.ExplodeDeck
+import Struct.Page.Room.Action.Flip
+import Struct.Page.Room.Action.LookInside
+import Struct.Page.Room.Action.Move
+import Struct.Page.Room.Action.Ping
+import Struct.Page.Room.Action.PlaceInto
+import Struct.Page.Room.Action.Roll
+import Struct.Page.Room.Action.SetFace
+import Struct.Page.Room.Action.Shuffle
+
+--------------------------------------------------------------------------------
+-- TYPES -----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+type Category =
+   Chat String
+   | CreateDeck Struct.Page.Room.Action.CreateDeck.Type
+   | DrawFrom Struct.Page.Room.Action.DrawFrom.Type
+   | ExplodeDeck Struct.Page.Room.Action.ExplodeDeck.Type
+   | Flip Struct.Page.Room.Action.Flip.Type
+   | LookInside Struct.Page.Room.Action.LookInside.Type
+   | Move Struct.Page.Room.Action.Move.Type
+   | Ping Struct.Page.Room.Action.Ping.Type
+   | PlaceInto Struct.Page.Room.Action.PlaceInto.Type
+   | Roll Struct.Page.Room.Action.Roll.Type
+   | SetFace Struct.Page.Room.Action.SetFace.Type
+   | Shuffle Struct.Page.Room.Action.Shuffle.Type
+
+type alias Type =
+   {
+      actor : String,
+      category : Category
+   }
+
+--------------------------------------------------------------------------------
+-- LOCAL FUNCTIONS -------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- EXPORTED FUNCTIONS ----------------------------------------------------------
+--------------------------------------------------------------------------------

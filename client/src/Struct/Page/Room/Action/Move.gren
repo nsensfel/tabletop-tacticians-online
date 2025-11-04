@@ -1,0 +1,77 @@
+module Struct.Page.Room.Action.Move exposing
+   (
+      Type,
+      get_object_ids,
+      get_x_offset,
+      get_y_offset,
+      get_z_offset,
+      get_angle_offset,
+      decoder
+   )
+
+--------------------------------------------------------------------------------
+-- IMPORTS ---------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Standard Library ------------------------------------------------------------
+import Json.Decode
+
+-- Third Party -----------------------------------------------------------------
+
+-- Project ---------------------------------------------------------------------
+import Comm.Protocol
+
+--------------------------------------------------------------------------------
+-- TYPES -----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+type alias Type =
+   {
+      object_ids : (Array String),
+      x_offset : Int,
+      y_offset : Int,
+      z_offset : Int,
+      angle_offset : Int
+   }
+
+--------------------------------------------------------------------------------
+-- LOCAL FUNCTIONS -------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- EXPORTED FUNCTIONS ----------------------------------------------------------
+--------------------------------------------------------------------------------
+get_object_ids : (Array String)
+get_object_ids move = move.object_ids
+
+get_x_offset : Int
+get_x_offset move = move.x_offset
+
+get_y_offset : Int
+get_y_offset move = move.y_offset
+
+get_z_offset : Int
+get_z_offset move = move.z_offset
+
+get_angle_offset : Int
+get_angle_offset move = move.angle_offset
+
+decoder : (Json.Decode.Decoder Type)
+decoder =
+   (Json.Decode.map5
+      ( \object_ids x_offset y_offset z_offset angle_offset ->
+         {
+            object_ids = object_ids,
+            x_offset = x_offset,
+            y_offset = y_offset,
+            z_offset = z_offset,
+            angle_offset = angle_offset
+         }
+      )
+      (Json.Decode.field
+         Comm.Protocol.object_ids_field
+         (Json.Decode.array Json.Decode.string)
+      )
+      (Json.Decode.field Comm.Protocol.x_field Json.Decode.int)
+      (Json.Decode.field Comm.Protocol.y_field Json.Decode.int)
+      (Json.Decode.field Comm.Protocol.z_field Json.Decode.int)
+      (Json.Decode.field Comm.Protocol.angle_field Json.Decode.int)
+   )

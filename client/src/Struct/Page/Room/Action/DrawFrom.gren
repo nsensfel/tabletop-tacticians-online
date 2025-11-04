@@ -1,25 +1,31 @@
-module Comm.Receive.SetRoom exposing (decoder)
+module Struct.Page.Room.Action.DrawFrom exposing
+   (
+      Type,
+      get_object_id,
+      get_source_deck_id,
+      get_previous_top_id,
+      get_new_top_id
+   )
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
-import Json.Decode
 
--- Third Party------------------------------------------------------------------
+-- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Struct.Error
-import Struct.Event
-import Struct.Page
-
-import Struct.Page.Room
-
-import Comm.Protocol
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
+type alias Type =
+   {
+      object_id : String,
+      source_deck_id : String,
+      previous_top_id : String,
+      new_top_id : String
+   }
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
@@ -28,11 +34,14 @@ import Comm.Protocol
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-decoder : (Json.Decode.Decoder Struct.Event.Type)
-decoder =
-   (Json.Decode.map
-      ( \room ->
-         (Struct.Event.SetPage (Struct.Page.Room room))
-      )
-      (Json.Decode.field Comm.Protocol.room_field Struct.Page.Room.decoder)
-   )
+get_object_id : String
+get_object_id create_object = create_object.object_id
+
+get_source_deck_id : String
+get_source_deck_id create_source_deck = create_source_deck.source_deck_id
+
+get_previous_top_id : String
+get_previous_top_id create_previous_top = create_previous_top.previous_top_id
+
+get_new_top_id : String
+get_new_top_id create_new_top = create_new_top.new_top_id

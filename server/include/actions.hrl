@@ -5,10 +5,10 @@
 	move,
 	{
 		object_ids :: list(room_object:id()),
-		offset_x :: integer(),
-		offset_y :: integer(),
-		offset_z :: integer(),
-		offset_angle :: integer()
+		x_offset :: integer(),
+		y_offset :: integer(),
+		z_offset :: integer(),
+		angle_offset :: integer()
 	}
 ).
 
@@ -34,15 +34,6 @@
 	flip,
 	{
 		object_ids :: list(room_object:id())
-	}
-).
-
--record
-(
-	rotate,
-	{
-		object_ids :: list(room_object:id()),
-		angle_offset :: integer()
 	}
 ).
 
@@ -81,7 +72,7 @@
 	draw_from,
 	{
 		object_id :: room_object:id(),
-		deck_source :: deck_source(),
+		deck_source :: room_object:id(),
 		previous_top :: room_object:id(),
 		new_top :: room_object:id()
 	}
@@ -102,9 +93,7 @@
 (
 	look_inside,
 	{
-		object_id :: room_object:id(),
-		previous_top :: room_object:id(),
-		new_top :: room_object:id()
+		deck_id :: room_object:id()
 	}
 ).
 
@@ -113,6 +102,7 @@
 	create_deck,
 	{
 		deck_id :: room_object:id(),
+		card_ids :: list(room_object:id()),
 		previous_attitudes :: list(room_object:attitude())
 	}
 ).
@@ -121,7 +111,9 @@
 (
 	explode_deck,
 	{
-		as_line :: boolean()
+		deck_id :: room_object:id(),
+		card_ids :: list(room_object:id()),
+		new_attitudes :: list(room_object:attitude())
 	}
 ).
 
@@ -130,7 +122,6 @@
 	| #ping{}
 	| #chat{}
 	| #flip{}
-	| #rotate{}
 	| #set_face{}
 	| #shuffle{}
 	| #roll{}
