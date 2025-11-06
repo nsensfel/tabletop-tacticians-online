@@ -4,21 +4,25 @@ module Struct.Page.Room.Action.DrawFrom exposing
       get_object_id,
       get_source_deck_id,
       get_previous_top_id,
-      get_new_top_id
+      get_new_top_id,
+      decoder
    )
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
+import Json.Decode
 
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Comm.Protocol
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
+-- FIXME: that does not look right.
 type alias Type =
    {
       object_id : String,
@@ -35,13 +39,30 @@ type alias Type =
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
 get_object_id : String
-get_object_id create_object = create_object.object_id
+get_object_id draw_from = draw_from.object_id
 
 get_source_deck_id : String
-get_source_deck_id create_source_deck = create_source_deck.source_deck_id
+get_source_deck_id draw_from = draw_from.source_deck_id
 
 get_previous_top_id : String
-get_previous_top_id create_previous_top = create_previous_top.previous_top_id
+get_previous_top_id draw_from = draw_from.previous_top_id
 
 get_new_top_id : String
-get_new_top_id create_new_top = create_new_top.new_top_id
+get_new_top_id draw_from = draw_from.new_top_id
+
+decoder : (Json.Decode.Decoder Type)
+decoder =
+   (Json.Decode.map4
+      ( \object_id source_deck_id previous_top_id new_top_id ->
+         {
+            object_id = object_id,
+            source_deck_id = source_deck_id,
+            previous_top_id = previous_top_id,
+            new_top_id = new_top_id
+         }
+      )
+      (Json.Decode.field Comm.Protocol.object_id_field Json.Decode.string)
+      (Json.Decode.field Comm.Protocol.source_deck_id_field Json.Decode.string)
+      (Json.Decode.field Comm.Protocol.previous_top_id_field Json.Decode.string)
+      (Json.Decode.field Comm.Protocol.new_top_id_field Json.Decode.string)
+   )

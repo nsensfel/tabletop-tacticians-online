@@ -1,27 +1,27 @@
-module Struct.Page.Room.Action.CreateDeck exposing
+module Struct.Page.Room.Action.Flip exposing
    (
       Type,
-      get_deck_id,
-      get_previous_attitudes
+      get_object_ids,
+      decoder
    )
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
+import Json.Decode
 
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Struct.Page.Room.Attitude
+import Comm.Protocol
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
 type alias Type =
    {
-      deck_id : String,
-      previous_attitudes : (Array Struct.Page.Room.Attitude.Type)
+      object_ids : (Array String)
    }
 
 --------------------------------------------------------------------------------
@@ -31,8 +31,19 @@ type alias Type =
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-get_deck_id : String
-get_deck_id create_deck = create_deck.deck_id
+get_object_ids : (Array String)
+get_object_ids flip = create_deck.object_ids
 
-get_previous_attitudes : (Array Struct.Page.Room.Attitude.Type)
-get_previous_attitudes create_deck = create_deck.previous_attitudes
+decoder : (Json.Decode.Decoder Type)
+decoder =
+   (Json.Decode.map
+      ( \object_ids ->
+         {
+            object_ids = object_ids
+         }
+      )
+      (Json.Decode.field
+         Comm.Protocol.object_ids_field
+         (Json.Decode.array (Json.Decode.string))
+      )
+   )

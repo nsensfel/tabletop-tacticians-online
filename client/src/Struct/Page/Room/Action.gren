@@ -1,50 +1,56 @@
 module Struct.Page.Room.Action exposing
    (
       Type,
-      Category
+      Details,
+      get_actor_id,
+      get_details,
+      decoder
    )
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
+import Json.Decode
 
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Struct.Page.Room.Action.CreateDeck
-import Struct.Page.Room.Action.DrawFrom
-import Struct.Page.Room.Action.ExplodeDeck
+import Comm.Protocol
+
+-- import Struct.Page.Room.Action.CreateDeck
+-- import Struct.Page.Room.Action.DrawFrom
+-- import Struct.Page.Room.Action.ExplodeDeck
 import Struct.Page.Room.Action.Flip
-import Struct.Page.Room.Action.LookInside
+-- import Struct.Page.Room.Action.LookInside
 import Struct.Page.Room.Action.Move
 import Struct.Page.Room.Action.Ping
-import Struct.Page.Room.Action.PlaceInto
+-- import Struct.Page.Room.Action.PlaceInto
 import Struct.Page.Room.Action.Roll
 import Struct.Page.Room.Action.SetFace
-import Struct.Page.Room.Action.Shuffle
+-- import Struct.Page.Room.Action.Shuffle
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
-type Category =
+type Details =
    Chat String
-   | CreateDeck Struct.Page.Room.Action.CreateDeck.Type
-   | DrawFrom Struct.Page.Room.Action.DrawFrom.Type
-   | ExplodeDeck Struct.Page.Room.Action.ExplodeDeck.Type
+--   | CreateDeck Struct.Page.Room.Action.CreateDeck.Type
+--   | DrawFrom Struct.Page.Room.Action.DrawFrom.Type
+ --  | ExplodeDeck Struct.Page.Room.Action.ExplodeDeck.Type
    | Flip Struct.Page.Room.Action.Flip.Type
-   | LookInside Struct.Page.Room.Action.LookInside.Type
+--   | LookInside Struct.Page.Room.Action.LookInside.Type
    | Move Struct.Page.Room.Action.Move.Type
    | Ping Struct.Page.Room.Action.Ping.Type
-   | PlaceInto Struct.Page.Room.Action.PlaceInto.Type
+--   | PlaceInto Struct.Page.Room.Action.PlaceInto.Type
    | Roll Struct.Page.Room.Action.Roll.Type
    | SetFace Struct.Page.Room.Action.SetFace.Type
-   | Shuffle Struct.Page.Room.Action.Shuffle.Type
+--   | Shuffle Struct.Page.Room.Action.Shuffle.Type
 
 type alias Type =
    {
-      actor : String,
-      category : Category
+      actor_id : String,
+      details : Details
    }
 
 --------------------------------------------------------------------------------
@@ -54,3 +60,68 @@ type alias Type =
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
+get_actor_id : Type -> String
+get_actor_id action = action.actor_id
+
+get_details : Type -> Details
+get_details action = action.details
+
+decoder : (Json.Decode.Decoder Type)
+decoder =
+   (Json.Decode.map2
+      ( \actor details ->
+         {
+            actor_id = actor_id,
+            details = details
+         }
+      )
+      (Json.Decode.field Comm.Protocol.actor_id_field Json.Decode.string)
+      (Json.Decode.field
+         Comm.Protocol.action_field
+         (Json.Decode.andThen
+            ( \action_type ->
+               -- TODO: check values there.
+               when action_type is
+                  "chat" ->
+                     (Json.Decode.map
+                        ( \msg -> (Chat msg))
+                        (Json.Decode.field
+                           Comm.Protocol.message_field
+                           Json.Decode.string
+                        )
+                     )
+
+                  "flip" ->
+                     (Json.Decode.map
+                        ( \flip -> (Flip flip))
+                        Struct.Page.Room.Action.Flip.decoder
+                     )
+
+                  "move" ->
+                     (Json.Decode.map
+                        ( \move -> (Move move))
+                        Struct.Page.Room.Action.Move.decoder
+                     )
+
+                  "ping" ->
+                     (Json.Decode.map
+                        ( \ping -> (Ping ping))
+                        Struct.Page.Room.Action.Ping.decoder
+                     )
+
+                  "roll" ->
+                     (Json.Decode.map
+                        ( \roll -> (Roll roll))
+                        Struct.Page.Room.Action.Roll.decoder
+                     )
+
+                  "setFace" ->
+                     (Json.Decode.map
+                        ( \set_face -> (SetFace set_face))
+                        Struct.Page.Room.Action.SetFace.decoder
+                     )
+            )
+            (Json.Decode.field Comm.Protocol.details_field Json.Decode.string)
+         )
+      )
+   )
