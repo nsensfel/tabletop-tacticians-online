@@ -25,12 +25,13 @@ import Json.Decode
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Struct.Page.Room.Action
 import Struct.Page.Room.Card
-import Struct.Page.Room.Deck
-import Struct.Page.Room.Player
 import Struct.Page.Room.Chat
-import Struct.Page.Room.Selection
+import Struct.Page.Room.Deck
 import Struct.Page.Room.DeckBrowser
+import Struct.Page.Room.Player
+import Struct.Page.Room.Selection
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -44,7 +45,8 @@ type alias Type =
       cards : (Dict.Dict String Struct.Page.Room.Card.Type),
       chat : Struct.Page.Room.Chat.Type,
       selection : Struct.Page.Room.Selection.Type,
-      deck_browser : Struct.Page.Room.DeckBrowser.Type
+      deck_browser : Struct.Page.Room.DeckBrowser.Type,
+      history : (Array Struct.Page.Room.Action.Type)
    }
 
 -- Events here are how the user interact with the client. Not the puppeteer's
@@ -104,7 +106,8 @@ new =
       cards = (Dict.empty),
       chat = (Struct.Page.Room.Chat.new),
       selection = (Struct.Page.Room.Selection.new),
-      deck_browser = (Struct.Page.Room.DeckBrowser.new)
+      deck_browser = (Struct.Page.Room.DeckBrowser.new),
+      history = []
    }
 
 get_id : Type -> String

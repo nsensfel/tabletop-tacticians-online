@@ -35,19 +35,24 @@ type alias Type =
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-get_object_ids : (Array String)
+get_object_ids : Type -> (Array String)
 get_object_ids roll = roll.object_ids
 
-get_previous_faces : (Array Int)
+get_previous_faces : Type -> (Array Int)
 get_previous_faces roll = roll.previous_faces
 
-get_new_faces : (Array Int)
+get_new_faces : Type -> (Array Int)
 get_new_faces roll = roll.new_faces
 
 decoder : (Json.Decode.Decoder Type)
 decoder =
    (Json.Decode.map3
       ( \object_ids previous_faces new_faces ->
+         {
+            object_ids = object_ids,
+            previous_faces = previous_faces,
+            new_faces = new_faces
+         }
       )
       (Json.Decode.field
          Comm.Protocol.object_ids_field

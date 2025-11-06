@@ -33,10 +33,10 @@ type alias Type =
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-get_x : Int
+get_x : Type -> Int
 get_x ping = ping.x
 
-get_y : Int
+get_y : Type -> Int
 get_y ping = ping.y
 
 decoder : (Json.Decode.Decoder Type)
