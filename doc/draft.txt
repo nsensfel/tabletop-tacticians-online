@@ -120,3 +120,5 @@ Room list is
 	game_id: to display an image corresponding to the game.
 	is_pending: whether the user is currently being pinged.
 }
+
+Maybe a first prototype without deck support, then have the actions added progressively.

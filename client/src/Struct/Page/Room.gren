@@ -10,6 +10,8 @@ module Struct.Page.Room exposing
       set_players,
       get_cards,
       set_cards,
+      get_puppeteer,
+      set_puppeteer,
       event_to_string,
       decoder
    )
@@ -31,6 +33,7 @@ import Struct.Page.Room.Chat
 import Struct.Page.Room.Deck
 import Struct.Page.Room.DeckBrowser
 import Struct.Page.Room.Player
+import Struct.Page.Room.Puppeteer
 import Struct.Page.Room.Selection
 
 --------------------------------------------------------------------------------
@@ -46,7 +49,8 @@ type alias Type =
       chat : Struct.Page.Room.Chat.Type,
       selection : Struct.Page.Room.Selection.Type,
       deck_browser : Struct.Page.Room.DeckBrowser.Type,
-      history : (Array Struct.Page.Room.Action.Type)
+      history : (Array Struct.Page.Room.Action.Type),
+      puppeteer : Struct.Page.Room.Puppeteer.Type
    }
 
 -- Events here are how the user interact with the client. Not the puppeteer's
@@ -107,7 +111,8 @@ new =
       chat = (Struct.Page.Room.Chat.new),
       selection = (Struct.Page.Room.Selection.new),
       deck_browser = (Struct.Page.Room.DeckBrowser.new),
-      history = []
+      history = [],
+      puppeteer = (Struct.Page.Room.Puppeteer.new [])
    }
 
 get_id : Type -> String
@@ -137,6 +142,15 @@ get_name room = room.name
 get_chat : Type -> Struct.Page.Room.Chat.Type
 get_chat room = room.chat
 
+set_chat : Struct.Page.Room.Chat.Type -> Type -> Type
+set_chat chat room = {room | chat = chat}
+
+get_puppeteer : Type -> Struct.Page.Room.Puppeteer.Type
+get_puppeteer room = room.puppeteer
+
+set_puppeteer : Struct.Page.Room.Puppeteer.Type -> Type -> Type
+set_puppeteer puppeteer room = {room | puppeteer = puppeteer}
+
 get_selection : Type -> Struct.Page.Room.Selection.Type
 get_selection room = room.selection
 
@@ -145,9 +159,6 @@ get_deck_browser room = room.deck_browser
 
 set_name : String -> Type -> Type
 set_name name room = {room | name = name}
-
-set_chat : Struct.Page.Room.Chat.Type -> Type -> Type
-set_chat chat room = {room | chat = chat}
 
 set_selection : Struct.Page.Room.Selection.Type -> Type -> Type
 set_selection selection room = {room | selection = selection}

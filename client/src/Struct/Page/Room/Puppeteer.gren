@@ -1,0 +1,76 @@
+module Struct.Page.Room.Puppeteer exposing
+   (
+      Type,
+      new,
+      get_current_action,
+      move_forward,
+      move_backward,
+      step
+   )
+
+--------------------------------------------------------------------------------
+-- IMPORTS ---------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Standard Library ------------------------------------------------------------
+
+-- Third Party -----------------------------------------------------------------
+
+-- Project ---------------------------------------------------------------------
+import Struct.Page.Room.Action
+
+--------------------------------------------------------------------------------
+-- TYPES -----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+type alias Type =
+   {
+      queue : (Array Struct.Page.Room.Action.Type),
+      index : Int,
+      move_forward : Bool
+   }
+
+--------------------------------------------------------------------------------
+-- LOCAL FUNCTIONS -------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- EXPORTED FUNCTIONS ----------------------------------------------------------
+--------------------------------------------------------------------------------
+new : (Array Struct.Page.Room.Action.Type) -> Type
+new queue =
+   {
+      queue = queue,
+      index = 0,
+      move_forward = False
+   }
+
+get_current_action : Type -> (Maybe Struct.Page.Room.Action.Type)
+get_current_action puppeteer =
+   (Array.get
+      puppeteer.index
+      puppeteer.queue
+   )
+
+move_forward : Type -> Type
+move_forward puppeteer = {puppeteer | move_forward = True}
+
+move_backward : Type -> Type
+move_backward puppeteer = {puppeteer | move_forward = False}
+
+step : Type -> Type
+step puppeteer =
+   {puppeteer |
+      index =
+         if puppeteer.move_forward
+         then
+            (
+               if (puppeteer.index == (Array.length puppeteer.queue))
+               then puppeteer.index
+               else (puppeteer.index + 1)
+            )
+         else
+            (
+               if (puppeteer.index == 0)
+               then puppeteer.index
+               else (puppeteer.index - 1)
+            )
+   }
