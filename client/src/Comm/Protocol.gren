@@ -58,11 +58,14 @@ contains_field = "con"
 content_field : String
 content_field = "ctn"
 
-displayed_name_field : String
-displayed_name_field = "dnm"
-
 declined_field : String
 declined_field = "dcl"
+
+details_field : String
+details_field = "dts"
+
+displayed_name_field : String
+displayed_name_field = "dnm"
 
 email_field : String
 email_field = "eml"
@@ -103,8 +106,17 @@ lobby_field = "lby"
 message_field : String
 message_field = "msg"
 
+new_faces_field : String
+new_faces_field = "nfs"
+
+new_face_field : String
+new_face_field = "nfa"
+
 objects_field : String
 objects_field = "obj"
+
+object_ids_field : String
+object_ids_field = "oid"
 
 password_field : String
 password_field = "pwd"
@@ -112,17 +124,20 @@ password_field = "pwd"
 pending_rooms_field : String
 pending_rooms_field = "prs"
 
+previous_faces_field : String
+previous_faces_field = "pfa"
+
 properties_field : String
 properties_field = "pro"
+
+room_field : String
+room_field = "rom"
 
 room_game_id_field : String
 room_game_id_field = "rgi"
 
 room_id_field : String
 room_id_field = "rid"
-
-room_field : String
-room_field = "rom"
 
 room_name_field : String
 room_name_field = "rnm"

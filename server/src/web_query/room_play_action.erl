@@ -40,10 +40,10 @@ decode_action (Map) ->
 				#move
 				{
 					object_ids = maps:get(?TARGETS_FIELD, Map),
-					offset_x = maps:get(?X_FIELD, Map),
-					offset_y = maps:get(?Y_FIELD, Map),
-					offset_z = maps:get(?Z_FIELD, Map),
-					offset_angle = maps:get(?ANGLE_FIELD, Map)
+					x_offset = maps:get(?X_FIELD, Map),
+					y_offset = maps:get(?Y_FIELD, Map),
+					z_offset = maps:get(?Z_FIELD, Map),
+					angle_offset = maps:get(?ANGLE_FIELD, Map)
 				}
 			};
 
@@ -282,10 +282,10 @@ apply_action
 		#move
 		{
 			object_ids = Targets,
-			offset_x = X,
-			offset_y = Y,
-			offset_z = Z,
-			offset_angle = Angle
+			x_offset = X,
+			y_offset = Y,
+			z_offset = Z,
+			angle_offset = Angle
 		}
 ) ->
 	% TODO: check that list is not empty.

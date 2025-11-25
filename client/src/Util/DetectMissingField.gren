@@ -24,7 +24,10 @@ import Util.Array
 --------------------------------------------------------------------------------
 apply : (Array String) -> (Array String) -> (Maybe String)
 apply values names =
-   (Array.get
-      (Util.Array.findFirstIndex (\a -> (String.isEmpty a)) values)
-      names
-   )
+   let
+      missing_field_ix =
+         (Util.Array.findFirstIndex (\a -> (String.isEmpty a)) values)
+   in
+      when (missing_field_ix == -1) is
+         True -> Nothing
+         _ -> (Array.get missing_field_ix names )

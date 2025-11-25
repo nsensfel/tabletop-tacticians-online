@@ -34,7 +34,8 @@ import Struct.Page.Room.Action.SetFace
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
 type Details =
-   Chat String
+   Unknown String
+   | Chat String
 --   | CreateDeck Struct.Page.Room.Action.CreateDeck.Type
 --   | DrawFrom Struct.Page.Room.Action.DrawFrom.Type
  --  | ExplodeDeck Struct.Page.Room.Action.ExplodeDeck.Type
@@ -69,7 +70,7 @@ get_details action = action.details
 decoder : (Json.Decode.Decoder Type)
 decoder =
    (Json.Decode.map2
-      ( \actor details ->
+      ( \actor_id details ->
          {
             actor_id = actor_id,
             details = details
@@ -120,6 +121,8 @@ decoder =
                         ( \set_face -> (SetFace set_face))
                         Struct.Page.Room.Action.SetFace.decoder
                      )
+
+                  _ -> (Json.Decode.succeed (Unknown action_type))
             )
             (Json.Decode.field Comm.Protocol.details_field Json.Decode.string)
          )
