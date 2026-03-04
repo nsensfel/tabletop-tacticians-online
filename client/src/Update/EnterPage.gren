@@ -1,4 +1,4 @@
-module Update.SetPage exposing (update)
+module Update.EnterPage exposing (update)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
@@ -38,7 +38,6 @@ update page model =
          (Struct.InvocationParameters.erase_url_parameters
             (Struct.Model.get_invocation_parameters model)
          )
-      new_model = (Struct.Model.set_page page model)
    in
       when page is
          Struct.Page.Home ->
@@ -47,7 +46,7 @@ update page model =
                model =
                   (Struct.Model.set_invocation_parameters
                      reset_invocation_parameters
-                     new_model
+                     model
                   )
             }
 
@@ -61,7 +60,7 @@ update page model =
                         "room_list"
                         reset_invocation_parameters
                      )
-                     new_model
+                     model
                   )
             }
 
@@ -75,7 +74,7 @@ update page model =
                         "login"
                         reset_invocation_parameters
                      )
-                     new_model
+                     model
                   )
             }
 
@@ -89,13 +88,14 @@ update page model =
                         "edit_profile"
                         reset_invocation_parameters
                      )
-                     new_model
+                     model
                   )
             }
 
          (Struct.Page.Room room) ->
-            let
-               updated_model =
+            {
+               command = (Cmd.none), -- TODO: may start puppeteer
+               model =
                   (Struct.Model.set_invocation_parameters
                      (Struct.InvocationParameters.set_url_parameter
                         "page"
@@ -106,16 +106,9 @@ update page model =
                            reset_invocation_parameters
                         )
                      )
-                     new_model
+                     model
                   )
-            in
-               when (Struct.Page.Room.is_loaded room) is
-                  False -> (Comm.Send.RoomRequest.send room updated_model)
-                  _ ->
-                     {
-                        command = Cmd.none, -- May need to start Puppeteer.
-                        model = updated_model
-                     }
+            }
 
          (Struct.Page.CreateRoom _) ->
             {
@@ -127,7 +120,7 @@ update page model =
                         "create_room"
                         reset_invocation_parameters
                      )
-                     new_model
+                     model
                   )
             }
 
@@ -141,7 +134,7 @@ update page model =
                         "register"
                         reset_invocation_parameters
                      )
-                     new_model
+                     model
                   )
             }
 
@@ -155,6 +148,6 @@ update page model =
                         name
                         reset_invocation_parameters
                      )
-                     new_model
+                     model
                   )
             }

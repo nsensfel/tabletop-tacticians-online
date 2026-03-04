@@ -1,22 +1,18 @@
-module Comm.Receive exposing (expect)
+module Update.ServerReply.SetSession exposing (update)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
-import Http
-import Json.Decode
-import Result
 
 -- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
 import Struct.Event
-import Struct.Error
+import Struct.Model
+import Struct.Session
 
-import Dragoman.ServerReply
-
-import Comm.Protocol
+import Dragoman.SetSessionReply
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -25,40 +21,36 @@ import Comm.Protocol
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
-result_to_msg :
-   (empty empty
-      (Result.Result Http.Error (Array Struct.Event.Type)) ->
-      Struct.Event.Type
-   )
-result_to_msg result =
-   when result is
-      (Result.Ok sequence) -> (Struct.Event.Sequence sequence)
-      (Result.Err error) ->
-         (Struct.Event.ErrorOccurred
-            (Struct.Error.new
-               Struct.Error.Network
-               (
-                  when error is
-                     (Http.BadUrl url) -> ("Invalid URL: " ++ url)
-                     Http.Timeout -> "Request timed out."
-                     Http.NetworkError -> "Network connection error."
-                     (Http.BadBody msg) -> ("Invalid reply: " ++ msg)
-                     (Http.BadStatus num) ->
-                        ("HTTP Error: " ++ (String.fromInt num))
-               )
-            )
-         )
+
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-expect : (Http.Expect Struct.Event.Type)
-expect =
-   (Http.expectJson
-      (result_to_msg)
-      (Json.Decode.array
-         (Json.Decode.map
-            Struct.Event.ServerReplied
-            Dragoman.ServerReply.decoder
-         )
-      )
+update :
+   (
+      Dragoman.SetSessionReply.Type ->
+      Struct.Model.Type ->
+      { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
    )
+update set_session model =
+   let
+      new_model =
+         when (Struct.Model.get_page model) is
+            (Struct.Page.Login _) ->
+               (Struct.Model.set_page (Struct.Page.new "room_list") model)
+
+            (Struct.Page.Register _) ->
+               (Struct.Model.set_page (Struct.Page.new "room_list") model)
+
+            _ -> model
+   in
+      {
+         model =
+            (Struct.Model.set_session
+               (Struct.Session.set_credentials
+                  set_session
+                  (Struct.Model.get_session model)
+               )
+               new_model
+            ),
+         command = Cmd.none
+      }

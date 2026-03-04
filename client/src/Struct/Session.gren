@@ -1,10 +1,13 @@
 module Struct.Session exposing
    (
       Type,
-      empty,
-      new,
-      get_version,
-      get_pending_rooms
+      none,
+
+      get_credentials,
+      set_credentials,
+
+      get_pending_rooms,
+      set_pending_rooms
    )
 
 --------------------------------------------------------------------------------
@@ -15,6 +18,9 @@ module Struct.Session exposing
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Dragoman.ServerReply
+import Dragoman.ServerReplyID
+
 import Struct.Session.PendingRoom
 
 --------------------------------------------------------------------------------
@@ -22,7 +28,7 @@ import Struct.Session.PendingRoom
 --------------------------------------------------------------------------------
 type alias Type =
    {
-      version: Int,
+      credentials: Dragoman.SetSessionReply.Type,
       pending_rooms: (Array Struct.Session.PendingRoom.Type)
    }
 
@@ -33,18 +39,27 @@ type alias Type =
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-new : Int -> (Array Struct.Session.PendingRoom.Type) -> Type
-new version pending_rooms =
+none: Type
+none =
    {
-      version = version,
-      pending_rooms = pending_rooms
+      credentials =
+         (Dragoman.SetSessionReply.new
+            -1
+            ""
+            ""
+            Dragoman.ServerReplyID.SET_SESSION
+         ),
+      pending_rooms = []
    }
 
-empty : Type
-empty = (new -1 [])
+set_credentials: Dragoman.SetSessionReply.Type -> Type -> Type
+set_credentials credentials session = {session | credentials = credentials}
 
-get_version : Type -> Int
-get_version session = session.version
+get_credentials: Type -> Dragoman.SetSessionReply.Type
+get_credentials session = session.credentials
 
-get_pending_rooms : Type -> (Array Struct.Session.PendingRoom.Type)
+get_pending_rooms: Type -> (Array Struct.Session.PendingRoom.Type)
 get_pending_rooms session = session.pending_rooms
+
+set_pending_rooms: (Array Struct.Session.PendingRoom.Type) -> Type -> Type
+set_pending_rooms rooms session = {session | pending_rooms = rooms}

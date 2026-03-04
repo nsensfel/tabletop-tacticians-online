@@ -1,4 +1,4 @@
-module Update.SetSession exposing (update)
+module Update.ServerReply exposing (update)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
@@ -8,9 +8,15 @@ module Update.SetSession exposing (update)
 -- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Struct.Error
 import Struct.Event
 import Struct.Model
-import Struct.Session
+
+import Dragoman.ServerReply
+
+import Update.ServerReply.SetRoom
+import Update.ServerReply.SetSession
+import Update.ServerReply.Error
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -25,12 +31,17 @@ import Struct.Session
 --------------------------------------------------------------------------------
 update :
    (
-      Struct.Session.Type ->
+      Dragoman.ServerReply.Type ->
       Struct.Model.Type ->
       { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
    )
-update session model =
-   {
-      model = (Struct.Model.set_session session model),
-      command = Cmd.none
-   }
+update server_reply model =
+   when server_reply is
+      (Dragoman.ServerReply.SET_ROOM set_room) ->
+         (Update.ServerReply.SetRoom.update set_room model)
+
+      (Dragoman.ServerReply.SET_SESSION set_session) ->
+         (Update.ServerReply.SetSession.update set_session model)
+
+      (Dragoman.ServerReply.ERROR error) ->
+         (Update.ServerReply.Error.update erro model)

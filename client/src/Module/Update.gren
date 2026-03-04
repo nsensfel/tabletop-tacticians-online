@@ -20,6 +20,7 @@ import Update.LoginPage
 import Update.RegisterPage
 import Update.RoomListPage
 import Update.RoomPage
+import Update.ServerReply
 import Update.SetLocalValue
 import Update.SetPage
 import Update.SetSession
@@ -81,6 +82,9 @@ handle_event event model =
 
       (Struct.Event.SetSession session) ->
          (Update.SetSession.update session model)
+
+      (Struct.Event.ServerReplied server_reply) ->
+         (Update.ServerReply.update server_reply model)
 
       (Struct.Event.EraseLocalValue key) ->
          (Update.EraseLocalValue.update key model)

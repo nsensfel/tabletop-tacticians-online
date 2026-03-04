@@ -20,12 +20,16 @@ ERLC_OPTS ?= -I $(INCLUDE_DIR)
 DIALYZER ?= dialyzer
 DIALYZER_OPTS ?= --verbose -I $(INCLUDE_DIR)
 
+DRAGOMAN ?= $(HOME)/src/dragoman/dragoman-erlang.py
+
 M4 ?= m4
 M4_OPTS ?=
 
 ## Filenames
 DIALYZER_BASE_PLT_FILE ?= base.plt
 DIALYZER_PLT_FILE ?= tto.plt
+
+DRAGOMAN_DIR ?= ../dragoman
 
 ################################################################################
 ## MAKEFILE MAGIC ##############################################################
@@ -45,6 +49,8 @@ ERL_SRC_FILES = \
 	$(filter-out $(PREPROCESSED_ERL_SRC_FILES),$(CURRENT_ERL_SRC_FILES)) \
 	$(PREPROCESSED_ERL_SRC_FILES)
 ERL_BIN_FILES = $(patsubst $(SRC_DIR)%.erl,$(BIN_DIR)/%.beam,$(ERL_SRC_FILES))
+
+DRAGOMAN_FILES = $(shell find $(DRAGOMAN_DIR) -name "*.dgl")
 
 ## Binaries
 ERLC_EXEC = $(ERLC) $(ERLC_OPTS)
@@ -71,7 +77,7 @@ all: build
 
 debug: debug_run
 
-build: $(OPTIONAL_DIRS)	$(PREPROCESSED_FILES) $(ERL_BIN_FILES)
+build: $(OPTIONAL_DIRS) dragoman $(PREPROCESSED_FILES) $(ERL_BIN_FILES)
 
 clean:
 	# Preprocessor
@@ -108,6 +114,12 @@ $(PREPROCESSED_FILES): %: %.m4 .PHONY
 
 $(OPTIONAL_DIRS): %:
 	mkdir -p $@
+
+dragoman: $(DRAGOMAN_FILES)
+	$(DRAGOMAN) $(DRAGOMAN_DIR)/main.dgl \
+		--ataxia \
+		--include $(DRAGOMAN_DIR) \
+		--output-folder $(SRC_DIR)/dragoman
 
 $(ERL_BIN_FILES): $(BIN_DIR)/%.beam: $(SRC_DIR)/%.erl
 	mkdir -p $(dir $@)

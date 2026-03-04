@@ -16,6 +16,8 @@ import Struct.KeyValue
 import Struct.Page
 import Struct.Session
 
+import Dragoman.ServerReply
+
 import Struct.Page.EditProfile
 import Struct.Page.Room
 import Struct.Page.RoomList
@@ -43,6 +45,7 @@ type Type =
    | SetSession Struct.Session.Type
    | SetUrlParam Struct.KeyValue.Type
    | UnknownMessageTypeReceived String
+   | ServerReplied Dragoman.ServerReply.Type
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
@@ -98,6 +101,7 @@ to_string event =
       (SetPage _) -> "SetPage"
       ClearUrlParams -> "ClearUrlParams"
       (EraseUrlParam _) -> "EraseUrlParam"
+      (ServerReplied _) -> "ServerReplied"
 
       (UnknownMessageTypeReceived str) ->
          ("UnknownMessageTypeReceived: " ++ str)

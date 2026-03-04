@@ -1,21 +1,20 @@
-module Comm.Receive exposing (expect)
+module Comm.Send.RoomRequest exposing (send)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
-import Http
-import Json.Decode
-import Result
+import Json.Encode
 
 -- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
 import Struct.Event
-import Struct.Error
+import Struct.Model
 
-import Dragoman.ServerReply
+import Struct.Page.Room
 
+import Comm.Send
 import Comm.Protocol
 
 --------------------------------------------------------------------------------
@@ -25,40 +24,39 @@ import Comm.Protocol
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
-result_to_msg :
-   (empty empty
-      (Result.Result Http.Error (Array Struct.Event.Type)) ->
-      Struct.Event.Type
-   )
-result_to_msg result =
-   when result is
-      (Result.Ok sequence) -> (Struct.Event.Sequence sequence)
-      (Result.Err error) ->
-         (Struct.Event.ErrorOccurred
-            (Struct.Error.new
-               Struct.Error.Network
-               (
-                  when error is
-                     (Http.BadUrl url) -> ("Invalid URL: " ++ url)
-                     Http.Timeout -> "Request timed out."
-                     Http.NetworkError -> "Network connection error."
-                     (Http.BadBody msg) -> ("Invalid reply: " ++ msg)
-                     (Http.BadStatus num) ->
-                        ("HTTP Error: " ++ (String.fromInt num))
-               )
-            )
-         )
+encode : Struct.Page.Room.Type Struct.Model.Type -> Json.Encode.Value
+encode room model =
+   let
+      invocation_parameters = (Struct.Model.get_invocation_parameters model)
+   in
+      (Json.Encode.object
+         [ -- The credentials part should be shared...
+            {
+               key = (Comm.Protocol.user_id_field),
+               value = (Json.Encode.string (Struct.Page.Room.get_username room))
+            },
+            {
+               key = (Comm.Protocol.session_token_field),
+               value = (Json.Encode.string (Struct.Page.Room.get_password room))
+            },
+            {
+               key = (Comm.Protocol.user_version_field),
+               value = (Json.Encode.string (Struct.Page.Room.get_password room))
+            }
+         ]
+      )
+
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-expect : (Http.Expect Struct.Event.Type)
-expect =
-   (Http.expectJson
-      (result_to_msg)
-      (Json.Decode.array
-         (Json.Decode.map
-            Struct.Event.ServerReplied
-            Dragoman.ServerReply.decoder
-         )
-      )
+send :
+   (
+      Struct.Page.Room.Type ->
+      Struct.Model.Type ->
+      { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
    )
+send room model =
+   {
+      model = model,
+      command = (Comm.Send.send (encode room model) Comm.Send.RoomHandler)
+   }

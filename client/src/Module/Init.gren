@@ -34,12 +34,15 @@ init :
       { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
    )
 init flags =
-   {
+   let
       model =
          (Struct.Model.new
             (Struct.InvocationParameters.new
                (Debug.log "flags:" flags)
             )
-         ),
-      command = Cmd.none
-   }
+         )
+   in
+      {
+         model = model,
+         command = (Cmd.none)
+      }

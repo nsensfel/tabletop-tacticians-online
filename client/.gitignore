@@ -1,2 +1,7 @@
 .gren
 gren_packages/
+node_modules
+package-lock.json
+package.json
+public/
+src/Dragoman/

@@ -1,0 +1,7 @@
+*.log
+.DS_Store
+.idea
+base.plt
+src/dragoman/
+tmp/
+tto.plt
