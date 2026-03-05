@@ -6,6 +6,7 @@
 
 (object Room
 	(entry name nam string)
+	(entry id id string)
 	(entry game_id gid string)
 	(entry objects obj (dict id RoomObject))
 	(entry history his (array RoomAction))

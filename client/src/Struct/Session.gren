@@ -20,6 +20,7 @@ module Struct.Session exposing
 -- Project ---------------------------------------------------------------------
 import Dragoman.ServerReply
 import Dragoman.ServerReplyID
+import Dragoman.SetSessionReply
 
 import Struct.Session.PendingRoom
 

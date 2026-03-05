@@ -23,7 +23,6 @@ import Update.RoomPage
 import Update.ServerReply
 import Update.SetLocalValue
 import Update.SetPage
-import Update.SetSession
 import Update.SetUrlParam
 
 --------------------------------------------------------------------------------
@@ -79,9 +78,6 @@ handle_event event model =
 
       (Struct.Event.SetLocalValue key_value) ->
          (Update.SetLocalValue.update key_value model)
-
-      (Struct.Event.SetSession session) ->
-         (Update.SetSession.update session model)
 
       (Struct.Event.ServerReplied server_reply) ->
          (Update.ServerReply.update server_reply model)
