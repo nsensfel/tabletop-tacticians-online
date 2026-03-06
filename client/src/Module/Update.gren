@@ -16,6 +16,7 @@ import Update.Dirty
 import Update.EditProfilePage
 import Update.EraseLocalValue
 import Update.EraseUrlParam
+import Update.Error
 import Update.LoginPage
 import Update.RegisterPage
 import Update.RoomListPage
@@ -93,16 +94,7 @@ handle_event event model =
       (Struct.Event.EraseUrlParam key) ->
          (Update.EraseUrlParam.update key model)
 
-      (Struct.Event.ErrorOccurred error) ->
-         {
-            model =
-               (Struct.Model.push_error
-                  (Struct.Error.get_category error)
-                  (Struct.Error.get_message error)
-                  model
-               ),
-            command = Cmd.none
-         }
+      (Struct.Event.ErrorOccurred error) -> (Update.Error.update error model)
 
       (Struct.Event.Sequence events) ->
          let
@@ -111,15 +103,13 @@ handle_event event model =
             {model = result.model, command = (Cmd.batch result.commands)}
 
       other ->
-         {
-            model =
-               (Struct.Model.push_error
-                  Struct.Error.Programming
-                  ("Unhandled event: " ++ (Struct.Event.to_string other))
-                  model
-               ),
-            command = Cmd.none
-         }
+         (Update.Error.update
+            (Struct.Error.new
+               Struct.Error.Programming
+               ("Unhandled event: " ++ (Struct.Event.to_string other))
+            )
+            model
+         )
 
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------

@@ -1,4 +1,4 @@
-module Update.RegisterPage.SetPasswordTo exposing (update)
+module Update.ServerReply.Error exposing (update)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
@@ -8,13 +8,13 @@ module Update.RegisterPage.SetPasswordTo exposing (update)
 -- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Struct.Error
 import Struct.Event
 import Struct.Model
 
-import Struct.Page
-import Struct.Page.Register
+import Dragoman.ErrorReply
 
-import Dragoman.RegisterQuery
+import Update.Error
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -29,25 +29,22 @@ import Dragoman.RegisterQuery
 --------------------------------------------------------------------------------
 update :
    (
-      String ->
-      Struct.Page.Register.Type ->
+      Dragoman.ErrorReply.Type ->
       Struct.Model.Type ->
       { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
    )
-update password register model =
-   {
-      command = Cmd.none,
-      model =
-         (Struct.Model.set_page
-            (Struct.Page.Register
-               (Struct.Page.Register.set_query
-                  (Dragoman.RegisterQuery.set_password
-                     password
-                     (Struct.Page.Register.get_query register)
-                  )
-                  register
-               )
-            )
-            model
+update error model =
+   (Update.Error.update
+      (Struct.Error.new
+         (
+            when (Dragoman.ErrorReply.get_category error) is
+               WARNING -> Struct.Error.Warning
+               PROGRAMMING_ERROR -> Struct.Error.Programming
+               NETWORK_ERROR -> Struct.Error.Network
+               MISSING_INPUT -> Struct.Error.MissingInput
+               ERROR -> Struct.Error.Error
          )
-   }
+         (Dragoman.ErrorReply.get_message_content error)
+      )
+      model
+   )

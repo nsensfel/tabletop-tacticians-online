@@ -22,6 +22,8 @@ import Struct.Page.Login
 
 import View.ErrorTracker
 
+import Dragoman.LoginQuery
+
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -29,10 +31,10 @@ import View.ErrorTracker
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
-username_field : Struct.Page.Login.Type -> (Html.Html Struct.Event.Type)
-username_field login =
+username_field : Dragoman.LoginQuery.Type -> (Html.Html Struct.Event.Type)
+username_field query =
    let
-      username = (Struct.Page.Login.get_username login)
+      username = (Dragoman.LoginQuery.get_username query)
    in
       (Html.div
          [
@@ -62,10 +64,10 @@ username_field login =
          ]
       )
 
-password_field : Struct.Page.Login.Type -> (Html.Html Struct.Event.Type)
-password_field login =
+password_field : Dragoman.LoginQuery.Type -> (Html.Html Struct.Event.Type)
+password_field query =
    let
-      password = (Struct.Page.Login.get_password login)
+      password = (Dragoman.LoginQuery.get_password query)
    in
       (Html.div
          [
@@ -106,55 +108,58 @@ view :
       (Browser.Document Struct.Event.Type)
    )
 view model login =
-   {
-      title = "Login",
-      body =
-      [
-         (Html.article
-            [
-               (Html.Attributes.class "login-page")
-            ]
-            [
-               (username_field login),
-               (password_field login),
-               (Html.button
-                  [
-                     (Html.Events.onClick
-                        (Struct.Event.LoginPage Struct.Page.Login.FormSubmitted)
-                     )
-                  ]
-                  [
-                     (Html.text "Send")
-                  ]
-               ),
-               (Html.button
-                  [
-                     (Html.Attributes.class "login-debug-button"),
-                     (Html.Events.onClick
-                        (Struct.Event.LoginPage
-                           (Struct.Page.Login.DebugSignInAs "0")
+   let query = (Struct.Page.Login.get_query login) in
+      {
+         title = "Login",
+         body =
+         [
+            (Html.article
+               [
+                  (Html.Attributes.class "login-page")
+               ]
+               [
+                  (username_field query),
+                  (password_field query),
+                  (Html.button
+                     [
+                        (Html.Events.onClick
+                           (Struct.Event.LoginPage
+                              Struct.Page.Login.FormSubmitted
+                           )
                         )
-                     )
-                  ]
-                  [
-                     (Html.text "[PH] Login as Player 1")
-                  ]
-               ),
-               (Html.button
-                  [
-                     (Html.Attributes.class "login-debug-button"),
-                     (Html.Events.onClick
-                        (Struct.Event.LoginPage
-                           (Struct.Page.Login.DebugSignInAs "1")
+                     ]
+                     [
+                        (Html.text "Send")
+                     ]
+                  ),
+                  (Html.button
+                     [
+                        (Html.Attributes.class "login-debug-button"),
+                        (Html.Events.onClick
+                           (Struct.Event.LoginPage
+                              (Struct.Page.Login.DebugSignInAs "0")
+                           )
                         )
-                     )
-                  ]
-                  [
-                     (Html.text "[PH] Login as Player 2")
-                  ]
-               )
-            ]
-         ),
-         (View.ErrorTracker.get_html model)
-      ]
-   }
+                     ]
+                     [
+                        (Html.text "[PH] Login as Player 1")
+                     ]
+                  ),
+                  (Html.button
+                     [
+                        (Html.Attributes.class "login-debug-button"),
+                        (Html.Events.onClick
+                           (Struct.Event.LoginPage
+                              (Struct.Page.Login.DebugSignInAs "1")
+                           )
+                        )
+                     ]
+                     [
+                        (Html.text "[PH] Login as Player 2")
+                     ]
+                  )
+               ]
+            ),
+            (View.ErrorTracker.get_html model)
+         ]
+      }

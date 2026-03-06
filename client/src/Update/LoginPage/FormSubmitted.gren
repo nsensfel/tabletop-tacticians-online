@@ -14,11 +14,11 @@ import Struct.Model
 
 import Struct.Page.Login
 
-import Comm.Send.LoginRequest
+import Comm.Send
 
 import Util.DetectMissingField
 
-import Module.Port
+import Dragoman.LoginQuery
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -38,28 +38,36 @@ update :
       { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
    )
 update login model =
-   when
-      (Util.DetectMissingField.apply
-         [
-            (Struct.Page.Login.get_username login),
-            (Struct.Page.Login.get_password login)
-         ]
-         [
-            "username",
-            "password"
-         ]
-      )
-   is
-      (Just name) ->
-         {
-            model =
-               (Struct.Model.push_error
-                  Struct.Error.Error
-                  ("Missing " ++ name)
-                  model
-               ),
-            command = (Module.Port.any_test 0) --Cmd.none
-         }
+   let query = (Struct.Page.Login.get_query login) in
+      when
+         (Util.DetectMissingField.apply
+            [
+               (Dragoman.LoginQuery.get_username query),
+               (Dragoman.LoginQuery.get_password query)
+            ]
+            [
+               "username",
+               "password"
+            ]
+         )
+      is
+         (Just name) ->
+            {
+               model =
+                  (Struct.Model.push_error
+                     Struct.Error.Error
+                     ("Missing " ++ name)
+                     model
+                  ),
+               command = Cmd.none
+            }
 
-      Nothing ->
-         (Comm.Send.LoginRequest.send login model)
+         Nothing ->
+            {
+               model = model, -- TODO: acknowledge it's been sent?
+               command =
+                  (Comm.Send.send
+                     (Dragoman.LoginQuery.encode query)
+                     (Comm.Send.LoginHandler)
+                  )
+            }

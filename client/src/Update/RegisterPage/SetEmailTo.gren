@@ -14,6 +14,8 @@ import Struct.Model
 import Struct.Page
 import Struct.Page.Register
 
+import Dragoman.RegisterQuery
+
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -38,7 +40,13 @@ update email register model =
       model =
          (Struct.Model.set_page
             (Struct.Page.Register
-               (Struct.Page.Register.set_email email register)
+               (Struct.Page.Register.set_query
+                  (Dragoman.RegisterQuery.set_email
+                     email
+                     (Struct.Page.Register.get_query register)
+                  )
+                  register
+               )
             )
             model
          )

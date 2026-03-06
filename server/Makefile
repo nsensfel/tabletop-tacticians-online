@@ -116,6 +116,7 @@ $(OPTIONAL_DIRS): %:
 	mkdir -p $@
 
 dragoman: $(DRAGOMAN_FILES)
+	rm -rf $(SRC_DIR)/dragoman
 	$(DRAGOMAN) $(DRAGOMAN_DIR)/main.dgl \
 		--ataxia \
 		--include $(DRAGOMAN_DIR) \

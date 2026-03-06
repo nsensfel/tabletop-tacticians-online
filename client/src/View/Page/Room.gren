@@ -35,6 +35,72 @@ import View.Room.MainMenu
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
+int_to_px : Int -> String
+int_to_px i = ((String.fromInt i) ++ "px")
+
+object_get_html_attributes:
+   (
+      Dragoman.RoomObject.Type ->
+      (Array (Html.Html Struct.Event.Type)
+   )
+object_get_html_attributes object =
+   let attitude = (Dragoman.RoomObject.get_attitude object) in
+      [
+         (Html.Attributes.style
+            "width"
+            (int_to_px (Dragoman.RoomObject.get_width card))
+         ),
+         (Html.Attributes.style
+            "height"
+            (int_to_px (Dragoman.RoomObject.get_height card))
+         ),
+         (Html.Attributes.style
+            "top"
+            (int_to_px (Dragoman.RoomObjectAttitude.get_y attitude))
+         ),
+         (Html.Attributes.style
+            "left"
+            (int_to_px (Dragoman.RoomObjectAttitude.get_x attitude))
+         ),
+         (Html.Attributes.style
+            "z-index"
+            (String.fromInt (Dragoman.RoomObjectAttitude.get_z attitude))
+         ),
+         (Html.Attributes.style
+            "transform"
+            (
+               "rotate("
+               ++
+               (String.fromInt
+                  (Dragoman.RoomObjectAttitude.get_angle attitude)
+               )
+               ++ "deg)"
+            )
+         )
+      ]
+
+object_view_html: Dragoman.RoomObject.Type -> (Html.Html Struct.Event.Type)
+object_view_html object =
+   when (Dragoman.RoomObject.get_properties object) is
+      (DECK deck) ->
+         (View.Room.Deck.get_html
+            (object_get_html_attributes object)
+            deck
+         )
+
+      (DICE dice) ->
+         (View.Room.Dice.get_html
+            (object_get_html_attributes object)
+            dice
+         )
+
+      (CARD card) ->
+         (View.Room.Card.get_html
+            (object_get_html_attributes object)
+            card
+         )
+
+
 room_view_html :
    (
       Struct.Model.Type ->

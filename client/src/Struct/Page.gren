@@ -11,22 +11,24 @@ import Url
 -- Project ---------------------------------------------------------------------
 import Struct.Page.CreateRoom
 import Struct.Page.EditProfile
-import Struct.Page.Room
-import Struct.Page.RoomList
+import Struct.Page.Loading
 import Struct.Page.Login
 import Struct.Page.Register
+import Struct.Page.Room
+import Struct.Page.RoomList
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
 type Type =
    Home
-   | EditProfile Struct.Page.EditProfile.Type
-   | Room Struct.Page.Room.Type
-   | RoomList Struct.Page.RoomList.Type
    | CreateRoom Struct.Page.CreateRoom.Type
+   | EditProfile Struct.Page.EditProfile.Type
+   | Loading Struct.Page.Loading.Type
    | Login Struct.Page.Login.Type
    | Register Struct.Page.Register.Type
+   | Room Struct.Page.Room.Type
+   | RoomList Struct.Page.RoomList.Type
    | Unknown String
 
 --------------------------------------------------------------------------------
@@ -42,8 +44,8 @@ new name =
       "" -> Home
       "login" -> (Login (Struct.Page.Login.new))
       "register" -> (Register (Struct.Page.Register.new))
-      "edit_profile" -> (EditProfile (Struct.Page.EditProfile.new))
+      "edit_profile" -> (Loading (Struct.Page.Loading.new))
       "room_list" -> (RoomList (Struct.Page.RoomList.new))
       "create_room" -> (CreateRoom (Struct.Page.CreateRoom.new))
-      "room" -> (Room (Struct.Page.Room.new))
+      "room" -> (Loading (Struct.Page.Loading.new))
       other -> (Unknown other)

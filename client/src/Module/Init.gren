@@ -3,11 +3,8 @@ module Module.Init exposing (init)
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
+
 -- Standard Library ------------------------------------------------------------
-import Browser.Navigation
-
-import Url
-
 import Debug
 
 -- Third Party------------------------------------------------------------------
@@ -35,14 +32,16 @@ init :
    )
 init flags =
    let
-      model =
-         (Struct.Model.new
-            (Struct.InvocationParameters.new
-               (Debug.log "flags:" flags)
-            )
+      invocation_parameters =
+         (Struct.InvocationParameters.new
+            (Debug.log "flags:" flags)
          )
+      model = (Struct.Model.new invocation_parameters)
    in
-      {
-         model = model,
-         command = (Cmd.none)
-      }
+      when (Struct.Model.get_page model) is
+         -- TODO: request data depending on page.
+         _ -> -- Nothing else to do
+            {
+               model = model,
+               command = (Cmd.none)
+            }

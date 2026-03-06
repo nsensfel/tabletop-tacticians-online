@@ -20,6 +20,8 @@ import Struct.Event
 
 import Struct.Page.Register
 
+import Dragoman.RegisterQuery
+
 import View.Avatar
 import View.ErrorTracker
 
@@ -30,10 +32,10 @@ import View.ErrorTracker
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
-username_field : Struct.Page.Register.Type -> (Html.Html Struct.Event.Type)
-username_field register =
+username_field : Dragoman.RegisterQuery.Type -> (Html.Html Struct.Event.Type)
+username_field query =
    let
-      username = (Struct.Page.Register.get_username register)
+      username = (Dragoman.RegisterQuery.get_username query)
    in
       (Html.div
          [
@@ -63,10 +65,10 @@ username_field register =
          ]
       )
 
-avatar_field : Struct.Page.Register.Type -> (Html.Html Struct.Event.Type)
-avatar_field register =
+avatar_field : Dragoman.RegisterQuery.Type -> (Html.Html Struct.Event.Type)
+avatar_field query =
    let
-      avatar = (Struct.Page.Register.get_avatar register)
+      avatar = (Dragoman.RegisterQuery.get_avatar query)
    in
       (Html.div
          [
@@ -96,10 +98,10 @@ avatar_field register =
          ]
       )
 
-password_field : Struct.Page.Register.Type -> (Html.Html Struct.Event.Type)
-password_field register =
+password_field : Dragoman.RegisterQuery.Type -> (Html.Html Struct.Event.Type)
+password_field query =
    let
-      password = (Struct.Page.Register.get_password register)
+      password = (Dragoman.RegisterQuery.get_password query)
    in
       (Html.div
          [
@@ -130,10 +132,15 @@ password_field register =
          ]
       )
 
-password_confirmation_field : Struct.Page.Register.Type -> (Html.Html Struct.Event.Type)
-password_confirmation_field register =
+password_confirmation_field:
+   (
+      Dragoman.RegisterQuery.Type ->
+      Struct.Page.Register.Type ->
+      (Html.Html Struct.Event.Type)
+   )
+password_confirmation_field query register =
    let
-      password = (Struct.Page.Register.get_password register)
+      password = (Dragoman.RegisterQuery.get_password query)
       password_confirmation =
          (Struct.Page.Register.get_password_confirmation register)
    in
@@ -171,10 +178,14 @@ password_confirmation_field register =
          ]
       )
 
-displayed_name_field : Struct.Page.Register.Type -> (Html.Html Struct.Event.Type)
-displayed_name_field register =
+displayed_name_field :
+   (
+      Dragoman.RegisterQuery.Type ->
+      (Html.Html Struct.Event.Type)
+   )
+displayed_name_field query =
    let
-      displayed_name = (Struct.Page.Register.get_displayed_name register)
+      displayed_name = (Dragoman.RegisterQuery.get_displayed_name query)
    in
       (Html.div
          [
@@ -206,10 +217,10 @@ displayed_name_field register =
          ]
       )
 
-email_field : Struct.Page.Register.Type -> (Html.Html Struct.Event.Type)
-email_field register =
+email_field : Dragoman.RegisterQuery.Type -> (Html.Html Struct.Event.Type)
+email_field query =
    let
-      email = (Struct.Page.Register.get_email register)
+      email = (Dragoman.RegisterQuery.get_email query)
    in
       (Html.div
          [
@@ -249,33 +260,34 @@ view :
       (Browser.Document Struct.Event.Type)
    )
 view model register =
-   {
-      title = "Register",
-      body =
-      [
-         (Html.article
-            []
-            [
-               (username_field register),
-               (password_field register),
-               (password_confirmation_field register),
-               (displayed_name_field register),
-               (email_field register),
-               (avatar_field register),
-               (Html.button
-                  [
-                     (Html.Events.onClick
-                        (Struct.Event.RegisterPage
-                           Struct.Page.Register.FormSubmitted
+   let query = (Struct.Page.Register.get_query register) in
+      {
+         title = "Register",
+         body =
+         [
+            (Html.article
+               []
+               [
+                  (username_field query),
+                  (password_field query),
+                  (password_confirmation_field query register),
+                  (displayed_name_field query),
+                  (email_field query),
+                  (avatar_field query),
+                  (Html.button
+                     [
+                        (Html.Events.onClick
+                           (Struct.Event.RegisterPage
+                              Struct.Page.Register.FormSubmitted
+                           )
                         )
-                     )
-                  ]
-                  [
-                     (Html.text "Send")
-                  ]
-               )
-            ]
-         ),
-         (View.ErrorTracker.get_html model)
-      ]
-   }
+                     ]
+                     [
+                        (Html.text "Send")
+                     ]
+                  )
+               ]
+            ),
+            (View.ErrorTracker.get_html model)
+         ]
+      }

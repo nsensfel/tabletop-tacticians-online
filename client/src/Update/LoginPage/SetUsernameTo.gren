@@ -14,6 +14,7 @@ import Struct.Model
 import Struct.Page
 import Struct.Page.Login
 
+import Dragoman.LoginQuery
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -37,7 +38,15 @@ update username login model =
       command = Cmd.none,
       model =
          (Struct.Model.set_page
-            (Struct.Page.Login (Struct.Page.Login.set_username username login))
+            (Struct.Page.Login
+               (Struct.Page.Login.set_query
+                  (Dragoman.LoginQuery.set_username
+                     username
+                     (Struct.Page.Login.get_query login)
+                  )
+                  login
+               )
+            )
             model
          )
    }

@@ -109,13 +109,10 @@ update page model =
                      new_model
                   )
             in
-               when (Struct.Page.Room.is_loaded room) is
-                  False -> (Comm.Send.RoomRequest.send room updated_model)
-                  _ ->
-                     {
-                        command = Cmd.none, -- May need to start Puppeteer.
-                        model = updated_model
-                     }
+               {
+                  command = Cmd.none, -- May need to start Puppeteer.
+                  model = updated_model
+               }
 
          (Struct.Page.CreateRoom _) ->
             {

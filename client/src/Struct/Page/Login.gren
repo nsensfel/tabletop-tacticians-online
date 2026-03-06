@@ -3,10 +3,8 @@ module Struct.Page.Login exposing
       Type,
       Event(..),
       new,
-      get_username,
-      set_username,
-      get_password,
-      set_password,
+      get_query,
+      set_query,
       event_to_string
    )
 
@@ -18,14 +16,14 @@ module Struct.Page.Login exposing
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Dragoman.LoginQuery
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
 type alias Type =
    {
-      username : String,
-      password : String
+      query: Dragoman.LoginQuery.Type
    }
 
 type Event =
@@ -50,16 +48,10 @@ event_to_string event =
       (SetUsernameTo _) -> "SetUsernameTo"
 
 new : Type
-new = { username = "", password = "" }
+new = { query = (Dragoman.LoginQuery.new "" "") }
 
-get_username : Type -> String
-get_username login = login.username
+get_query : Type -> Dragoman.LoginQuery.Type
+get_query login = login.query
 
-set_username : String -> Type -> Type
-set_username username login = {login | username = username}
-
-get_password : Type -> String
-get_password login = login.password
-
-set_password : String -> Type -> Type
-set_password password login = {login | password = password}
+set_query : Dragoman.LoginQuery.Type -> Type -> Type
+set_query query login = {login | query = query}

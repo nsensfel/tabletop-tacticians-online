@@ -3,18 +3,10 @@ module Struct.Page.Register exposing
       Type,
       Event(..),
       new,
-      get_username,
-      set_username,
-      get_avatar,
-      set_avatar,
-      get_displayed_name,
-      set_displayed_name,
-      get_password,
-      set_password,
+      get_query,
+      set_query,
       get_password_confirmation,
       set_password_confirmation,
-      get_email,
-      set_email,
       event_to_string
    )
 
@@ -26,18 +18,15 @@ module Struct.Page.Register exposing
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Dragoman.RegisterQuery
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
 type alias Type =
    {
-      username : String,
-      avatar : String,
-      displayed_name : String,
-      password : String,
-      password_confirmation : String,
-      email : String
+      query: Dragoman.RegisterQuery.Type,
+      password_confirmation: String
    }
 
 type Event =
@@ -56,7 +45,7 @@ type Event =
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-event_to_string : Event -> String
+event_to_string: Event -> String
 event_to_string event =
    when event is
       FormSubmitted -> "FormSubmitted"
@@ -67,51 +56,22 @@ event_to_string event =
       (SetPasswordConfirmationTo _) -> "SetPasswordConfirmationTo"
       (SetPasswordTo _) -> "SetPasswordTo"
 
-new : Type
+new: Type
 new =
    {
-      username = "",
-      displayed_name = "",
-      avatar = "",
-      password = "",
-      password_confirmation = "",
-      email = ""
+      query = (Dragoman.RegisterQuery.new "" "" "" "" ""),
+      password_confirmation = ""
    }
 
-get_username : Type -> String
-get_username register = register.username
+get_query: Type -> Dragoman.RegisterQuery.Type
+get_query register = register.query
 
-set_username : String -> Type -> Type
-set_username username register = {register | username = username}
+set_query: Dragoman.RegisterQuery.Type -> Type -> Type
+set_query query register = {register | query = query}
 
-get_avatar : Type -> String
-get_avatar register = register.avatar
-
-set_avatar : String -> Type -> Type
-set_avatar avatar register = {register | avatar = avatar}
-
-get_displayed_name : Type -> String
-get_displayed_name register = register.displayed_name
-
-set_displayed_name : String -> Type -> Type
-set_displayed_name displayed_name register =
-   {register | displayed_name = displayed_name}
-
-get_password : Type -> String
-get_password register = register.password
-
-set_password : String -> Type -> Type
-set_password password register = {register | password = password}
-
-get_password_confirmation : Type -> String
+get_password_confirmation: Type -> String
 get_password_confirmation register = register.password_confirmation
 
-set_password_confirmation : String -> Type -> Type
+set_password_confirmation: String -> Type -> Type
 set_password_confirmation password_confirmation register =
    {register | password_confirmation = password_confirmation}
-
-get_email : Type -> String
-get_email register = register.email
-
-set_email : String -> Type -> Type
-set_email email register = {register | email = email}

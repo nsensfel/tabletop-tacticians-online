@@ -1,8 +1,0 @@
-(require ServerReplyID)
-
-(object SetSessionReply
-	(entry message_id msg ServerReplyID)
-	(entry user_id uid string)
-	(entry session_token tkn string)
-	(entry user_version uvr integer)
-)

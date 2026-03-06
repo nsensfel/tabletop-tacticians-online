@@ -15,7 +15,7 @@ import Struct.Model
 import Dragoman.ServerReply
 
 import Update.ServerReply.SetRoom
-import Update.ServerReply.SetSession
+import Update.ServerReply.SetCredentials
 import Update.ServerReply.Error
 
 --------------------------------------------------------------------------------
@@ -40,8 +40,8 @@ update server_reply model =
       (Dragoman.ServerReply.SET_ROOM set_room) ->
          (Update.ServerReply.SetRoom.update set_room model)
 
-      (Dragoman.ServerReply.SET_SESSION set_session) ->
-         (Update.ServerReply.SetSession.update set_session model)
+      (Dragoman.ServerReply.SET_CREDENTIALS set_credentials) ->
+         (Update.ServerReply.SetCredentials.update set_credentials model)
 
       (Dragoman.ServerReply.ERROR error) ->
-         (Update.ServerReply.Error.update erro model)
+         (Update.ServerReply.Error.update error model)

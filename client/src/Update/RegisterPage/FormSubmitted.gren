@@ -14,9 +14,11 @@ import Struct.Model
 
 import Struct.Page.Register
 
-import Comm.Send.RegisterRequest
+import Comm.Send
 
 import Util.DetectMissingField
+
+import Dragoman.RegisterQuery
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -36,51 +38,60 @@ update :
       { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
    )
 update register model =
-   when
-      (Util.DetectMissingField.apply
-         [
-            (Struct.Page.Register.get_username register),
-            (Struct.Page.Register.get_password register),
-            (Struct.Page.Register.get_displayed_name register),
-            (Struct.Page.Register.get_email register),
-            (Struct.Page.Register.get_password_confirmation register),
-            (Struct.Page.Register.get_avatar register)
-         ]
-         [
-            "username",
-            "password",
-            "displayed name",
-            "email",
-            "password confirmation",
-            "avatar"
-         ]
-      )
-   is
-      (Just name) ->
-         {
-            model =
-               (Struct.Model.push_error
-                  Struct.Error.MissingInput
-                  ("Missing " ++ name)
-                  model
-               ),
-            command = Cmd.none
-         }
-
-      Nothing ->
-         if
-         (
-            (Struct.Page.Register.get_password register)
-            == (Struct.Page.Register.get_password_confirmation register)
+   let query = (Struct.Page.Register.get_query register) in
+      when
+         (Util.DetectMissingField.apply
+            [
+               (Dragoman.RegisterQuery.get_username query),
+               (Dragoman.RegisterQuery.get_password query),
+               (Dragoman.RegisterQuery.get_displayed_name query),
+               (Dragoman.RegisterQuery.get_email query),
+               (Dragoman.RegisterQuery.get_avatar query),
+               (Struct.Page.Register.get_password_confirmation register)
+            ]
+            [
+               "username",
+               "password",
+               "displayed name",
+               "email",
+               "avatar",
+               "password confirmation"
+            ]
          )
-         then (Comm.Send.RegisterRequest.send register model)
-         else
-         {
-            model =
-               (Struct.Model.push_error
-                  Struct.Error.Error
-                  ("Password and Password Confirmation mismatch")
-                  model
-               ),
-            command = Cmd.none
-         }
+      is
+         (Just name) ->
+            {
+               model =
+                  (Struct.Model.push_error
+                     Struct.Error.MissingInput
+                     ("Missing " ++ name)
+                     model
+                  ),
+               command = Cmd.none
+            }
+
+         Nothing ->
+            if
+            (
+               (Dragoman.RegisterQuery.get_password query)
+               == (Struct.Page.Register.get_password_confirmation register)
+            )
+            then
+               {
+                  model = model,
+                  command =
+                     (Comm.Send.send
+                        (Dragoman.RegisterQuery.encode query)
+                        Comm.Send.RegisterHandler
+                     )
+               }
+            else
+               {
+                  model =
+                     (Struct.Model.push_error
+                        Struct.Error.Error
+                        ("Password and Password Confirmation mismatch")
+                        model
+                     ),
+                  command = Cmd.none
+               }

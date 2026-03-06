@@ -3,8 +3,9 @@ module Struct.Session exposing
       Type,
       none,
 
-      get_credentials,
+      maybe_get_credentials,
       set_credentials,
+      clear_credentials,
 
       get_pending_rooms,
       set_pending_rooms
@@ -18,9 +19,7 @@ module Struct.Session exposing
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Dragoman.ServerReply
-import Dragoman.ServerReplyID
-import Dragoman.SetSessionReply
+import Dragoman.Credentials
 
 import Struct.Session.PendingRoom
 
@@ -29,7 +28,7 @@ import Struct.Session.PendingRoom
 --------------------------------------------------------------------------------
 type alias Type =
    {
-      credentials: Dragoman.SetSessionReply.Type,
+      credentials: (Maybe Dragoman.Credentials.Type),
       pending_rooms: (Array Struct.Session.PendingRoom.Type)
    }
 
@@ -43,21 +42,19 @@ type alias Type =
 none: Type
 none =
    {
-      credentials =
-         (Dragoman.SetSessionReply.new
-            -1
-            ""
-            ""
-            Dragoman.ServerReplyID.SET_SESSION
-         ),
+      credentials = Nothing,
       pending_rooms = []
    }
 
-set_credentials: Dragoman.SetSessionReply.Type -> Type -> Type
-set_credentials credentials session = {session | credentials = credentials}
+set_credentials: Dragoman.Credentials.Type -> Type -> Type
+set_credentials credentials session =
+   {session | credentials = (Just credentials)}
 
-get_credentials: Type -> Dragoman.SetSessionReply.Type
-get_credentials session = session.credentials
+maybe_get_credentials: Type -> (Maybe Dragoman.Credentials.Type)
+maybe_get_credentials session = session.credentials
+
+clear_credentials: Type -> Type
+clear_credentials session = {session | credentials = Nothing}
 
 get_pending_rooms: Type -> (Array Struct.Session.PendingRoom.Type)
 get_pending_rooms session = session.pending_rooms

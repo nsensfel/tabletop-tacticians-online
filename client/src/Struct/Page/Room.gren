@@ -4,16 +4,13 @@ module Struct.Page.Room exposing
       Event(..),
       new,
       get_id,
-      get_decks,
-      set_decks,
       get_players,
       set_players,
-      get_cards,
-      set_cards,
+      get_objects,
+      set_objects,
       get_puppeteer,
       set_puppeteer,
-      event_to_string,
-      decoder
+      event_to_string
    )
 
 --------------------------------------------------------------------------------
@@ -22,15 +19,15 @@ module Struct.Page.Room exposing
 -- Standard Library ------------------------------------------------------------
 import Dict
 
-import Json.Decode
-
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Dragoman.Room
+import Dragoman.RoomAction
+import Dragoman.RoomObject
+
 import Struct.Page.Room.Action
-import Struct.Page.Room.Card
 import Struct.Page.Room.Chat
-import Struct.Page.Room.Deck
 import Struct.Page.Room.DeckBrowser
 import Struct.Page.Room.Player
 import Struct.Page.Room.Puppeteer
@@ -41,16 +38,17 @@ import Struct.Page.Room.Selection
 --------------------------------------------------------------------------------
 type alias Type =
    {
-      id : String,
-      name : String,
-      players : (Dict.Dict String Struct.Page.Room.Player.Type),
-      decks : (Dict.Dict String Struct.Page.Room.Deck.Type),
-      cards : (Dict.Dict String Struct.Page.Room.Card.Type),
-      chat : Struct.Page.Room.Chat.Type,
-      selection : Struct.Page.Room.Selection.Type,
-      deck_browser : Struct.Page.Room.DeckBrowser.Type,
-      history : (Array Struct.Page.Room.Action.Type),
-      puppeteer : Struct.Page.Room.Puppeteer.Type
+      id: String,
+      name: String,
+      game_id: String,
+      objects: (Dict.Dict String Dragoman.RoomObject.Type),
+      history: (Array Dragoman.RoomAction.Type),
+      history_index: Int,
+      players: (Dict.Dict String Struct.Page.Room.Player.Type),
+      chat: Struct.Page.Room.Chat.Type,
+      selection: Struct.Page.Room.Selection.Type,
+      deck_browser: Struct.Page.Room.DeckBrowser.Type,
+      puppeteer: Struct.Page.Room.Puppeteer.Type
    }
 
 -- Events here are how the user interact with the client. Not the puppeteer's
@@ -91,7 +89,7 @@ type Event =
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-event_to_string : Event -> String
+event_to_string: Event -> String
 event_to_string event =
    when event is
       (SelectCard _) -> "SelectCard"
@@ -100,71 +98,63 @@ event_to_string event =
       Rotate -> "Rotate"
       _ -> "other"
 
-new : Type
-new =
+new: Dragoman.Room.Type -> Type
+new drago_room =
    {
-      id = "",
-      name = "",
+      id = (Dragoman.Room.get_id drago_room),
+      name = (Dragoman.Room.get_name drago_room),
+      game_id = (Dragoman.Room.get_game_id drago_room),
+      objects = (Dragoman.Room.get_objects drago_room),
+      history = (Dragoman.Room.get_history drago_room),
+      history_index = (Dragoman.Room.get_history_index drago_room),
       players = (Dict.empty),
-      decks = (Dict.empty),
-      cards = (Dict.empty),
       chat = (Struct.Page.Room.Chat.new),
       selection = (Struct.Page.Room.Selection.new),
       deck_browser = (Struct.Page.Room.DeckBrowser.new),
-      history = [],
       puppeteer = (Struct.Page.Room.Puppeteer.new [])
    }
 
-get_id : Type -> String
+get_id: Type -> String
 get_id room = room.id
 
-get_decks : Type -> (Dict.Dict String Struct.Page.Room.Deck.Type)
-get_decks room = room.decks
+get_objects: Type -> (Dict.Dict String Dragoman.RoomObject.Type)
+get_objects room = room.objects
 
-set_decks : (Dict.Dict String Struct.Page.Room.Deck.Type) -> Type -> Type
-set_decks decks room = {room | decks = decks}
+set_objects: (Dict.Dict String Dragoman.RoomObject.Type) -> Type -> Type
+set_objects objects room = {room | objects = objects}
 
-get_players : Type -> (Dict.Dict String Struct.Page.Room.Player.Type)
+get_players: Type -> (Dict.Dict String Struct.Page.Room.Player.Type)
 get_players room = room.players
 
-set_players : (Dict.Dict String Struct.Page.Room.Player.Type) -> Type -> Type
+set_players: (Dict.Dict String Struct.Page.Room.Player.Type) -> Type -> Type
 set_players players room = {room | players = players}
 
-get_cards : Type -> (Dict.Dict String Struct.Page.Room.Card.Type)
-get_cards room = room.cards
-
-set_cards : (Dict.Dict String Struct.Page.Room.Card.Type) -> Type -> Type
-set_cards cards room = {room | cards = cards}
-
-get_name : Type -> String
+get_name: Type -> String
 get_name room = room.name
 
-get_chat : Type -> Struct.Page.Room.Chat.Type
+get_chat: Type -> Struct.Page.Room.Chat.Type
 get_chat room = room.chat
 
-set_chat : Struct.Page.Room.Chat.Type -> Type -> Type
+set_chat: Struct.Page.Room.Chat.Type -> Type -> Type
 set_chat chat room = {room | chat = chat}
 
-get_puppeteer : Type -> Struct.Page.Room.Puppeteer.Type
+get_puppeteer: Type -> Struct.Page.Room.Puppeteer.Type
 get_puppeteer room = room.puppeteer
 
-set_puppeteer : Struct.Page.Room.Puppeteer.Type -> Type -> Type
+set_puppeteer: Struct.Page.Room.Puppeteer.Type -> Type -> Type
 set_puppeteer puppeteer room = {room | puppeteer = puppeteer}
 
-get_selection : Type -> Struct.Page.Room.Selection.Type
+get_selection: Type -> Struct.Page.Room.Selection.Type
 get_selection room = room.selection
 
-get_deck_browser : Type -> Struct.Page.Room.DeckBrowser.Type
+get_deck_browser: Type -> Struct.Page.Room.DeckBrowser.Type
 get_deck_browser room = room.deck_browser
 
-set_name : String -> Type -> Type
+set_name: String -> Type -> Type
 set_name name room = {room | name = name}
 
-set_selection : Struct.Page.Room.Selection.Type -> Type -> Type
+set_selection: Struct.Page.Room.Selection.Type -> Type -> Type
 set_selection selection room = {room | selection = selection}
 
-set_deck_browser : Struct.Page.Room.DeckBrowser.Type -> Type -> Type
+set_deck_browser: Struct.Page.Room.DeckBrowser.Type -> Type -> Type
 set_deck_browser deck_browser room = {room | deck_browser = deck_browser}
-
-decoder : (Json.Decode.Decoder Type)
-decoder = (Json.Decode.succeed (new)) -- TODO: implement

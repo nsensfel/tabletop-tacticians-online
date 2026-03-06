@@ -1,22 +1,24 @@
-module Update.ServerReply.SetSession exposing (update)
+module Struct.Page.Loading exposing
+   (
+      Type,
+      new
+   )
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
 --------------------------------------------------------------------------------
 -- Standard Library ------------------------------------------------------------
 
--- Third Party------------------------------------------------------------------
+-- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
-import Struct.Event
-import Struct.Model
-import Struct.Session
-
-import Dragoman.SetSessionReply
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
+type alias Type =
+   {
+   }
 
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
@@ -25,32 +27,5 @@ import Dragoman.SetSessionReply
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-update :
-   (
-      Dragoman.SetSessionReply.Type ->
-      Struct.Model.Type ->
-      { model : Struct.Model.Type, command : (Cmd Struct.Event.Type) }
-   )
-update set_session model =
-   let
-      new_model =
-         when (Struct.Model.get_page model) is
-            (Struct.Page.Login _) ->
-               (Struct.Model.set_page (Struct.Page.new "room_list") model)
-
-            (Struct.Page.Register _) ->
-               (Struct.Model.set_page (Struct.Page.new "room_list") model)
-
-            _ -> model
-   in
-      {
-         model =
-            (Struct.Model.set_session
-               (Struct.Session.set_credentials
-                  set_session
-                  (Struct.Model.get_session model)
-               )
-               new_model
-            ),
-         command = Cmd.none
-      }
+new : Type
+new = { }
