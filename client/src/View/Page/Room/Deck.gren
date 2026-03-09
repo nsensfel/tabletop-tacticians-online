@@ -27,62 +27,35 @@ import Struct.Page.Room.Attitude
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
-int_to_px : Int -> String
-int_to_px i = ((String.fromInt i) ++ "px")
 
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-get_html : Struct.Page.Room.Deck.Type -> (Html.Html Struct.Event.Type)
-get_html deck =
-   let
-      attitude = (Struct.Page.Room.Deck.get_attitude deck)
-   in
-      (Html.img
+get_html :
+   (
+      (Array Html.Attribute) ->
+      Dragoman.RoomObjectDeck.Type ->
+      (Html.Html Struct.Event.Type)
+   )
+get_html attributes deck =
+   let size = (Array.length (Dragoman.RoomObjectDeck.get_contents deck)) in
+   (Html.img
+      (
+         attributes
+         ++
          [
             (Html.Attributes.class "room-deck"),
-            (Html.Attributes.style
-               "width"
-               (int_to_px (Struct.Page.Room.Deck.get_width deck))
-            ),
-            (Html.Attributes.style
-               "height"
-               (int_to_px (Struct.Page.Room.Deck.get_height deck))
-            ),
-            (Html.Attributes.style
-               "top"
-               (int_to_px (Struct.Page.Room.Attitude.get_y attitude))
-            ),
-            (Html.Attributes.style
-               "left"
-               (int_to_px (Struct.Page.Room.Attitude.get_x attitude))
-            ),
-            (Html.Attributes.style
-               "z-index"
-               (String.fromInt (Struct.Page.Room.Attitude.get_z attitude))
-            ),
-            (Html.Attributes.style
-               "transform"
-               (
-                  "rotate("
-                  ++
-                  (String.fromInt
-                     (Struct.Page.Room.Attitude.get_rotation attitude)
-                  )
-                  ++ "deg)"
-               )
+            (
+               if (size == 0)
+               then (Html.Attributes.class "room-deck-empty")
+               else (Html.Attributes.class "")
             ),
             (Html.Attributes.src
                (Struct.Page.Room.Deck.get_image deck)
-            ),
-            (Html.Events.onClick
-               (Struct.Event.RoomPage
-                  (Struct.Page.Room.SelectDeck
-                     (Struct.Page.Room.Deck.get_id deck)
-                  )
-               )
             )
          ]
-         [
-         ]
       )
+      [
+         (Html.text (String.fromInt size))
+      ]
+   )

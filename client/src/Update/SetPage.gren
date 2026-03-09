@@ -51,6 +51,12 @@ update page model =
                   )
             }
 
+         (Struct.Page.Loading _) ->
+            {
+               command = (Cmd.none),
+               model = new_model
+            }
+
          (Struct.Page.RoomList _) ->
             {
                command = (Cmd.none),

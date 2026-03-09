@@ -24,9 +24,13 @@ import Struct.Page.Room
 
 import View.ErrorTracker
 
-import View.Room.Deck
-import View.Room.Card
-import View.Room.MainMenu
+import View.Page.Room.Deck
+import View.Page.Room.Card
+import View.Page.Room.MainMenu
+
+import Dragoman.RoomObject
+import Dragoman.RoomObjectAttitude
+import Dragoman.RoomObjectProperties
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -41,18 +45,18 @@ int_to_px i = ((String.fromInt i) ++ "px")
 object_get_html_attributes:
    (
       Dragoman.RoomObject.Type ->
-      (Array (Html.Html Struct.Event.Type)
+      (Array (Html.Html Struct.Event.Type))
    )
 object_get_html_attributes object =
    let attitude = (Dragoman.RoomObject.get_attitude object) in
       [
          (Html.Attributes.style
             "width"
-            (int_to_px (Dragoman.RoomObject.get_width card))
+            (int_to_px (Dragoman.RoomObject.get_width object))
          ),
          (Html.Attributes.style
             "height"
-            (int_to_px (Dragoman.RoomObject.get_height card))
+            (int_to_px (Dragoman.RoomObject.get_height object))
          ),
          (Html.Attributes.style
             "top"
@@ -82,19 +86,19 @@ object_get_html_attributes object =
 object_view_html: Dragoman.RoomObject.Type -> (Html.Html Struct.Event.Type)
 object_view_html object =
    when (Dragoman.RoomObject.get_properties object) is
-      (DECK deck) ->
+      (Dragoman.RoomObjectProperties.DECK deck) ->
          (View.Room.Deck.get_html
             (object_get_html_attributes object)
             deck
          )
 
-      (DICE dice) ->
+      (Dragoman.RoomObjectProperties.DICE dice) ->
          (View.Room.Dice.get_html
             (object_get_html_attributes object)
             dice
          )
 
-      (CARD card) ->
+      (Dragoman.RoomObjectProperties.CARD card) ->
          (View.Room.Card.get_html
             (object_get_html_attributes object)
             card
@@ -112,18 +116,12 @@ room_view_html model room =
       [
          (Html.Attributes.class "room-page")
       ]
-      (
-         (Array.map
-            (View.Room.Deck.get_html)
-            (Dict.values (Struct.Page.Room.get_decks room))
-         )
-         ++
-         (Array.map
-            (View.Room.Card.get_html)
-            (Dict.values (Struct.Page.Room.get_cards room))
-         )
+      (Array.map
+         (object_view_html)
+         (Dict.values (Struct.Page.Room.get_objects room))
       )
    )
+
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------

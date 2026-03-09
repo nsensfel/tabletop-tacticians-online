@@ -1,4 +1,4 @@
-module View.Room.Card exposing (get_html)
+module View.Page.Room.Card exposing (get_html)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
@@ -17,8 +17,9 @@ import Struct.Model
 import Struct.Event
 
 import Struct.Page.Room
-import Struct.Page.Room.Card
 import Struct.Page.Room.Attitude
+
+import Dragoman.RoomObjectCard.Type
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -33,51 +34,30 @@ int_to_px i = ((String.fromInt i) ++ "px")
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-get_html : Struct.Page.Room.Card.Type -> (Html.Html Struct.Event.Type)
-get_html card =
-   let
-      attitude = (Struct.Page.Room.Card.get_attitude card)
-   in
-      (Html.img
+get_html :
+   (
+      (Array Html.Attribute) ->
+      Dragoman.RoomObjectCard.Type ->
+      (Html.Html Struct.Event.Type)
+   )
+get_html attributes card =
+   (Html.img
+      (
+         attributes
+         ++
          [
             (Html.Attributes.class "room-card"),
-            (Html.Attributes.style
-               "width"
-               (int_to_px (Struct.Page.Room.Card.get_width card))
-            ),
-            (Html.Attributes.style
-               "height"
-               (int_to_px (Struct.Page.Room.Card.get_height card))
-            ),
-            (Html.Attributes.style
-               "top"
-               (int_to_px (Struct.Page.Room.Attitude.get_y attitude))
-            ),
-            (Html.Attributes.style
-               "left"
-               (int_to_px (Struct.Page.Room.Attitude.get_x attitude))
-            ),
-            (Html.Attributes.style
-               "z-index"
-               (String.fromInt (Struct.Page.Room.Attitude.get_z attitude))
-            ),
-            (Html.Attributes.style
-               "transform"
-               (
-                  "rotate("
-                  ++
-                  (String.fromInt
-                     (Struct.Page.Room.Attitude.get_rotation attitude)
-                  )
-                  ++ "deg)"
-               )
-            ),
             (Html.Attributes.hidden
-               (not (Struct.Page.Room.Card.get_is_displayed card))
+               (not (Dragoman.RoomObjectCard.get_is_displayed card))
             ),
             (Html.Attributes.src
-               (Struct.Page.Room.Card.get_displayed_image card)
+               (
+                  if (Dragoman.RoomObjectCard.get_is_flipped card)
+                  then (Dragoman.RoomObjectCard.get_back_url card)
+                  else (Dragoman.RoomObjectCard.get_front_url card)
+               )
             ),
+            -- Make the event part of the shared attributes?
             (Html.Events.onClick
                (Struct.Event.RoomPage
                   (Struct.Page.Room.SelectCard
@@ -86,6 +66,7 @@ get_html card =
                )
             )
          ]
-         [
-         ]
       )
+      [
+      ]
+   )
