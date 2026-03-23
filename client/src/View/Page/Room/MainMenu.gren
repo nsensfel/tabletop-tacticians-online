@@ -1,4 +1,4 @@
-module View.Room.MainMenu exposing (get_html)
+module View.Page.Room.MainMenu exposing (get_html)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------

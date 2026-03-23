@@ -3,16 +3,8 @@ module Struct.Page.EditProfile exposing
       Type,
       Event(..),
       new,
-      get_displayed_name,
-      set_displayed_name,
-      get_email,
-      set_email,
-      get_avatar,
-      set_avatar,
-      get_password,
-      set_password,
-      get_new_password,
-      set_new_password,
+      get_query,
+      set_query,
       get_new_password_confirmation,
       set_new_password_confirmation,
       event_to_string
@@ -26,17 +18,15 @@ module Struct.Page.EditProfile exposing
 -- Third Party -----------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Dragoman.Credentials
+import Dragoman.EditProfileQuery
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
 type alias Type =
    {
-      password : String,
-      displayed_name : String,
-      email : String,
-      avatar : String,
-      new_password : String,
+      query: Dragoman.EditProfileQuery.Type,
       new_password_confirmation : String
    }
 
@@ -56,7 +46,7 @@ type Event =
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
-event_to_string : Event -> String
+event_to_string: Event -> String
 event_to_string event =
    when event is
       FormSubmitted -> "FormSubmitted"
@@ -67,48 +57,18 @@ event_to_string event =
       (SetNewPasswordTo _) -> "SetNewPasswordTo"
       (SetNewPasswordConfirmationTo _) -> "SetNewPasswordConfirmationTo"
 
-new : Type
-new =
+new: Dragoman.Credentials.Type -> Type
+new credentials =
    {
-      password = "",
-      displayed_name = "",
-      avatar = "",
-      email = "",
-      new_password = "",
+      query = (Dragoman.EditProfileQuery.new "" "" "" "" "" credentials),
       new_password_confirmation = ""
    }
 
-get_password : Type -> String
-get_password profile = profile.password
+get_query: Type -> Dragoman.EditProfileQuery.Type
+get_query profile = profile.query
 
-set_password : String -> Type -> Type
-set_password password profile = {profile | password = password}
-
-get_displayed_name : Type -> String
-get_displayed_name edit_profile = edit_profile.displayed_name
-
-set_displayed_name : String -> Type -> Type
-set_displayed_name displayed_name edit_profile =
-   {edit_profile | displayed_name = displayed_name}
-
-get_email : Type -> String
-get_email edit_profile = edit_profile.email
-
-set_email : String -> Type -> Type
-set_email email edit_profile = {edit_profile | email = email}
-
-get_avatar : Type -> String
-get_avatar edit_profile = edit_profile.avatar
-
-set_avatar : String -> Type -> Type
-set_avatar avatar edit_profile = {edit_profile | avatar = avatar}
-
-get_new_password : Type -> String
-get_new_password edit_profile = edit_profile.new_password
-
-set_new_password : String -> Type -> Type
-set_new_password new_password edit_profile =
-   {edit_profile | new_password = new_password}
+set_query: Dragoman.EditProfileQuery.Type -> Type -> Type
+set_query query profile = {profile | query = query}
 
 get_new_password_confirmation : Type -> String
 get_new_password_confirmation edit_profile =

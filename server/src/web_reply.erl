@@ -46,7 +46,7 @@ merge (ReplyA, ReplyB) -> ReplyA ++ ReplyB.
 
 -spec encode (type()) -> binary().
 encode (Reply) -> jiffy:encode(Reply).
-	
+
 -spec to_list (type()) -> list(fragment()).
 to_list (Reply) -> Reply.
 

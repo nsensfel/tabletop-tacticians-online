@@ -15,6 +15,8 @@ import String
 -- Third Party------------------------------------------------------------------
 
 -- Project ---------------------------------------------------------------------
+import Dragoman.EditProfileQuery
+
 import Struct.Model
 import Struct.Event
 
@@ -32,12 +34,12 @@ import View.ErrorTracker
 --------------------------------------------------------------------------------
 new_password_field :
    (
-      Struct.Page.EditProfile.Type ->
+      Dragoman.EditProfileQuery.Type ->
       (Html.Html Struct.Event.Type)
    )
-new_password_field edit_profile =
+new_password_field query =
    let
-      new_password = (Struct.Page.EditProfile.get_new_password edit_profile)
+      new_password = (Dragoman.EditProfileQuery.get_new_password query)
    in
       (Html.div
          [
@@ -70,10 +72,10 @@ new_password_field edit_profile =
          ]
       )
 
-password_field : Struct.Page.EditProfile.Type -> (Html.Html Struct.Event.Type)
-password_field edit_profile =
+password_field : Dragoman.EditProfileQuery.Type -> (Html.Html Struct.Event.Type)
+password_field query =
    let
-      password = (Struct.Page.EditProfile.get_password edit_profile)
+      password = (Dragoman.EditProfileQuery.get_password query)
    in
       (Html.div
          [
@@ -81,7 +83,7 @@ password_field edit_profile =
             (Html.Attributes.class "edit-profile-password")
          ]
          [
-            (Html.h1 [] [ (Html.text "Password") ]),
+            (Html.h1 [] [ (Html.text "Password (Required)") ]),
             (Html.input
                [
                   (Html.Events.onInput
@@ -104,10 +106,15 @@ password_field edit_profile =
          ]
       )
 
-new_password_confirmation_field : Struct.Page.EditProfile.Type -> (Html.Html Struct.Event.Type)
-new_password_confirmation_field edit_profile =
+new_password_confirmation_field :
+   (
+      Dragoman.EditProfileQuery.Type ->
+      Struct.Page.EditProfile.Type ->
+      (Html.Html Struct.Event.Type)
+   )
+new_password_confirmation_field query edit_profile =
    let
-      new_password = (Struct.Page.EditProfile.get_new_password edit_profile)
+      new_password = (Dragoman.EditProfileQuery.get_new_password query)
       new_password_confirmation =
          (Struct.Page.EditProfile.get_new_password_confirmation edit_profile)
    in
@@ -145,10 +152,10 @@ new_password_confirmation_field edit_profile =
          ]
       )
 
-avatar_field : Struct.Page.EditProfile.Type -> (Html.Html Struct.Event.Type)
-avatar_field edit_profile =
+avatar_field : Dragoman.EditProfileQuery.Type -> (Html.Html Struct.Event.Type)
+avatar_field query =
    let
-      avatar = (Struct.Page.EditProfile.get_avatar edit_profile)
+      avatar = (Dragoman.EditProfileQuery.get_avatar query)
    in
       (Html.div
          [
@@ -178,10 +185,14 @@ avatar_field edit_profile =
          ]
       )
 
-displayed_name_field : Struct.Page.EditProfile.Type -> (Html.Html Struct.Event.Type)
-displayed_name_field edit_profile =
+displayed_name_field :
+   (
+      Dragoman.EditProfileQuery.Type ->
+      (Html.Html Struct.Event.Type)
+   )
+displayed_name_field query =
    let
-      displayed_name = (Struct.Page.EditProfile.get_displayed_name edit_profile)
+      displayed_name = (Dragoman.EditProfileQuery.get_displayed_name query)
    in
       (Html.div
          [
@@ -213,10 +224,10 @@ displayed_name_field edit_profile =
          ]
       )
 
-email_field : Struct.Page.EditProfile.Type -> (Html.Html Struct.Event.Type)
-email_field edit_profile =
+email_field : Dragoman.EditProfileQuery.Type -> (Html.Html Struct.Event.Type)
+email_field query =
    let
-      email = (Struct.Page.EditProfile.get_email edit_profile)
+      email = (Dragoman.EditProfileQuery.get_email query)
    in
       (Html.div
          [
@@ -256,33 +267,34 @@ view :
       (Browser.Document Struct.Event.Type)
    )
 view model edit_profile =
-   {
-      title = "Edit Profile",
-      body =
-      [
-         (Html.article
-            []
-            [
-               (new_password_field edit_profile),
-               (new_password_confirmation_field edit_profile),
-               (displayed_name_field edit_profile),
-               (email_field edit_profile),
-               (avatar_field edit_profile),
-               (password_field edit_profile),
-               (Html.button
-                  [
-                     (Html.Events.onClick
-                        (Struct.Event.EditProfilePage
-                           Struct.Page.EditProfile.FormSubmitted
+   let query = (Struct.Page.EditProfile.get_query edit_profile) in
+      {
+         title = "Edit Profile",
+         body =
+         [
+            (Html.article
+               []
+               [
+                  (new_password_field query),
+                  (new_password_confirmation_field query edit_profile),
+                  (displayed_name_field query),
+                  (email_field query),
+                  (avatar_field query),
+                  (password_field query),
+                  (Html.button
+                     [
+                        (Html.Events.onClick
+                           (Struct.Event.EditProfilePage
+                              Struct.Page.EditProfile.FormSubmitted
+                           )
                         )
-                     )
-                  ]
-                  [
-                     (Html.text "Send")
-                  ]
-               )
-            ]
-         ),
-         (View.ErrorTracker.get_html model)
-      ]
-   }
+                     ]
+                     [
+                        (Html.text "Send")
+                     ]
+                  )
+               ]
+            ),
+            (View.ErrorTracker.get_html model)
+         ]
+      }

@@ -19,7 +19,7 @@ import Struct.Event
 import Struct.Page.Room
 import Struct.Page.Room.Attitude
 
-import Dragoman.RoomObjectCard.Type
+import Dragoman.RoomObjectCard
 
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
@@ -28,15 +28,13 @@ import Dragoman.RoomObjectCard.Type
 --------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS -------------------------------------------------------------
 --------------------------------------------------------------------------------
-int_to_px : Int -> String
-int_to_px i = ((String.fromInt i) ++ "px")
 
 --------------------------------------------------------------------------------
 -- EXPORTED FUNCTIONS ----------------------------------------------------------
 --------------------------------------------------------------------------------
 get_html :
    (
-      (Array Html.Attribute) ->
+      (Array (Html.Attribute Struct.Event.Type)) ->
       Dragoman.RoomObjectCard.Type ->
       (Html.Html Struct.Event.Type)
    )
@@ -55,14 +53,6 @@ get_html attributes card =
                   if (Dragoman.RoomObjectCard.get_is_flipped card)
                   then (Dragoman.RoomObjectCard.get_back_url card)
                   else (Dragoman.RoomObjectCard.get_front_url card)
-               )
-            ),
-            -- Make the event part of the shared attributes?
-            (Html.Events.onClick
-               (Struct.Event.RoomPage
-                  (Struct.Page.Room.SelectCard
-                     (Struct.Page.Room.Card.get_id card)
-                  )
                )
             )
          ]

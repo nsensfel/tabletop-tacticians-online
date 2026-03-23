@@ -1,15 +1,15 @@
 (require ServerReplyID)
 
 (enum ErrorCategoryID string
-	(entry ERROR err)
-	(entry MISSING_INPUT miss)
-	(entry NETWORK_ERROR net)
-	(entry PROGRAMMING_ERROR pog)
-	(entry WARNING wrn)
+	(entry Error err)
+	(entry MissingInput miss)
+	(entry NetworkError net)
+	(entry ProgrammingError pog)
+	(entry Warning wrn)
 )
 
 (object ErrorReply
-	(entry message_id msg ServerReplyID)
+	(entry message_id msg ServerReplyID (const Error))
 	(entry category cat ErrorCategoryID)
 	(entry message_content cnt string)
 )

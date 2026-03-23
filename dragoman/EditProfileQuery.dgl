@@ -1,0 +1,10 @@
+(require Credentials)
+
+(object EditProfileQuery
+	(entry credentials Credentials)
+	(entry password string)
+	(entry new_password string)
+	(entry displayed_name string)
+	(entry avatar string)
+	(entry email string)
+)

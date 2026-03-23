@@ -10,12 +10,13 @@
 	(entry dict_deep_map (array (array (dict id RoomObject ))))
 )
 (polymorph ServerReply message_id
-	(case ERROR ErrorReply)
-	(case SET_CREDENTIALS SetCredentialsReply)
-	(case SET_ROOM SetRoomReply)
+	(case Error ErrorReply)
+	(case SetCredentials SetCredentialsReply)
+	(case SetRoom SetRoomReply)
 )
 
 (require HistoryLoadQuery)
 (require LoginQuery)
 (require RegisterQuery)
+(require EditProfileQuery)
 (require RoomLoadQuery)

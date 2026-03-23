@@ -1,7 +1,7 @@
 (enum RoomObjectTypeID string
-	(entry CARD crd)
-	(entry DICE dic)
-	(entry DECK dek)
+	(entry Card crd)
+	(entry Dice dic)
+	(entry Deck dek)
 )
 
 (object RoomObjectAttitude
@@ -12,7 +12,7 @@
 )
 
 (object RoomObjectCard
-	(entry object_type RoomObjectTypeID)
+	(entry object_type obt RoomObjectTypeID (const Card))
 	(entry front_url string)
 	(entry back_url string)
 	(entry is_flipped boolean)
@@ -20,22 +20,22 @@
 )
 
 (object RoomObjectDice
-	(entry object_type RoomObjectTypeID)
+	(entry object_type obt RoomObjectTypeID (const Dice))
 	(entry faces (array string))
 	(entry active_face integer)
 )
 
 (object RoomObjectDeck
-	(entry object_type RoomObjectTypeID)
+	(entry object_type obt RoomObjectTypeID (const Deck))
 	(entry url string)
 	(entry shows_card boolean)
 	(entry contents (array string))
 )
 
 (polymorph RoomObjectProperties object_type
-	(case CARD RoomObjectCard)
-	(case DICE RoomObjectDice)
-	(case DECK RoomObjectDeck)
+	(case Card RoomObjectCard)
+	(case Dice RoomObjectDice)
+	(case Deck RoomObjectDeck)
 )
 
 (object RoomObject

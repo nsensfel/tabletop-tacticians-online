@@ -24,8 +24,9 @@ import Struct.Page.Room
 
 import View.ErrorTracker
 
-import View.Page.Room.Deck
 import View.Page.Room.Card
+import View.Page.Room.Deck
+import View.Page.Room.Dice
 import View.Page.Room.MainMenu
 
 import Dragoman.RoomObject
@@ -45,11 +46,18 @@ int_to_px i = ((String.fromInt i) ++ "px")
 object_get_html_attributes:
    (
       Dragoman.RoomObject.Type ->
-      (Array (Html.Html Struct.Event.Type))
+      (Array (Html.Attribute Struct.Event.Type))
    )
 object_get_html_attributes object =
    let attitude = (Dragoman.RoomObject.get_attitude object) in
       [
+         (Html.Events.onClick
+            (Struct.Event.RoomPage
+               (Struct.Page.Room.SelectObject
+                  (Dragoman.RoomObject.get_id object)
+               )
+            )
+         ),
          (Html.Attributes.style
             "width"
             (int_to_px (Dragoman.RoomObject.get_width object))
@@ -86,20 +94,20 @@ object_get_html_attributes object =
 object_view_html: Dragoman.RoomObject.Type -> (Html.Html Struct.Event.Type)
 object_view_html object =
    when (Dragoman.RoomObject.get_properties object) is
-      (Dragoman.RoomObjectProperties.DECK deck) ->
-         (View.Room.Deck.get_html
+      (Dragoman.RoomObjectProperties.Deck deck) ->
+         (View.Page.Room.Deck.get_html
             (object_get_html_attributes object)
             deck
          )
 
-      (Dragoman.RoomObjectProperties.DICE dice) ->
-         (View.Room.Dice.get_html
+      (Dragoman.RoomObjectProperties.Dice dice) ->
+         (View.Page.Room.Dice.get_html
             (object_get_html_attributes object)
             dice
          )
 
-      (Dragoman.RoomObjectProperties.CARD card) ->
-         (View.Room.Card.get_html
+      (Dragoman.RoomObjectProperties.Card card) ->
+         (View.Page.Room.Card.get_html
             (object_get_html_attributes object)
             card
          )
@@ -136,7 +144,7 @@ view model room =
       title = "Room",
       body =
          [
-            (View.Room.MainMenu.get_html room),
+            (View.Page.Room.MainMenu.get_html room),
             (room_view_html model room),
             (View.ErrorTracker.get_html model)
          ]

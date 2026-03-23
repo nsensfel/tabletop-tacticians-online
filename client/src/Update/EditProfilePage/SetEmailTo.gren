@@ -14,6 +14,7 @@ import Struct.Model
 import Struct.Page
 import Struct.Page.EditProfile
 
+import Dragoman.EditProfileQuery
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -38,7 +39,13 @@ update email edit_profile model =
       model =
          (Struct.Model.set_page
             (Struct.Page.EditProfile
-               (Struct.Page.EditProfile.set_email email edit_profile)
+               (Struct.Page.EditProfile.set_query
+                  (Dragoman.EditProfileQuery.set_email
+                     email
+                     (Struct.Page.EditProfile.get_query edit_profile)
+                  )
+                  edit_profile
+               )
             )
             model
          )

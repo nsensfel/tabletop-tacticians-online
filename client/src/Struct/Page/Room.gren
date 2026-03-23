@@ -54,8 +54,7 @@ type alias Type =
 -- Events here are how the user interact with the client. Not the puppeteer's
 -- actions.
 type Event =
-   SelectCard String
-   | SelectDeck String
+   SelectObject String
    | CancelSelection
    | Rotate
    | Flip
@@ -92,8 +91,7 @@ type Event =
 event_to_string: Event -> String
 event_to_string event =
    when event is
-      (SelectCard _) -> "SelectCard"
-      (SelectDeck _) -> "SelectDeck"
+      (SelectObject _) -> "SelectObject"
       CancelSelection -> "CancelSelection"
       Rotate -> "Rotate"
       _ -> "other"

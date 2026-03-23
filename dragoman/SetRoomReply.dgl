@@ -17,6 +17,6 @@
 )
 
 (object SetRoomReply
-	(entry message_id msg ServerReplyID)
+	(entry message_id msg ServerReplyID (const SetRoom))
 	(entry room rom Room)
 )

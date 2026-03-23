@@ -39,11 +39,11 @@ update error model =
       (Struct.Error.new
          (
             when (Dragoman.ErrorReply.get_category error) is
-               Dragoman.ErrorCategoryID.WARNING -> Struct.Error.Warning
-               Dragoman.ErrorCategoryID.PROGRAMMING_ERROR -> Struct.Error.Programming
-               Dragoman.ErrorCategoryID.NETWORK_ERROR -> Struct.Error.Network
-               Dragoman.ErrorCategoryID.MISSING_INPUT -> Struct.Error.MissingInput
-               Dragoman.ErrorCategoryID.ERROR -> Struct.Error.Error
+               Dragoman.ErrorCategoryID.Warning -> Struct.Error.Warning
+               Dragoman.ErrorCategoryID.ProgrammingError -> Struct.Error.Programming
+               Dragoman.ErrorCategoryID.NetworkError -> Struct.Error.Network
+               Dragoman.ErrorCategoryID.MissingInput -> Struct.Error.MissingInput
+               Dragoman.ErrorCategoryID.Error -> Struct.Error.Error
          )
          (Dragoman.ErrorReply.get_message_content error)
       )

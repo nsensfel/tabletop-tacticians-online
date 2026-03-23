@@ -37,11 +37,11 @@ update :
    )
 update server_reply model =
    when server_reply is
-      (Dragoman.ServerReply.SET_ROOM set_room) ->
+      (Dragoman.ServerReply.SetRoom set_room) ->
          (Update.ServerReply.SetRoom.update set_room model)
 
-      (Dragoman.ServerReply.SET_CREDENTIALS set_credentials) ->
+      (Dragoman.ServerReply.SetCredentials set_credentials) ->
          (Update.ServerReply.SetCredentials.update set_credentials model)
 
-      (Dragoman.ServerReply.ERROR error) ->
+      (Dragoman.ServerReply.Error error) ->
          (Update.ServerReply.Error.update error model)

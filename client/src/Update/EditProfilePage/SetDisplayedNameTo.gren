@@ -14,6 +14,8 @@ import Struct.Model
 import Struct.Page
 import Struct.Page.EditProfile
 
+import Dragoman.EditProfileQuery
+
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -38,8 +40,11 @@ update displayed_name edit_profile model =
       model =
          (Struct.Model.set_page
             (Struct.Page.EditProfile
-               (Struct.Page.EditProfile.set_displayed_name
-                  displayed_name
+               (Struct.Page.EditProfile.set_query
+                  (Dragoman.EditProfileQuery.set_displayed_name
+                     displayed_name
+                     (Struct.Page.EditProfile.get_query edit_profile)
+                  )
                   edit_profile
                )
             )

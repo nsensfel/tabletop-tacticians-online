@@ -1,4 +1,4 @@
-module View.Room.Deck exposing (get_html)
+module View.Page.Room.Deck exposing (get_html)
 
 --------------------------------------------------------------------------------
 -- IMPORTS ---------------------------------------------------------------------
@@ -20,6 +20,8 @@ import Struct.Page.Room
 import Struct.Page.Room.Deck
 import Struct.Page.Room.Attitude
 
+import Dragoman.RoomObjectDeck
+
 --------------------------------------------------------------------------------
 -- TYPES -----------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -33,7 +35,7 @@ import Struct.Page.Room.Attitude
 --------------------------------------------------------------------------------
 get_html :
    (
-      (Array Html.Attribute) ->
+      (Array (Html.Attribute Struct.Event.Type)) ->
       Dragoman.RoomObjectDeck.Type ->
       (Html.Html Struct.Event.Type)
    )
@@ -50,9 +52,7 @@ get_html attributes deck =
                then (Html.Attributes.class "room-deck-empty")
                else (Html.Attributes.class "")
             ),
-            (Html.Attributes.src
-               (Struct.Page.Room.Deck.get_image deck)
-            )
+            (Html.Attributes.src (Dragoman.RoomObjectDeck.get_url deck))
          ]
       )
       [
