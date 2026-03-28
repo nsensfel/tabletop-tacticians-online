@@ -1,0 +1,5 @@
+(object PendingRoom
+	(entry id string)
+	(entry name string)
+	(entry game_id string)
+)
