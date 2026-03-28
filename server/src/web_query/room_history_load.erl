@@ -10,12 +10,7 @@
 (
 	request,
 	{
-		user_id :: ataxia_id:type(),
-		session_token :: binary(),
-		user_version :: non_neg_integer(),
-		lock_janitor :: ataxia_lock_client:janitor(),
-		room_id :: ataxia_id:type(),
-		history_ix :: non_neg_integer(),
+		dragoman :: dgn_history_load_query:type(),
 		ataxia_client :: ataxia_client:type()
 	}
 ).
@@ -37,31 +32,12 @@ decode_request (Query) ->
 		ok,
 		#request
 		{
-			user_id = maps:get(?USER_ID_FIELD, Map),
-			session_token = maps:get(?SESSION_TOKEN_FIELD, Map),
-			user_version = maps:get(?USER_VERSION_FIELD, Map),
-			room_id = maps:get(?ROOM_ID_FIELD, Map),
-			history_ix = maps:get(?HISTORY_INDEX_FIELD, Map),
+			dragoman = dgn_history_load_query:json_import(Map),
 			ataxia_client = ataxia_client:type()
 		}
 	}.
 
 %%%% Request Accessors %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--spec get_request_user_id (request()) -> ataxia_id:type().
-get_request_user_id (#request{ user_id = Result }) -> Result.
-
--spec get_request_session_token (request()) -> binary().
-get_request_session_token (#request{ session_token = Result }) -> Result.
-
--spec get_request_user_version (request()) -> non_neg_integer().
-get_request_user_version (#request{ user_version = Result }) -> Result.
-
--spec get_request_room_id (request()) -> ataxia_id:type().
-get_request_room_id (#request{ room_id = Result }) -> Result.
-
--spec get_request_history_index (request()) -> non_neg_integer().
-get_request_history_index (#request{ history_ix = Result }) -> Result.
-
 -spec get_request_ataxia_client (request()) -> ataxia_client:type().
 get_request_ataxia_client (#request{ ataxia_client = Result }) -> Result.
 
@@ -80,9 +56,7 @@ authenticate_user (Request) ->
 		query_user_management:handle_session
 		(
 			get_request_ataxia_client(Request),
-			get_request_user_version(Request),
-			get_request_user_id(Request),
-			get_request_session_token(Request)
+			dgn_history_load_query:get_credentials(Request#request.dragoman)
 		),
 
 	{set_request_ataxia_client(AtaxiaClient, Request), Result}.
@@ -99,8 +73,14 @@ authenticate_user (Request) ->
 		)
 	}.
 fetch_data ({Request, {ok, CurrentReplies}}) ->
-	RoomID = get_request_room_id(Request),
-	UserID = get_request_user_id(Request),
+	Dragoman = Request#request.dragoman,
+	RoomID = dgn_history_load_query:get_room_id(Dragoman),
+	UserID =
+		dgn_credentials:get_user_id
+		(
+			dgn_history_load_query:get_credentials(Dragoman)
+		),
+
 	{AtaxiaClient, FetchResult} =
 		ataxia_client:fetch_if
 		(
@@ -157,12 +137,20 @@ fetch_data (Other) -> Other.
 )
 -> web_reply:type().
 generate_reply ({Request, {ok, DBData, CurrentReplies}}) ->
+	Dragoman = Request#request.dragoman,
 	web_reply:add_fragment
 	(
+		% TODO: Dragoman version of this.
 		history_update_reply:new
 		(
-			get_request_user_id(Request),
-			get_request_history_index(Request),
+			dgn_credentials:get_user_id
+			(
+				dgn_history_load_query:get_credentials
+				(
+					Dragoman
+				)
+			),
+			dgn_history_load_query:get_history_index(Dragoman),
 			ataxia_client_data:get_value(DBData)
 		),
 		CurrentReplies

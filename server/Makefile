@@ -20,7 +20,7 @@ ERLC_OPTS ?= -I $(INCLUDE_DIR)
 DIALYZER ?= dialyzer
 DIALYZER_OPTS ?= --verbose -I $(INCLUDE_DIR)
 
-DRAGOMAN ?= $(HOME)/src/dragoman/dragoman-erlang.py
+DRAGOMAN ?= $(HOME)/src/dragoman/dragoman-erlang-jiffy.py
 
 M4 ?= m4
 M4_OPTS ?=

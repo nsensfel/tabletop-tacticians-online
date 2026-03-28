@@ -9,11 +9,7 @@
 (
 	request,
 	{
-		username :: ataxia_id:type(),
-		password :: binary(),
-		displayed_name :: binary(),
-		avatar :: binary(),
-		email :: binary(),
+		dragoman :: dgn_register_query:type(),
 		ataxia_client :: ataxia_client:type()
 	}
 ).
@@ -35,11 +31,7 @@ decode_request (Query) ->
 		'ok',
 		#request
 		{
-			username = maps:get(?USER_ID_FIELD, Map),
-			password = maps:get(?PASSWORD_FIELD, Map),
-			displayed_name = maps:get(?DISPLAYED_NAME_FIELD, Map),
-			avatar = maps:get(?AVATAR_FIELD, Map),
-			email = maps:get(?EMAIL_FIELD, Map),
+			dragoman = dgn_register_query:json_import(Map),
 			ataxia_client = ataxia_client:new()
 		}
 	}.
@@ -52,25 +44,6 @@ get_request_ataxia_client (#request{ ataxia_client = Result }) -> Result.
 set_request_ataxia_client (AtaxiaClient, Request) ->
 	Request#request{ ataxia_client = AtaxiaClient }.
 
--spec get_request_username (request()) -> ataxia_id:type().
-get_request_username (#request{ username = Result }) -> Result.
-
--spec get_request_password (request()) -> binary().
-get_request_password (#request{ password = Result }) -> Result.
-
--spec get_request_email (request()) -> binary().
-get_request_email (#request{ email = Result }) -> Result.
-
--spec get_request_avatar (request()) -> binary().
-get_request_avatar (#request{ avatar = Result }) -> Result.
-
--spec get_request_displayed_name (request()) -> binary().
-get_request_displayed_name (#request{ displayed_name = Result }) -> Result.
-
--spec set_request_displayed_name (binary(), request()) -> request().
-set_request_displayed_name (Name, Request) ->
-	Request#request{ displayed_name = Name}.
-
 %%%% Request Processing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -spec validate
 	(
@@ -80,7 +53,7 @@ set_request_displayed_name (Name, Request) ->
 	->
 	({'ok', request()} | {'error', binary()}).
 validate (username, {ok, Request}) ->
-	Username = get_request_username(Request),
+	Username = dgn_register_query:get_username(Request#request.dragoman),
 	Length = string:length(Username),
 	case
 		{
@@ -115,7 +88,7 @@ validate (username, {ok, Request}) ->
 			}
 	end;
 validate (password, {ok, Request}) ->
-	Password = get_request_password(Request),
+	Password = dgn_register_query:get_password(Request#request.dragoman),
 	Length = string:length(Password),
 	case { Length > 0, Length < 257 } of
 		{true, true} -> {ok, Request};
@@ -123,7 +96,7 @@ validate (password, {ok, Request}) ->
 		{_, false} -> {error, <<"Password too long (256 char max).">>}
 	end;
 validate (email, {ok, Request}) ->
-	Email = get_request_email(Request),
+	Email = dgn_register_query:get_email(Request#request.dragoman),
 	Length = string:length(Email),
 	AtCharCount =
 		lists:foldl
@@ -144,17 +117,30 @@ validate (email, {ok, Request}) ->
 		{_, _, false} -> {error, <<"Email syntax invalid.">>}
 	end;
 validate (displayed_name, {ok, Request}) ->
-	S0DisplayedName = get_request_displayed_name(Request),
+	S0DisplayedName =
+		dgn_register_query:get_displayed_name(Request#request.dragoman),
+
 	S1DisplayedName = string:trim(S0DisplayedName),
 	Length = string:length(S1DisplayedName),
 	case { Length > 0, Length < 65 } of
 		{true, true} ->
-			{ok, set_request_displayed_name(S1DisplayedName, Request)};
+			{
+				ok,
+				Request#request
+				{
+					dragoman =
+						dgn_register_query:set_displayed_name
+						(
+							S1DisplayedName,
+							Request#request.dragoman
+						)
+				}
+			};
 		{false, _} -> {error, <<"Missing Displayed Name.">>};
 		{_, false} -> {error, <<"Displayed Name is too long (max 64 chars).">>}
 	end;
 validate (avatar, {ok, Request}) ->
-	Avatar = get_request_avatar(Request),
+	Avatar = dgn_register_query:get_avatar(Request#request.dragoman),
 	Length = string:length(Avatar),
 	case {Length > 0, uri_string:parse(Avatar)} of
 		{false, _} -> {error, <<"Avatar missing.">>};
@@ -178,7 +164,7 @@ validate_request (Request) ->
 		| {'error', binary()}
 	).
 fetch_data ({ok, Request}) ->
-	Username = get_request_username(Request),
+	Username = dgn_register_query:get_username(Request#request.dragoman),
 	S0AtaxiaClient = get_request_ataxia_client(Request),
 	{S1AtaxiaClient, FetchResult} =
 		ataxia_client:fetch
@@ -207,15 +193,16 @@ fetch_data (Error) -> Error.
 	).
 create_new_user ({ok, Request}) ->
 	S0AtaxiaClient = get_request_ataxia_client(Request),
-	Username = get_request_username(Request),
+	Dragoman = Request#request.dragoman,
+	Username = dgn_register_query:get_username(Request#request.dragoman),
 	S0User =
 		user_db_entry:new
 		(
 			Username,
-			get_request_password(Request),
-			get_request_email(Request),
-			get_request_displayed_name(Request),
-			get_request_avatar(Request)
+			dgn_register_query:get_password(Dragoman),
+			dgn_register_query:get_email(Dragoman),
+			dgn_register_query:get_displayed_name(Dragoman),
+			dgn_register_query:get_avatar(Dragoman)
 		),
 
 	{S1User, SessionToken} = ataxia_client_data:add_token(S0User),
@@ -245,12 +232,13 @@ create_new_user (Other) -> Other.
 generate_reply ({ok, Version, Username, SessionToken}) ->
 	web_reply:new
 	(
-		set_session_reply:new
+		dgn_set_credentials_reply:json_export
 		(
-			Version,
-			Username,
-			SessionToken,
-			[] % No rooms yet.
+			dgn_set_credentials_reply:new
+			(
+				dgn_credentials:new(Version, SessionToken, Username),
+				maps:new()
+			)
 		)
 	);
 generate_reply ({error, ErrorMessage}) ->

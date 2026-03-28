@@ -10,8 +10,7 @@
 (
 	request,
 	{
-		username :: ataxia_id:type(),
-		password :: binary(),
+		dragoman :: dgn_login_query:type(),
 		ataxia_client :: ataxia_client:type(),
 		lock_janitor :: ataxia_lock_client:janitor()
 	}
@@ -34,8 +33,7 @@ decode_request (Query) ->
 		'ok',
 		#request
 		{
-			username = maps:get(?USER_ID_FIELD, Map),
-			password = maps:get(?PASSWORD_FIELD, Map),
+			dragoman = dgn_login_query:json_import(Map),
 			ataxia_client = ataxia_client:new(),
 			lock_janitor = ataxia_lock_client:new_janitor()
 		}
@@ -49,12 +47,6 @@ get_request_ataxia_client (#request{ ataxia_client = Result }) -> Result.
 set_request_ataxia_client (AtaxiaClient, Request) ->
 	Request#request{ ataxia_client = AtaxiaClient }.
 
--spec get_request_username (request()) -> ataxia_id:type().
-get_request_username (#request{ username = Result }) -> Result.
-
--spec get_request_password (request()) -> binary().
-get_request_password (#request{ password = Result }) -> Result.
-
 -spec get_request_lock_janitor (request()) -> ataxia_lock_client:janitor().
 get_request_lock_janitor (#request{ lock_janitor = Result }) -> Result.
 
@@ -65,7 +57,7 @@ get_request_lock_janitor (#request{ lock_janitor = Result }) -> Result.
 		| {'error', binary()}
 	).
 fetch_data (Request) ->
-	Username = get_request_username(Request),
+	Username = dgn_login_query:get_user_name(Request#request.dragoman),
 	S0AtaxiaClient = get_request_ataxia_client(Request),
 	{S1AtaxiaClient, FetchResult} =
 		ataxia_client:fetch
@@ -131,12 +123,14 @@ generate_session_token(S0Request, S0DBData) ->
 		| {'error', binary()}
 	).
 update_data ({ok, S0Request, S0DBData}) ->
-	Username = get_request_username(S0Request),
+	Dragoman = S0Request#request.dragoman,
+	Username = dgn_login_query:get_username(Dragoman),
+	Password = dgn_login_query:get_password(Dragoman),
 	LockJanitor = get_request_lock_janitor(S0Request),
 	S0AtaxiaClient = get_request_ataxia_client(S0Request),
 	S0User = ataxia_client_data:get_value(S0DBData),
 	S0Version = ataxia_client_data:get_version(S0DBData),
-	case user_db_entry:password_is(get_request_password(S0Request), S0User) of
+	case user_db_entry:password_is(Password, S0User) of
 		false -> {error, "Invalid password."};
 		true ->
 			{S1AtaxiaClient, FetchResult} =
@@ -197,12 +191,18 @@ generate_reply ({ok, DBEntry, SessionToken}) ->
 	User = ataxia_client_data:get_value(DBEntry),
 	web_reply:new
 	(
-		set_session_reply:new
+		dgn_set_credentials_reply:json_export
 		(
-			ataxia_client_data:get_version(DBEntry),
-			user_db_entry:get_username(User),
-			SessionToken,
-			user_db_entry:get_pending_room_list(User)
+			dgn_set_credentials_reply:new
+			(
+				dgn_credentials:new
+				(
+					ataxia_client_data:get_version(DBEntry),
+					user_db_entry:get_username(User),
+					SessionToken
+				),
+				user_db_entry:get_pending_room_list(User)
+			)
 		)
 	);
 generate_reply ({error, ErrorMessage}) ->
