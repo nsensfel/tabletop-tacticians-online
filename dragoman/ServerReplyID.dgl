@@ -1,8 +1,8 @@
-(enum ServerReplyID string
+(enum Server_Reply_ID string
 	(entry Disconnect dis)
 	(entry Error err)
-	(entry HistoryUpdate hup)
-	(entry PendingRoomsUpdate pru)
-	(entry SetRoom sro)
-	(entry SetCredentials scd)
+	(entry History_Update hup)
+	(entry Pending_Rooms_Update pru)
+	(entry Set_Room sro)
+	(entry Set_Credentials scd)
 )

@@ -175,7 +175,7 @@ generate_reply ({_Request, {error, CurrentReplies}}) -> CurrentReplies.
 -spec handle (web_query:type()) -> web_reply:type().
 handle (Query) ->
 	{ok, Request} = decode_request(Query), % Add lockJanitor in this decode function.
-	PostUserManagement =	user_management(Request),
+	PostUserManagement = user_management(Request),
 	PostFetchData = fetch_data(PostUserManagement),
 	generate_reply(PostFetchData).
 

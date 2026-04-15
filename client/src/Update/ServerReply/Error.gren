@@ -12,7 +12,7 @@ import Struct.Error
 import Struct.Event
 import Struct.Model
 
-import Dragoman.ErrorCategoryID
+import Dragoman.ErrorCategoryId
 import Dragoman.ErrorReply
 
 import Update.Error
@@ -39,11 +39,11 @@ update error model =
       (Struct.Error.new
          (
             when (Dragoman.ErrorReply.get_category error) is
-               Dragoman.ErrorCategoryID.Warning -> Struct.Error.Warning
-               Dragoman.ErrorCategoryID.ProgrammingError -> Struct.Error.Programming
-               Dragoman.ErrorCategoryID.NetworkError -> Struct.Error.Network
-               Dragoman.ErrorCategoryID.MissingInput -> Struct.Error.MissingInput
-               Dragoman.ErrorCategoryID.Error -> Struct.Error.Error
+               Dragoman.ErrorCategoryId.Warning -> Struct.Error.Warning
+               Dragoman.ErrorCategoryId.ProgrammingError -> Struct.Error.Programming
+               Dragoman.ErrorCategoryId.NetworkError -> Struct.Error.Network
+               Dragoman.ErrorCategoryId.MissingInput -> Struct.Error.MissingInput
+               Dragoman.ErrorCategoryId.Error -> Struct.Error.Error
          )
          (Dragoman.ErrorReply.get_message_content error)
       )

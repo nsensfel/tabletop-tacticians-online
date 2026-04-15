@@ -1,4 +1,4 @@
-(object LoginQuery
+(object Login_Query
 	(entry username string)
 	(entry password string)
 )

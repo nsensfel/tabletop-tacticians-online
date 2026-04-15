@@ -1,9 +1,9 @@
-(enum RoomActionID string
+(enum Room_Action_ID string
 	(entry Move mov)
 )
 
-(object RoomActionMove
-	(entry action_type act RoomActionID (const Move))
+(object Room_Action_Move
+	(entry action_type act Room_Action_ID (const move))
 	(entry object_ids oid (array string))
 	(entry x_offset xof integer)
 	(entry y_offset yof integer)
@@ -11,11 +11,11 @@
 	(entry angle_offset aof integer)
 )
 
-(polymorph RoomActionDetails action_type
-	(case Move RoomActionMove)
+(polymorph Room_Action_Details action_type
+	(case Move Room_Action_Move)
 )
 
-(object RoomAction
+(object Room_Action
 	(entry actor_id aid string)
-	(entry details det RoomActionDetails)
+	(entry details det Room_Action_Details)
 )

@@ -1,4 +1,4 @@
-(object RegisterQuery
+(object Register_Query
 	(entry username string)
 	(entry password string)
 	(entry displayed_name string)

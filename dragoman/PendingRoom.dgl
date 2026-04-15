@@ -1,4 +1,4 @@
-(object PendingRoom
+(object Pending_Room
 	(entry id string)
 	(entry name string)
 	(entry game_id string)

@@ -1,6 +1,6 @@
 (require Credentials)
 
-(object RoomLoadQuery
+(object Room_Load_Query
 	(entry room_id string)
 	(entry credentials Credentials)
 )

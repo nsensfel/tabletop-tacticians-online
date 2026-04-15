@@ -1,6 +1,6 @@
 (require Credentials)
 
-(object HistoryLoadQuery
+(object History_Load_Query
 	(entry credentials Credentials)
 	(entry room_id rmi string)
 	(entry history_index hix integer)

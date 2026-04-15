@@ -1,49 +1,49 @@
-(enum RoomObjectTypeID string
+(enum Room_Object_Type_ID string
 	(entry Card crd)
 	(entry Dice dic)
 	(entry Deck dek)
 )
 
-(object RoomObjectAttitude
+(object Room_Object_Attitude
 	(entry x integer)
 	(entry y integer)
 	(entry z integer)
 	(entry angle integer)
 )
 
-(object RoomObjectCard
-	(entry object_type obt RoomObjectTypeID (const Card))
+(object Room_Object_Card
+	(entry object_type obt Room_Object_Type_ID (const card))
 	(entry front_url string)
 	(entry back_url string)
 	(entry is_flipped boolean)
 	(entry is_displayed boolean)
 )
 
-(object RoomObjectDice
-	(entry object_type obt RoomObjectTypeID (const Dice))
+(object Room_Object_Dice
+	(entry object_type obt Room_Object_Type_ID (const dice))
 	(entry faces (array string))
 	(entry active_face integer)
 )
 
-(object RoomObjectDeck
-	(entry object_type obt RoomObjectTypeID (const Deck))
+(object Room_Object_Deck
+	(entry object_type obt Room_Object_Type_ID (const deck))
 	(entry url string)
 	(entry shows_card boolean)
 	(entry contents (array string))
 )
 
-(polymorph RoomObjectProperties object_type
-	(case Card RoomObjectCard)
-	(case Dice RoomObjectDice)
-	(case Deck RoomObjectDeck)
+(polymorph Room_Object_Properties object_type
+	(case Card Room_Object_Card)
+	(case Dice Room_Object_Dice)
+	(case Deck Room_Object_Deck)
 )
 
-(object RoomObject
+(object Room_Object
 	(entry id string)
 	(entry is_locked boolean)
 	(entry tags (array string))
 	(entry width integer)
 	(entry height integer)
-	(entry attitude RoomObjectAttitude)
-	(entry properties RoomObjectProperties)
+	(entry attitude Room_Object_Attitude)
+	(entry properties Room_Object_Properties)
 )

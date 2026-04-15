@@ -1,22 +1,23 @@
-;;(require LobbyEntry)
+(require RoomLobbyUser)
 (require RoomAction)
 (require RoomObject)
-;;(require RoomUser)
+(require RoomUser)
 (require ServerReplyID)
+(require RoomChatMessage)
 
 (object Room
 	(entry name nam string)
 	(entry id id string)
 	(entry game_id gid string)
-	(entry objects obj (dict id RoomObject))
-	(entry history his (array RoomAction))
+	(entry objects obj (dict id Room_Object))
+	(entry history his (array Room_Action))
 	(entry history_index hid integer)
-	;;(entry lobby lby (array LobbyEntry))
-	;;(entry chat cht Chat)
-	;;(entry users usr (array RoomUser))
+	(entry lobby (dict user.username Room_Lobby_User))
+	(entry chat (array Room_Chat_Message))
+	(entry users (dict username Room_User))
 )
 
-(object SetRoomReply
-	(entry message_id msg ServerReplyID (const SetRoom))
+(object Set_Room_Reply
+	(entry message_id msg Server_Reply_ID (const set_room))
 	(entry room rom Room)
 )

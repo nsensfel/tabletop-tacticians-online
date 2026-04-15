@@ -1,6 +1,6 @@
 (require Credentials)
 
-(object EditProfileQuery
+(object Edit_Profile_Query
 	(entry credentials Credentials)
 	(entry password string)
 	(entry new_password string)

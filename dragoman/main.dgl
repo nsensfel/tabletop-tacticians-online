@@ -4,15 +4,17 @@
 (require SetRoomReply)
 (require SetCredentialsReply)
 
-(object TestDeepMap
+(object Test_Deep_Map
 	(entry basic_deep_map (array (array integer)))
-	(entry user_deep_map (array (array ErrorReply)))
-	(entry dict_deep_map (array (array (dict id RoomObject ))))
+	(entry user_deep_map (array (array Error_Reply)))
+	(entry dict_deep_map (array (array (dict id Room_Object))))
+	(entry int_set (set integer))
+	(entry array_of_set (array (set string)))
 )
-(polymorph ServerReply message_id
-	(case Error ErrorReply)
-	(case SetCredentials SetCredentialsReply)
-	(case SetRoom SetRoomReply)
+(polymorph Server_Reply message_id
+	(case Error Error_Reply)
+	(case Set_Credentials Set_Credentials_Reply)
+	(case Set_Room Set_Room_Reply)
 )
 
 (require HistoryLoadQuery)
