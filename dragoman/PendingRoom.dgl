@@ -2,4 +2,5 @@
 	(entry id string)
 	(entry name string)
 	(entry game_id string)
+	(entry is_pinged boolean)
 )

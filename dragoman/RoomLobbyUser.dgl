@@ -1,0 +1,7 @@
+(require RoomUser)
+
+(object Room_Lobby_User
+	(entry user Room_User)
+	(entry message string)
+	(entry declined boolean)
+)

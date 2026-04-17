@@ -1,0 +1,4 @@
+(object Room_Chat_Message
+	(entry user_id string)
+	(entry message string)
+)

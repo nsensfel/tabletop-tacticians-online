@@ -57,7 +57,7 @@ get_request_lock_janitor (#request{ lock_janitor = Result }) -> Result.
 		| {'error', binary()}
 	).
 fetch_data (Request) ->
-	Username = dgn_login_query:get_user_name(Request#request.dragoman),
+	Username = dgn_login_query:get_username(Request#request.dragoman),
 	S0AtaxiaClient = get_request_ataxia_client(Request),
 	{S1AtaxiaClient, FetchResult} =
 		ataxia_client:fetch
@@ -198,8 +198,8 @@ generate_reply ({ok, DBEntry, SessionToken}) ->
 				dgn_credentials:new
 				(
 					ataxia_client_data:get_version(DBEntry),
-					user_db_entry:get_username(User),
-					SessionToken
+					SessionToken,
+					user_db_entry:get_username(User)
 				),
 				user_db_entry:get_pending_room_list(User)
 			)

@@ -1,0 +1,8 @@
+(object Room_User
+	(entry username string)
+	(entry color string)
+	(entry displayed_name string)
+	(entry avatar string)
+	(entry current_history_ix integer)
+	(entry is_pinged boolean)
+)

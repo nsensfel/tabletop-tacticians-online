@@ -9,19 +9,6 @@
 
 -record
 (
-	room,
-	{
-		id :: room_db_entry:id(),
-		game_id :: ataxia_id:type(),
-		name :: binary(),
-		is_pending :: boolean()
-	}
-).
-
--type room() :: #room{}.
-
--record
-(
 	user,
 	{
 		username :: binary(), % This is also the ID.
@@ -31,13 +18,13 @@
 		email :: binary(),
 		displayed_name :: binary(),
 		avatar :: binary(),
-		room_list :: #{room_db_entry:id() => room()}
+		room_list :: #{room_db_entry:id() => dgn_pending_room:type()}
 	}
 ).
 
 -opaque type() :: #user{}.
 
--export_type([type/0, id/0, room/0]).
+-export_type([type/0, id/0]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% EXPORTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -82,26 +69,6 @@
 		get_avatar_field/0,
 		get_displayed_name_field/0,
 		get_room_list_field/0
-	]
-).
-
--export
-(
-	[
-		room_get_id/1,
-		room_get_game_id/1,
-		room_get_name/1,
-		room_get_is_pending/1
-	]
-).
-
--export
-(
-	[
-		room_get_id_field/0,
-		room_get_game_id_field/0,
-		room_get_name_field/0,
-		room_get_is_pending_field/0
 	]
 ).
 
@@ -166,15 +133,15 @@ get_displayed_name (User) -> User#user.displayed_name.
 -spec get_avatar (type()) -> binary().
 get_avatar (User) -> User#user.avatar.
 
--spec get_room_list (type()) -> #{ ataxia_id:type() => room() }.
+-spec get_room_list (type()) -> #{ ataxia_id:type() => dgn_pending_room:type() }.
 get_room_list (User) -> User#user.room_list.
 
--spec get_pending_room_list (type()) -> list(room()).
+-spec get_pending_room_list (type()) -> #{ ataxia_id:type() => dgn_pending_room:type() }.
 get_pending_room_list (User) ->
-	lists:filter
+	maps:filter
 	(
-		fun (Room) -> Room#room.is_pending end,
-		maps:values(User#user.room_list)
+		fun (_Key, Value) -> dgn_pending_room:get_is_pinged(Value) end,
+		User#user.room_list
 	).
 
 -spec set_password (binary(), type()) -> type().
@@ -285,18 +252,6 @@ ataxia_set_avatar (Val, S0User) ->
 		S1User
 	}.
 
--spec room_get_name (room()) -> binary().
-room_get_name (#room{ name = Result }) -> Result.
-
--spec room_get_id (room()) -> ataxia_id:type().
-room_get_id (#room{ id = Result }) -> Result.
-
--spec room_get_is_pending (room()) -> boolean().
-room_get_is_pending (#room{ is_pending = Result }) -> Result.
-
--spec room_get_game_id (room()) -> ataxia_id:type().
-room_get_game_id (#room{ game_id = Result }) -> Result.
-
 -spec get_username_field () -> non_neg_integer().
 get_username_field () -> #user.username.
 
@@ -317,18 +272,6 @@ get_avatar_field () -> #user.avatar.
 
 -spec get_room_list_field () -> non_neg_integer().
 get_room_list_field () -> #user.room_list.
-
--spec room_get_id_field () -> non_neg_integer().
-room_get_id_field () -> #room.id.
-
--spec room_get_game_id_field () -> non_neg_integer().
-room_get_game_id_field () -> #room.game_id.
-
--spec room_get_name_field () -> non_neg_integer().
-room_get_name_field () -> #room.name.
-
--spec room_get_is_pending_field () -> non_neg_integer().
-room_get_is_pending_field () -> #room.is_pending.
 
 -spec password_is (binary(), type()) -> boolean().
 password_is (Val, User) ->
